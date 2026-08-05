@@ -194,7 +194,8 @@ from effects import (
     apply_clipping_effect, apply_printing_artifacts_effect, apply_mouse_cursor_effect, 
     apply_text_degradation_effect, apply_grid_occlusion_effect, apply_scan_rotation_effect, 
     apply_grayscale_effect, apply_perspective_effect, apply_perspective_warp_effect,
-    apply_uneven_lighting_effect, apply_chromatic_aberration_effect
+    apply_uneven_lighting_effect, apply_chromatic_aberration_effect,
+    apply_pdf_document_context_effect
 )
 
 from chart import (_generate_bar_chart, _generate_line_chart, _generate_scatter_chart, 
@@ -719,214 +720,18 @@ def build_51_from_plotted(points):
 # ===================================================================================
 # ==                               CONFIGURATION                                   ==
 # ===================================================================================
-GENERATION_CONFIG = {
-    "debug_mode": False,
-    "debug_annotations": False,  # Detailed annotation processing logs
-    "debug_artists": False,      # Detailed artist processing logs
-    "debug_coords": False,       # Detailed coordinate transformation logs
-    "num_images": 40, 
-    "output_dir": "dataset_export",
-    "seed": 43,
-    "dataset_format": "classification",  # "detection" or "classification"
-    "val_split": 0.2,                   # 20% validation split ratio
-
-"CLASS_MAP_BAR": {
-    "0": "chart",
-    "1": "bar",
-    "2": "axis_title",
-    "3": "significance_marker",
-    "4": "error_bar",
-    "5": "legend",
-    "6": "chart_title",
-    "7": "data_label",
-    "8": "axis_labels"
-  },
-  "CLASS_MAP_PIE_OBJ": {
-    "0": "chart",
-    "1": "wedge",
-    "2": "legend",
-    "3": "chart_title",
-    "4": "data_label",
-    "5": "connector_line"
-},
-"CLASS_MAP_PIE_POSE": {
-    "0": "slice_boundary",
-},
-"CLASS_MAP_LINE_OBJ": {
-    "0": "chart",
-    "1": "line_segment",
-    "2": "axis_title",
-    "3": "legend",
-    "4": "chart_title",
-    "5": "data_label",
-    "6": "axis_labels"
-},
-"CLASS_MAP_LINE_POSE": {
-    "0": "line_boundary",
-},
-  "CLASS_MAP_SCATTER": {
-    "0": "chart",
-    "1": "data_point",
-    "2": "axis_title",
-    "3": "significance_marker",
-    "4": "error_bar",
-    "5": "legend",
-    "6": "chart_title",
-    "7": "data_label",
-    "8": "axis_labels"
-  },
-  "CLASS_MAP_BOX": {
-    "0": "chart",
-    "1": "box",
-    "2": "axis_title",
-    "3": "significance_marker",
-    "4": "range_indicator",
-    "5": "legend",
-    "6": "chart_title",
-    "7": "median_line",
-    "8": "axis_labels",
-    "9": "outlier"
-  },
-  "CLASS_MAP_HISTOGRAM": {
-    "0": "chart",
-    "1": "bar",
-    "2": "axis_title",
-    "3": "significance_marker",
-    "4": "error_bar",
-    "5": "legend",
-    "6": "chart_title",
-    "7": "data_label",
-    "8": "axis_labels"
-  },
-  "CLASS_MAP_HEATMAP": {
-    "0": "chart",
-    "1": "cell",
-    "2": "axis_title",
-    "3": "color_bar",
-    "4": "legend",
-    "5": "chart_title",
-    "6": "data_label",
-    "7": "axis_labels",
-    "8": "color_bar_label",
-    "9": "color_bar_title"
-  },
-  "CLASS_MAP_AREA_POSE": {
-    "0": "area_boundary",
-  },
-  "CLASS_MAP_AREA_OBJ": {
-    "0": "chart",
-    "1": "axis_title",
-    "2": "legend",
-    "3": "chart_title",
-    "4": "data_label",
-    "5": "axis_labels"
-  },
-
-    "scenario_weights": {
-        "single": 100,   # Single panel charts
-        "overlay": 0,   # No overlays
-        "multi": 0,    # Multi-panel important for GNN (multiple baselines)
-    },
-
-    # GNN TRAINING MODE: Only bar charts enabled
-    # To restore all chart types, set all weights back to ~12 and enabled: True
-    "chart_types": {
-        "bar":      {"weight": 13, "enabled": False},  
-        "line":      {"weight": 12, "enabled": False},
-        "scatter":   {"weight": 12, "enabled": False},
-        "box":       {"weight": 13, "enabled": False},
-        "pie":       {"weight": 13, "enabled": False},
-        "area":      {"weight": 12, "enabled": False},
-        "histogram": {"weight": 12, "enabled": False},
-        "heatmap":   {"weight": 13, "enabled": True},  
-    },
-    
-    "bar_chart_config": {
-        "scientific_ratio": 0.6,
-        "styles": {
-            "standard":             {"weight": 30},
-            "compare_side_by_side": {"weight": 25},
-            "stacked":              {"weight": 20},
-            "touching":             {"weight": 15},
-            "3d_effect":            {"weight": 10},
-        },
-        "patterns": {
-            "none":    {"weight": 50}, "hatch":   {"weight": 20}, "hollow":  {"weight": 10},
-            "striped": {"weight": 10}, "dotted":  {"weight": 10},
-        }
-    },
-
-    "pie_config": {
-        "num_components_range": (3, 12),
-        "max_slices": 5,
-        "entropy_loss_tolerance": 0.5,
-        "aggregation": {"enabled": True},
-        "sorting": {"enabled": True, "clockwise": True, "other_label": "Other"},
-        "rounding": {"enabled": True, "decimals": 3},
-        "aln_noise": {"enabled": True, "variance_scale_range": (0.02, 0.08)},
-        "label_prefix": "Item",
-        "explode_prob": 0.4,
-        "explode_amount": 0.10,
-        "legend_prob": 0.35,
-        "connector_lines": True,
-        "connector_line_width": 0.8,
-        "connector_line_color": "#333333",
-        "distribution_weights": {
-            "dirichlet": 30,
-            "pareto": 20,
-            "dominant_trace": 20,
-            "stick_breaking": 15,
-            "kdga": 15
-        },
-        "dirichlet": {"alpha_range": (0.3, 8.0), "asymmetry_strength_range": (0.0, 1.5)},
-        "pareto": {"alpha_shape_range": (1.16, 3.5), "scale_min": 1.0},
-        "stick_breaking": {"gamma_dispersion_range": (1.0, 8.0), "n_components_range": (3, 10)},
-        "dominant_trace": {
-            "n_dominant_range": (1, 2),
-            "n_trace_range": (8, 25),
-            "dominance_alpha_range": (60.0, 120.0),
-            "dominance_beta_range": (5.0, 30.0),
-            "poisson_read_depth_range": (2000, 20000),
-            "apply_poisson": True
-        },
-        "kdga": {"alpha_range": (0.3, 5.0), "lambda_range": (-3.0, 3.0)}
-    },
-
-    "heatmap_validation": {
-        "enabled": True,
-        "mode": "warn",
-        "min_cell_coverage": 0.90
-    },
-    
-    "realism_effects": {
-        "blur":               {"p": 0.1, "params": {"radius_range": (0.25, 0.50)}},
-        "motion_blur":        {"p": 0.15, "params": {"radius_range": (2, 5), "angle_range": (0, 360)}},
-        "low_res":            {"p": 0.15, "params": {"scale_range": (0.25, 0.4)}},
-        "noise":              {"p": 0.05, "params": {"sigma_range": (1, 4)}},
-        "jpeg_compression":   {"p": 0.20, "params": {"quality_range": (50, 90)}},
-        "pixelation":         {"p": 0.05, "params": {"factor_options": [2, 3]}},
-        "posterize":          {"p": 0.05, "params": {"color_options": [16, 32, 64]}},
-        "color_variation":    {"p": 0.05, "params": {"shift_range": (0.97, 1.03)}},
-        "ui_chrome":          {"p": 0.05, "params": {}},
-        "watermark":          {"p": 0.05, "params": {"opacity_range": (0.04, 0.12)}},
-        "vignette":           {"p": 0.05, "params": {}},
-        "scanner_streaks":    {"p": 0.05, "params": {}},
-        "clipping":           {"p": 0.0, "params": {"clip_range_pct": (0.01, 0.04)}},
-        "printing_artifacts": {"p": 0.05, "params": {"texture_alpha": (0.05, 0.1), "blur_radius": (0.2, 0.4)}},
-        "mouse_cursor":       {"p": 0.05, "params": {}},
-        "text_degradation":   {"p": 0.05, "params": {"blur_radius_range": (0.4, 0.6), "pixelate_scale_options": [2, 3]}},
-        "grid_occlusion":     {"p": 0.0, "params": {}},
-        "scan_rotation":      {"p": 0.0, "params": {"angle_range": (-1, 1)}},
-        "grayscale":          {"p": 0.05, "params": {}},
-        "perspective":        {"p": 0.0, "params": {"magnitude": 0.5}},
-        "perspective_warp":   {"p": 0.03, "params": {"distortion_factor": 0.08}},
-        "uneven_lighting":    {"p": 0.05, "params": {"intensity": 0.6, "gradient_type": "radial"}},
-        "chromatic_aberration": {"p": 0.03, "params": {"r_shift": (2, 0), "b_shift": (-2, 0)}},
-    },
-    
-    # Post-processing options
-    "merge_json_files": True,  # Set to True to merge the 3 JSON files into 1 comprehensive JSON
-}
+try:
+    from custom_config import OCR_TRAINING_CONFIG as GENERATION_CONFIG
+except ImportError:
+    _custom_config_path = os.path.join(os.path.dirname(__file__), "custom_config.py")
+    if os.path.exists(_custom_config_path):
+        import importlib.util
+        _spec = importlib.util.spec_from_file_location("custom_config", _custom_config_path)
+        _mod = importlib.util.module_from_spec(_spec)
+        _spec.loader.exec_module(_mod)
+        GENERATION_CONFIG = _mod.OCR_TRAINING_CONFIG
+    else:
+        raise ImportError("custom_config.py could not be found.")
 
 # Chart-type-specific class maps
 CHART_CLASS_MAPS = {
@@ -2426,6 +2231,79 @@ def extract_line_pose_annotations_fixed(
     return keypoint_annotations
 
 
+def _select_multi_chart_layout(cfg):
+    """Sample grid dimensions (nrows, ncols) for multi_chart_detection layout."""
+    mcd_cfg = cfg.get('multi_chart_detection', {})
+    weights_dict = mcd_cfg.get('layout_weights', {
+        "1x1": 10, "1x2": 25, "2x1": 25, "2x2": 25, "1x3": 7.5, "3x1": 7.5
+    })
+    min_sub = mcd_cfg.get('min_subplots', 1)
+    max_sub = mcd_cfg.get('max_subplots', 4)
+
+    valid_layouts = []
+    weights = []
+    for k, v in weights_dict.items():
+        try:
+            r, c = map(int, k.split('x'))
+            if min_sub <= r * c <= max_sub:
+                valid_layouts.append((r, c))
+                weights.append(v)
+        except Exception:
+            continue
+
+    if not valid_layouts:
+        valid_layouts = [(1, 2)]
+        weights = [1.0]
+
+    r, c = random.choices(valid_layouts, weights=weights, k=1)[0]
+    return r, c
+
+
+def get_subchart_detection_annotations(fig, chart_info_map, class_map, renderer):
+    """Extract tight bounding box annotations for each subplot in a composite figure, including any auxiliary axes (e.g. colorbars, twin axes)."""
+    reverse_class_map = {v: int(k) for k, v in class_map.items()}
+    annotations = []
+    for ax, info in chart_info_map.items():
+        chart_type = info.get('chart_type_str', 'unknown')
+        class_id = reverse_class_map.get(chart_type, 0)
+        try:
+            bbox = ax.get_tightbbox(renderer)
+        except Exception:
+            bbox = ax.get_window_extent(renderer)
+
+        x0, y0, x1, y1 = bbox.x0, bbox.y0, bbox.x1, bbox.y1
+
+        aux_axes = list(info.get('aux_axes', []))
+        if not aux_axes:
+            for art in list(info.get('other_artists', [])) + list(info.get('data_artists', [])):
+                if hasattr(art, 'ax') and isinstance(getattr(art, 'ax'), plt.Axes) and art.ax != ax:
+                    if art.ax not in aux_axes:
+                        aux_axes.append(art.ax)
+                if hasattr(art, 'axes') and isinstance(getattr(art, 'axes'), plt.Axes) and art.axes != ax:
+                    if art.axes not in aux_axes:
+                        aux_axes.append(art.axes)
+
+        for aux_ax in aux_axes:
+            try:
+                aux_bbox = aux_ax.get_tightbbox(renderer)
+            except Exception:
+                aux_bbox = aux_ax.get_window_extent(renderer)
+            x0 = min(x0, aux_bbox.x0)
+            y0 = min(y0, aux_bbox.y0)
+            x1 = max(x1, aux_bbox.x1)
+            y1 = max(y1, aux_bbox.y1)
+
+        union_bbox = BoundingBox(x0=x0, y0=y0, x1=x1, y1=y1)
+
+        annotations.append({
+            'class_id': class_id,
+            'bbox': union_bbox,
+            'chart_type': chart_type,
+            'element_type': 'chart'
+        })
+    return annotations
+
+
 def apply_realism_effects(pil_img, annotations, effects_config):
     """Apply realism effects and return modified image and annotations."""
     effect_function_map = {
@@ -2452,6 +2330,7 @@ def apply_realism_effects(pil_img, annotations, effects_config):
         "perspective_warp": apply_perspective_warp_effect,
         "uneven_lighting": apply_uneven_lighting_effect,
         "chromatic_aberration": apply_chromatic_aberration_effect,
+        "pdf_document_context": apply_pdf_document_context_effect,
     }
     
     total_dx, total_dy = 0, 0
@@ -2510,7 +2389,7 @@ def apply_realism_effects(pil_img, annotations, effects_config):
             params = effect_config.get('params', {})
             
             try:
-                if effect_name == 'clipping':
+                if effect_name in ['clipping', 'pdf_document_context']:
                     pil_img, dx, dy = func(pil_img, **params)
                     total_dx += dx
                     total_dy += dy
@@ -3980,26 +3859,34 @@ def generate_single_chart(i, cfg, images_dir, labels_dir, output_dir):
     if cfg['debug_mode']:
         print(f"DEBUG: Using DPI {output_dpi}")
 
-    # Determine scenario
-    scenarios, weights = zip(*cfg['scenario_weights'].items())
-    scenario = random.choices(scenarios, weights=weights, k=1)[0]
-    
-    if cfg['debug_mode']:
-        print(f"DEBUG: Selected scenario: {scenario}")
-    
-    if scenario == 'multi':
-        nrows, ncols = random.choice([(1,2), (2,1), (2,2), (1,3), (3,1), (2,3), (3,2), (3,3)])
+    if cfg.get('dataset_format') == 'multi_chart_detection':
+        scenario = 'multi'
+        nrows, ncols = _select_multi_chart_layout(cfg)
         fig, axes = plt.subplots(nrows, ncols, figsize=(ncols*5, nrows*4), dpi=output_dpi)
         axes = np.array(axes).flatten()
-        
         if cfg['debug_mode']:
-            print(f"DEBUG: Created multi-axis chart: {nrows}x{ncols}")
+            print(f"DEBUG: Created multi_chart_detection chart: {nrows}x{ncols}")
     else:
-        fig, ax = plt.subplots(figsize=(7, 5), dpi=output_dpi)
-        axes = [ax]
+        # Determine scenario
+        scenarios, weights = zip(*cfg['scenario_weights'].items())
+        scenario = random.choices(scenarios, weights=weights, k=1)[0]
         
         if cfg['debug_mode']:
-            print(f"DEBUG: Created single-axis chart: 1x1")
+            print(f"DEBUG: Selected scenario: {scenario}")
+        
+        if scenario == 'multi':
+            nrows, ncols = random.choice([(1,2), (2,1), (2,2), (1,3), (3,1), (2,3), (3,2), (3,3)])
+            fig, axes = plt.subplots(nrows, ncols, figsize=(ncols*5, nrows*4), dpi=output_dpi)
+            axes = np.array(axes).flatten()
+            
+            if cfg['debug_mode']:
+                print(f"DEBUG: Created multi-axis chart: {nrows}x{ncols}")
+        else:
+            fig, ax = plt.subplots(figsize=(7, 5), dpi=output_dpi)
+            axes = [ax]
+            
+            if cfg['debug_mode']:
+                print(f"DEBUG: Created single-axis chart: 1x1")
 
     chart_info_map = {}
 
@@ -4117,12 +4004,31 @@ def generate_single_chart(i, cfg, images_dir, labels_dir, output_dir):
         ax.set_title(random.choice(CHART_TITLES), fontsize=14, pad=15)
         if random.random() < 0.6 and chart_type not in ['pie', 'heatmap']:
             ax.legend(loc=random.choice(['upper right', 'best']))
+        aux_axes = []
+        for art in list(data_artists) + list(other_artists):
+            if hasattr(art, 'ax') and isinstance(getattr(art, 'ax'), plt.Axes) and art.ax != ax:
+                if art.ax not in aux_axes:
+                    aux_axes.append(art.ax)
+            if hasattr(art, 'axes') and isinstance(getattr(art, 'axes'), plt.Axes) and art.axes != ax:
+                if art.axes not in aux_axes:
+                    aux_axes.append(art.axes)
+
+        is_dual_axis = isinstance(scale_axis_info, dict) and scale_axis_info.get('secondary_scale_axis') is not None
+        dual_axis_dict = {}
+        if is_dual_axis:
+            dual_axis_dict = {
+                'enabled': True,
+                'primary_axis': scale_axis_info.get('primary_scale_axis', 'y'),
+                'secondary_axis': scale_axis_info.get('secondary_scale_axis', 'y2')
+            }
 
         chart_info_map[ax] = {
             'chart_type_str': chart_type,
             'data_artists': data_artists,
             'other_artists': other_artists,
             'axis_related_artists': axis_related_artists,
+            'aux_axes': aux_axes,
+            'dual_axis_info': dual_axis_dict,
             'boxplot_dict': boxplot_dict,
             'scale_axis_info': scale_axis_info,
             'keypoint_info': keypoint_data,  
@@ -4147,13 +4053,20 @@ def generate_single_chart(i, cfg, images_dir, labels_dir, output_dir):
 
     # Determine the primary chart type for annotation extraction
     primary_chart_type = chart_info_map.get(axes[0], {}).get('chart_type_str', 'bar')
-    cls_map = CHART_CLASS_MAPS.get(primary_chart_type, CHART_CLASS_MAPS['bar'])
-    
-    if cfg['debug_mode']:
-        print(f"DEBUG: Primary chart type for annotation: {primary_chart_type}")
-        print(f"DEBUG: Using class map for annotations: {cls_map}")
 
-    annotations = get_granular_annotations(fig, chart_info_map, cls_map)
+    if cfg.get('dataset_format') == 'multi_chart_detection':
+        class_map = cfg.get('CLASS_MAP_CLASSIFICATION', GENERATION_CONFIG['CLASS_MAP_CLASSIFICATION'])
+        renderer = fig.canvas.get_renderer()
+        annotations = get_subchart_detection_annotations(fig, chart_info_map, class_map, renderer)
+        cls_map = {}
+    else:
+        cls_map = CHART_CLASS_MAPS.get(primary_chart_type, CHART_CLASS_MAPS['bar'])
+        
+        if cfg['debug_mode']:
+            print(f"DEBUG: Primary chart type for annotation: {primary_chart_type}")
+            print(f"DEBUG: Using class map for annotations: {cls_map}")
+
+        annotations = get_granular_annotations(fig, chart_info_map, cls_map)
     
     if cfg['debug_mode']:
         print(f"DEBUG: Total annotations detected: {len(annotations)}")
@@ -4271,7 +4184,13 @@ def generate_single_chart(i, cfg, images_dir, labels_dir, output_dir):
     if cfg['debug_mode']:
         print(f"DEBUG: Before realism effects - annotations: {len(annotations)}")
     
-    pil_img, annotations = apply_realism_effects(pil_img, annotations, cfg['realism_effects'])
+    effects_to_apply = dict(cfg.get('realism_effects', {}))
+    if cfg.get('dataset_format') == 'multi_chart_detection':
+        pdf_noise = cfg.get('multi_chart_detection', {}).get('pdf_context_noise', {})
+        if pdf_noise:
+            effects_to_apply['pdf_document_context'] = pdf_noise
+
+    pil_img, annotations = apply_realism_effects(pil_img, annotations, effects_to_apply)
     
     if cfg['debug_mode']:
         print(f"DEBUG: After realism effects - annotations: {len(annotations)}")
@@ -4286,8 +4205,9 @@ def generate_single_chart(i, cfg, images_dir, labels_dir, output_dir):
         width = bbox.x1 - bbox.x0
         height = bbox.y1 - bbox.y0
             
+        ann_chart_type = ann.get('chart_type', primary_chart_type)
         # FIX #1: Exempt heatmaps from aggressive aspect ratio pruning (preserves narrow bars/cells)
-        if chart_type in ['scatter', 'box', 'heatmap']:
+        if ann_chart_type in ['scatter', 'box', 'heatmap']:
             if width == 0 or height == 0:
                 continue
             valid_annotations.append(ann)
@@ -4309,9 +4229,10 @@ def generate_single_chart(i, cfg, images_dir, labels_dir, output_dir):
     final_valid_annotations = []
     for ann in annotations:
         bbox = ann['bbox']
+        ann_chart_type = ann.get('chart_type', primary_chart_type)
         
         # FIX #2: Safely clamp heatmap layouts to visible viewport dimensions instead of deleting them
-        if primary_chart_type == 'heatmap':
+        if ann_chart_type == 'heatmap':
             x0 = max(0.0, min(float(bbox.x0), img_w))
             x1 = max(x0, min(float(bbox.x1), img_w))
             y0 = max(0.0, min(float(bbox.y0), img_h))
@@ -4344,23 +4265,34 @@ def generate_single_chart(i, cfg, images_dir, labels_dir, output_dir):
 
     # Save files
     base_filename = f"chart_{i:05d}"
-    
+    val_split = cfg.get('val_split', 0.2)
+    if val_split > 0:
+        step = max(1, int(round(1.0 / val_split)))
+        split = 'val' if (i % step == 0) else 'train'
+    else:
+        split = 'train'
+
     if cfg.get('dataset_format') == 'classification':
-        val_split = cfg.get('val_split', 0.2)
-        if val_split > 0:
-            step = max(1, int(round(1.0 / val_split)))
-            split = 'val' if (i % step == 0) else 'train'
-        else:
-            split = 'train'
         cls_img_dir = os.path.join(output_dir, split, primary_chart_type)
         ensure_dir(cls_img_dir)
         pil_img.save(os.path.join(cls_img_dir, f"{base_filename}_{primary_chart_type}.png"))
+        save_annotations_yolo(annotations, img_w, img_h, 
+                             os.path.join(labels_dir, f"{base_filename}.txt"))
+    elif cfg.get('dataset_format') == 'multi_chart_detection':
+        out_img_dir = os.path.join(output_dir, 'images', split)
+        out_lbl_dir = os.path.join(output_dir, 'labels', split)
+        ensure_dir(out_img_dir)
+        ensure_dir(out_lbl_dir)
+        pil_img.save(os.path.join(out_img_dir, f"{base_filename}.png"))
+        save_annotations_yolo(annotations, img_w, img_h, 
+                             os.path.join(out_lbl_dir, f"{base_filename}.txt"))
+        iter_time = time.time() - iter_start
+        print(f"    ✓ Image {i+1}/{cfg['num_images']} complete in {iter_time:.2f}s | Saved {len(annotations)} annotations")
+        return
     else:
         pil_img.save(os.path.join(images_dir, f"{base_filename}.png"))
-    
-    # Save YOLO format labels
-    save_annotations_yolo(annotations, img_w, img_h, 
-                         os.path.join(labels_dir, f"{base_filename}.txt"))
+        save_annotations_yolo(annotations, img_w, img_h, 
+                             os.path.join(labels_dir, f"{base_filename}.txt"))
 
     if primary_chart_type == 'area':
         # Save object detection format with CLASS_MAP_AREA_OBJ
@@ -4776,9 +4708,12 @@ def generate_single_chart_task(args):
     print(f"--- Generating image {i+1}/{cfg['num_images']} (PID: {os.getpid()}) ---")
     try:
         generate_single_chart(i, cfg, images_dir, labels_dir, output_dir)
+        return (i, True, None)
     except Exception as e:
-        print(f"[ERROR] Process PID {os.getpid()} failed on image {i}: {e}")
+        err_msg = f"Process PID {os.getpid()} failed on image {i}: {e}"
+        print(f"[ERROR] {err_msg}")
         traceback.print_exc()
+        return (i, False, str(e))
     finally:
         plt.close('all')
 
@@ -4790,6 +4725,8 @@ def main():
     parser.add_argument('--config', type=str, default=default_cfg_path, help='Path to config file')
     parser.add_argument('--num', type=int, default=None, help='Number of images to generate')
     parser.add_argument('--output', '-o', type=str, default=None, help='Output directory')
+    parser.add_argument('--mode', '--format', type=str, default=None, choices=['classification', 'detection', 'multi_chart_detection'], help='Dataset format mode')
+    parser.add_argument('--strict', action='store_true', help='Exit with non-zero status code if any image generation fails')
     args = parser.parse_args()
 
     if args.config and os.path.exists(args.config):
@@ -4806,6 +4743,9 @@ def main():
     
     if args.output:
         cfg['output_dir'] = args.output
+
+    if args.mode:
+        cfg['dataset_format'] = args.mode
 
     random.seed(cfg['seed'])
     np.random.seed(cfg['seed'])
@@ -4824,10 +4764,17 @@ def main():
         ensure_dir(debug_dir)
     else:
         output_dir = cfg['output_dir']
-        images_dir = os.path.join(output_dir, 'images')
-        labels_dir = os.path.join(output_dir, 'labels')
-        ensure_dir(images_dir)
-        ensure_dir(labels_dir)
+        if cfg.get('dataset_format') == 'multi_chart_detection':
+            images_dir = os.path.join(output_dir, 'images')
+            labels_dir = os.path.join(output_dir, 'labels')
+            for split_name in ['train', 'val']:
+                ensure_dir(os.path.join(output_dir, 'images', split_name))
+                ensure_dir(os.path.join(output_dir, 'labels', split_name))
+        else:
+            images_dir = os.path.join(output_dir, 'images')
+            labels_dir = os.path.join(output_dir, 'labels')
+            ensure_dir(images_dir)
+            ensure_dir(labels_dir)
 
     if cfg['debug_mode']:
         print(f"DEBUG: Available chart types: {list(cfg['chart_types'].keys())}")
@@ -4838,6 +4785,7 @@ def main():
     start_time = time.time()
     num_images = cfg['num_images']
     
+    results = []
     use_parallel = cfg.get('use_parallel', True)
     if use_parallel and num_images > 1:
         num_cores = min(os.cpu_count(), num_images, 16)
@@ -4845,33 +4793,58 @@ def main():
         tasks = [(i, cfg, images_dir, labels_dir, output_dir) for i in range(num_images)]
         from concurrent.futures import ProcessPoolExecutor
         with ProcessPoolExecutor(max_workers=num_cores) as executor:
-            list(executor.map(generate_single_chart_task, tasks))
+            results = list(executor.map(generate_single_chart_task, tasks))
     else:
         # Sequential fallback
         for i in range(num_images):
-            generate_single_chart_task((i, cfg, images_dir, labels_dir, output_dir))
+            res = generate_single_chart_task((i, cfg, images_dir, labels_dir, output_dir))
+            results.append(res)
+
+    successful = [r for r in results if r[1]]
+    failed = [r for r in results if not r[1]]
 
     print(f"\nGeneration complete in {time.time() - start_time:.2f}s.")
+    print(f"SUMMARY: {len(successful)}/{num_images} images generated successfully ({len(failed)} failed).")
+    if failed:
+        failed_indices = [r[0] for r in failed]
+        print(f"[WARNING] Failed image indices: {failed_indices}")
+
     print("\n=== DATASET STATISTICS ===")
     class_counts = defaultdict(int)
-    for i in range(cfg['num_images']):
-        label_file = os.path.join(labels_dir, f"chart_{i:05d}.txt")
-        if os.path.exists(label_file):
-            with open(label_file, 'r') as f:
-                for line in f:
-                    class_id = int(line.split()[0])
-                    class_counts[class_id] += 1
+    if cfg.get('dataset_format') == 'multi_chart_detection':
+        for split in ['train', 'val']:
+            split_lbl_dir = os.path.join(output_dir, 'labels', split)
+            if os.path.exists(split_lbl_dir):
+                for fname in os.listdir(split_lbl_dir):
+                    if fname.endswith('.txt'):
+                        with open(os.path.join(split_lbl_dir, fname), 'r') as f:
+                            for line in f:
+                                if line.strip():
+                                    class_id = int(line.split()[0])
+                                    class_counts[class_id] += 1
+        cls_map = cfg.get('CLASS_MAP_CLASSIFICATION', GENERATION_CONFIG['CLASS_MAP_CLASSIFICATION'])
+        for class_id_str, class_name in sorted(cls_map.items(), key=lambda x: int(x[0])):
+            cid = int(class_id_str)
+            print(f"  {class_name:20s}: {class_counts[cid]:5d} instances")
+    else:
+        for i in range(cfg['num_images']):
+            label_file = os.path.join(labels_dir, f"chart_{i:05d}.txt")
+            if os.path.exists(label_file):
+                with open(label_file, 'r') as f:
+                    for line in f:
+                        class_id = int(line.split()[0])
+                        class_counts[class_id] += 1
 
-    # Use the combined class map for statistics
-    combined_cls_map = {}
-    for chart_type, chart_cls_map in CHART_CLASS_MAPS.items():
-        if chart_type != 'pie':
-            for id_val, class_name in chart_cls_map.items():
-                if id_val not in combined_cls_map:
-                    combined_cls_map[id_val] = class_name
+        # Use the combined class map for statistics
+        combined_cls_map = {}
+        for chart_type, chart_cls_map in CHART_CLASS_MAPS.items():
+            if chart_type != 'pie':
+                for id_val, class_name in chart_cls_map.items():
+                    if id_val not in combined_cls_map:
+                        combined_cls_map[id_val] = class_name
 
-    for class_id, class_name in sorted(combined_cls_map.items(), key=lambda x: x[1]):
-        print(f"  {class_name:20s}: {class_counts[class_id]:5d} instances")
+        for class_id, class_name in sorted(combined_cls_map.items(), key=lambda x: x[1]):
+            print(f"  {class_name:20s}: {class_counts[class_id]:5d} instances")
 
     if cfg.get('dataset_format') == 'classification':
         print("\n=== CLASSIFICATION FOLDER SUMMARY ===")
@@ -4884,8 +4857,20 @@ def main():
                     if os.path.isdir(c_path):
                         print(f"    - {c_path}: {len(os.listdir(c_path))} images")
 
+    if cfg.get('dataset_format') == 'multi_chart_detection':
+        yaml_path = os.path.join(output_dir, 'data.yaml')
+        cls_map = cfg.get('CLASS_MAP_CLASSIFICATION', GENERATION_CONFIG['CLASS_MAP_CLASSIFICATION'])
+        sorted_names = [cls_map[str(k)] for k in sorted(map(int, cls_map.keys()))]
+        abs_output_dir = os.path.abspath(output_dir)
+        yaml_content = f"path: {abs_output_dir}\ntrain: images/train\nval: images/val\nnc: {len(sorted_names)}\nnames:\n"
+        for name in sorted_names:
+            yaml_content += f"  - {name}\n"
+        with open(yaml_path, 'w') as f:
+            f.write(yaml_content)
+        print(f"\nWritten Ultralytics dataset config to {yaml_path}")
+
     # Merge JSON files if enabled in config
-    if cfg.get('merge_json_files', False) and batch_merge_all:
+    if cfg.get('dataset_format') != 'multi_chart_detection' and cfg.get('merge_json_files', False) and batch_merge_all:
         print("\n--- Merging JSON files ---")
         batch_merge_all(labels_dir)
     
@@ -4899,6 +4884,10 @@ def main():
             print(f"\n[ERROR] 'testar.py' script failed with error: {e}")
         except Exception as e:
             print(f"\n[ERROR] An unexpected error occurred while trying to run testar.py: {e}")
+
+    if failed and (args.strict or cfg.get('strict', False)):
+        print("\n[ERROR] Strict mode enabled and generation failures occurred. Exiting with status 1.")
+        sys.exit(1)
 
 
 if __name__ == '__main__':

@@ -407,3 +407,85 @@ def apply_chromatic_aberration_effect(pil_img, r_shift=(2, 0), b_shift=(-2, 0), 
     r = ImageChops.offset(r, int(r_dx), int(r_dy))
     b = ImageChops.offset(b, int(b_dx), int(b_dy))
     return Image.merge("RGB", (r, g, b))
+
+
+def apply_pdf_document_context_effect(pil_img, margin_px_range=(20, 50), caption_probability=0.7, body_text_probability=0.5, **kwargs):
+    """
+    Applies page-context realism effect (margins, optional figure caption, optional text blocks).
+    Grows canvas and returns (new_pil_img, dx, dy) where dx and dy translate Matplotlib bboxes.
+    """
+    w, h = pil_img.size
+    margin_left = random.randint(*margin_px_range)
+    margin_right = random.randint(*margin_px_range)
+    margin_top = random.randint(*margin_px_range)
+    margin_bottom = random.randint(*margin_px_range)
+
+    # Optional caption
+    has_caption = (random.random() < caption_probability)
+    caption_height = 0
+    caption_text = ""
+    if has_caption:
+        fig_num = random.randint(1, 12)
+        phrases = [
+            "Comparison of performance metrics across experimental groups.",
+            "Distribution of normalized values for key parameters.",
+            "Overview of experimental measurements and observed trends.",
+            "Summary of evaluation results under standard test conditions.",
+            "Quantitative breakdown of observed data distributions.",
+            "Analysis of key metrics relative to baseline performance.",
+            "Experimental results demonstrating systematic behavior.",
+            "Detailed view of measured indicators across categories."
+        ]
+        caption_text = f"Figure {fig_num}: {random.choice(phrases)}"
+        caption_height = random.randint(30, 45)
+
+    # Optional body text blocks
+    has_body_text = (random.random() < body_text_probability)
+    top_text_height = random.randint(30, 60) if has_body_text else 0
+    bottom_text_height = random.randint(30, 60) if has_body_text else 0
+
+    total_top_padding = margin_top + top_text_height
+    total_bottom_padding = margin_bottom + caption_height + bottom_text_height
+
+    new_w = w + margin_left + margin_right
+    new_h = h + total_top_padding + total_bottom_padding
+
+    # Page background (slightly off-white or white)
+    bg_gray = random.randint(245, 255)
+    bg_color = (bg_gray, bg_gray, bg_gray)
+    new_img = Image.new('RGB', (new_w, new_h), bg_color)
+
+    # Paste original chart canvas into padded region
+    paste_x = margin_left
+    paste_y = total_top_padding
+    new_img.paste(pil_img, (paste_x, paste_y))
+
+    draw = ImageDraw.Draw(new_img)
+    try:
+        font_size = max(11, int(min(new_w, new_h) * 0.022))
+        fnt = ImageFont.truetype("DejaVuSans.ttf", font_size)
+    except IOError:
+        fnt = ImageFont.load_default()
+
+    # Draw body text above
+    if has_body_text and top_text_height > 0:
+        line_y = max(5, margin_top // 2)
+        mock_line = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
+        draw.text((margin_left, line_y), mock_line[:int(new_w * 0.12)], fill=(60, 60, 60), font=fnt)
+
+    # Draw caption below figure
+    if has_caption:
+        caption_y = paste_y + h + 10
+        draw.text((margin_left, caption_y), caption_text, fill=(30, 30, 30), font=fnt)
+
+    # Draw body text below caption
+    if has_body_text and bottom_text_height > 0:
+        line_y = paste_y + h + caption_height + 15
+        mock_line = "Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat."
+        draw.text((margin_left, line_y), mock_line[:int(new_w * 0.12)], fill=(60, 60, 60), font=fnt)
+
+    dx = paste_x
+    dy = total_bottom_padding
+
+    return new_img, dx, dy
+

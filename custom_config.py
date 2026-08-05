@@ -3,10 +3,20 @@ OCR_TRAINING_CONFIG = {
   "num_images": 5000,
   "output_dir": "dataset_export",
   "seed": 42,
-  "dataset_format": "classification",  # "detection" or "classification"
+  "dataset_format": "classification",  # "detection", "classification", or "multi_chart_detection"
   "val_split": 0.2,                   # 20% validation split ratio
   "RESAMPLE_STRATEGY": "adaptive",  # "adaptive" | "uniform" 
   "RESAMPLE_MAX_ANCHORS": 10,  # Max number of anchor points for adaptive resampling
+  "CLASS_MAP_CLASSIFICATION": {
+    "0": "area",
+    "1": "bar",
+    "2": "box",
+    "3": "heatmap",
+    "4": "histogram",
+    "5": "line",
+    "6": "pie",
+    "7": "scatter"
+  },
   "CLASS_MAP_BAR": {
     "0": "chart",
     "1": "bar",
@@ -131,7 +141,6 @@ OCR_TRAINING_CONFIG = {
   },
   "scenario_weights": {
     "single": 100,
-    "overlay": 0,
     "multi": 0
   },
   "bar_chart_config": {
@@ -314,5 +323,24 @@ OCR_TRAINING_CONFIG = {
     "enabled": True,
     "mode": "warn",
     "min_cell_coverage": 0.90
+  },
+  "multi_chart_detection": {
+    "min_subplots": 1,
+    "max_subplots": 4,
+    "layout_weights": {
+      "1x1": 10,
+      "1x2": 25,
+      "2x1": 25,
+      "2x2": 25,
+      "1x3": 7.5,
+      "3x1": 7.5
+    },
+    "caption_probability": 0.7,
+    "body_text_probability": 0.5,
+    "margin_px_range": [20, 50],
+    "pdf_context_noise": {
+      "p": 0.5,
+      "params": {}
+    }
   }
 }
