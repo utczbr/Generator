@@ -3,8 +3,7 @@ OCR_TRAINING_CONFIG = {
   "num_images": 5000,
   "output_dir": "dataset_export",
   "seed": 42,
-  "dataset_format": "classification",  # "detection", "classification", or "multi_chart_detection"
-  "val_split": 0.2,                   # 20% validation split ratio
+  "dataset_format": "detection",  # "detection", "classification", or "multi_chart_detection"
   "RESAMPLE_STRATEGY": "adaptive",  # "adaptive" | "uniform" 
   "RESAMPLE_MAX_ANCHORS": 10,  # Max number of anchor points for adaptive resampling
   "CLASS_MAP_CLASSIFICATION": {
@@ -107,35 +106,35 @@ OCR_TRAINING_CONFIG = {
   },
   "chart_types": {
     "bar": {
-      "weight": 13,
+      "weight": 0,
       "enabled": True
     },
     "line": {
-      "weight": 12,
+      "weight": 0,
       "enabled": True
     },
     "scatter": {
-      "weight": 13,
+      "weight": 0,
       "enabled": True
     },
     "box": {
-      "weight": 13,
+      "weight": 100,
       "enabled": True
     },
     "pie": {
-      "weight": 12,
+      "weight": 0,
       "enabled": True
     },
     "area": {
-      "weight": 12,
+      "weight": 0,
       "enabled": True
     },
     "histogram": {
-      "weight": 12,
+      "weight":  0,
       "enabled": True
     },
     "heatmap": {
-      "weight": 13,
+      "weight": 0,
       "enabled": True
     }
   },

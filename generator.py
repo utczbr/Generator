@@ -792,6 +792,50 @@ def bbox_to_xyxy_absolute(bbox, img_h):
     abs_y1 = int(img_h - y0)
     return [int(x0), abs_y0, int(x1), abs_y1]
 
+def ensure_min_bbox_thickness(bbox, min_size=4.0):
+    """
+    Guarantee a bounding box has at least `min_size` pixels of extent along
+    BOTH the X and Y axes by applying bidirectional symmetric padding.
+
+    Thin 1D elements (vertical/horizontal median lines, whiskers without caps,
+    single-line error bars, connector lines) can otherwise collapse to 0-1px
+    bounding boxes, which vanish or degrade feature gradients during CNN/ViT
+    downsampling. Because the deficit is computed independently per axis, this
+    works correctly regardless of chart orientation (e.g. a horizontal
+    boxplot's vertical median line gets padded in X, not just Y).
+
+    Args:
+        bbox: A matplotlib Bbox-like object (has `.extents`) or an
+              (x0, y0, x1, y1) tuple/list.
+        min_size: Minimum guaranteed width and height, in pixels.
+
+    Returns:
+        A matplotlib Bbox with width/height >= min_size (original bbox
+        returned unchanged, as-is, if it already meets the minimum).
+    """
+    if bbox is None:
+        return bbox
+
+    if hasattr(bbox, 'extents'):
+        x0, y0, x1, y1 = bbox.extents
+    else:
+        x0, y0, x1, y1 = bbox
+
+    width = x1 - x0
+    height = y1 - y0
+
+    pad_x = max(0.0, (min_size - width) / 2.0)
+    pad_y = max(0.0, (min_size - height) / 2.0)
+
+    if pad_x == 0.0 and pad_y == 0.0:
+        return bbox
+
+    return transforms.Bbox.from_extents(
+        x0 - pad_x, y0 - pad_y,
+        x1 + pad_x, y1 + pad_y
+    )
+
+
 def create_reverse_class_map(cls_map):
     """Create reverse mapping: class_name -> class_id"""
     return {v: k for k, v in cls_map.items()}
@@ -1053,6 +1097,19 @@ def get_granular_annotations(fig, chart_info_map, cls_map):
 
             if GENERATION_CONFIG.get('debug_mode', False):
                 print(f"DEBUG: AX[{ax_idx}]: Added {x_labels_added} x-labels, {y_labels_added} y-labels")
+
+        # General chart / plot-area bounding box detection. Applies to ANY
+        # chart type whose class map defines a 'chart' class (not just
+        # heatmaps) - e.g. the box-plot Global/Layout annotation set.
+        if 'chart' in reverse_map:
+            try:
+                chart_bbox = ax.get_window_extent(renderer)
+                if add_unique_annotation(reverse_map['chart'], chart_bbox):
+                    if GENERATION_CONFIG.get('debug_mode', False):
+                        print(f"DEBUG: AX[{ax_idx}]: Added general chart layout box")
+            except Exception as e:
+                if GENERATION_CONFIG.get('debug_mode', False):
+                    print(f"DEBUG: AX[{ax_idx}]: General chart layout box failed: {e}")
         
         # CRITICAL FIX: Enhanced Bar chart data artist processing
         if chart_type == 'bar' and 'bar' in reverse_map:
@@ -1237,15 +1294,15 @@ def get_granular_annotations(fig, chart_info_map, cls_map):
 
         # Enhanced Box plot processing with fallback
         elif chart_type == 'box':
-            # Bug 1 fix: check both boxplot_dict and scale_axis_info['boxplot_raw']
             scale_axis_info_box = chart_info.get('scale_axis_info', {})
-            boxplot_dict = chart_info.get('boxplot_dict') or scale_axis_info_box.get('boxplot_raw')
-            
-            # CRITICAL FIX: Unwrap nested structure from chart.py
-            if boxplot_dict and 'boxplot_raw' in boxplot_dict:
-                bp_artists = boxplot_dict['boxplot_raw']
-            else:
-                bp_artists = boxplot_dict
+            # Look up the Matplotlib boxplot artists dictionary (contains 'boxes', 'whiskers', 'caps', 'medians', 'fliers')
+            bp_artists = (
+                chart_info.get('boxplot_artists')
+                or scale_axis_info_box.get('boxplot_raw')
+                or (chart_info.get('boxplot_dict', {}).get('boxplot_raw') if isinstance(chart_info.get('boxplot_dict'), dict) else None)
+            )
+            if not bp_artists and isinstance(chart_info.get('boxplot_dict'), dict) and 'boxes' in chart_info['boxplot_dict']:
+                bp_artists = chart_info['boxplot_dict']
             
             if GENERATION_CONFIG.get('debug_mode', False):
                 print(f"DEBUG: AX[{ax_idx}]: Boxplot dict: {bp_artists is not None} | Keys: {list(bp_artists.keys()) if bp_artists else 'None'}")
@@ -1278,14 +1335,12 @@ def get_granular_annotations(fig, chart_info_map, cls_map):
                         if median and median.get_visible():
                             try:
                                 orig_bbox = median.get_window_extent(renderer)
-                                # CRITICAL FIX: Always pad FIRST, then check size
-                                pad = 3
-                                padded = transforms.Bbox.from_extents(
-                                    orig_bbox.x0, orig_bbox.y0 - pad,
-                                    orig_bbox.x1, orig_bbox.y1 + pad
-                                )
+                                # Guarantee minimum pixel thickness in BOTH directions
+                                # so the median line stays detectable regardless of
+                                # box orientation (vertical boxplot -> thin height;
+                                # horizontal boxplot -> thin width).
+                                padded = ensure_min_bbox_thickness(orig_bbox, min_size=4.0)
                                 
-                                # Check padded bbox (not original)
                                 if padded.width > 0.5 and padded.height > 0.5:
                                     if add_unique_annotation(reverse_map['median_line'], padded):
                                         added += 1
@@ -1296,9 +1351,14 @@ def get_granular_annotations(fig, chart_info_map, cls_map):
                         print(f"DEBUG: AX[{ax_idx}]: Added {added} median annotations")
                 
                 # Range indicators (Whiskers and Caps)
+                # The annotation encompasses the full visual range indicator:
+                # the whisker lines and the caps at each end.  We union the
+                # raw artist bboxes (no per-element padding) so the natural
+                # cap width is preserved in the result.
                 if 'range_indicator' in reverse_map:
                     added = 0
-                    num_boxes = len(bp_artists.get('boxes', []))
+                    boxes_list = bp_artists.get('boxes', [])
+                    num_boxes = len(boxes_list)
                     whiskers = bp_artists.get('whiskers', [])
                     caps = bp_artists.get('caps', [])
                     for i in range(num_boxes):
@@ -1317,26 +1377,18 @@ def get_granular_annotations(fig, chart_info_map, cls_map):
                                     try:
                                         bbox = art.get_window_extent(renderer)
                                         if bbox:
-                                            # Always add the bbox; zero-width or zero-height elements should be padded
-                                            width, height = bbox.width, bbox.height
-                                            if width <= 0.5 or height <= 0.5:
-                                                # Pad thin elements to make them detectable
-                                                min_size = 3
-                                                padded_bbox = transforms.Bbox.from_extents(
-                                                    bbox.x0 - min_size/2, bbox.y0 - min_size/2,
-                                                    bbox.x1 + min_size/2, bbox.y1 + min_size/2
-                                                )
-                                                bboxes.append(padded_bbox)
-                                            else:
-                                                # Normal elements (both width and height > 0.5)
-                                                bboxes.append(bbox)
+                                            bboxes.append(bbox)
                                     except Exception as e:
                                         if GENERATION_CONFIG.get('debug_mode', False):
                                             print(f"DEBUG: AX[{ax_idx}]: Error processing range indicator artist: {e}")
-                                        pass
                             
                             if bboxes:
                                 union_bbox = transforms.Bbox.union(bboxes)
+                                
+                                # Guarantee minimum pixel thickness in both
+                                # directions (e.g. whiskers with no caps can
+                                # otherwise collapse to near-zero width/height).
+                                union_bbox = ensure_min_bbox_thickness(union_bbox, min_size=2.0)
                                 if union_bbox.width > 0.5 and add_unique_annotation(reverse_map['range_indicator'], union_bbox):
                                     added += 1
                         except Exception as e:
@@ -1493,13 +1545,9 @@ def get_granular_annotations(fig, chart_info_map, cls_map):
                 if isinstance(artist, matplotlib.lines.Line2D) and artist.get_visible():
                     try:
                         bbox = artist.get_window_extent(renderer)
-                        # Lines can be thin — pad to minimum detectable height
+                        # Lines can be thin — pad to minimum detectable thickness
                         if bbox.width > 0.5:
-                            pad = max(0, 4 - bbox.height / 2)
-                            padded = transforms.Bbox.from_extents(
-                                bbox.x0, bbox.y0 - pad,
-                                bbox.x1, bbox.y1 + pad
-                            )
+                            padded = ensure_min_bbox_thickness(bbox, min_size=4.0)
                             if add_unique_annotation(reverse_map['line_segment'], padded):
                                 lines_added += 1
                                 if debug:
@@ -1516,17 +1564,8 @@ def get_granular_annotations(fig, chart_info_map, cls_map):
             cells_added = 0
             colorbar_added = 0
             debug = GENERATION_CONFIG.get('debug_mode', False)
-            
-            if 'chart' in reverse_map:
-                try:
-                    chart_bbox = ax.get_window_extent(renderer)
-                    if add_unique_annotation(reverse_map['chart'], chart_bbox):
-                        if debug:
-                            print(f"DEBUG: AX[{ax_idx}]: Added main chart layout box")
-                except Exception as e:
-                    if debug:
-                        print(f"DEBUG: AX[{ax_idx}]: Main chart layout box failed: {e}")
-            
+            # NOTE: main 'chart' layout box is now added generically above
+            # (axis-loop level), so it's no longer duplicated here.
             
             if 'axis_title' in reverse_map:
                 titles_added = 0
@@ -1871,11 +1910,7 @@ def get_granular_annotations(fig, chart_info_map, cls_map):
                     if artist.get_gid() == 'pie_connector':
                         bbox = artist.get_window_extent(renderer)
                         if bbox.width > 0.5:
-                            pad = max(2.0, (2.0 - bbox.height / 2.0))
-                            padded = transforms.Bbox.from_extents(
-                                bbox.x0, bbox.y0 - pad,
-                                bbox.x1, bbox.y1 + pad
-                            )
+                            padded = ensure_min_bbox_thickness(bbox, min_size=4.0)
                             add_unique_annotation(reverse_map['connector_line'], padded)
                             continue
                 except Exception as e:
@@ -1889,6 +1924,7 @@ def get_granular_annotations(fig, chart_info_map, cls_map):
                     plotline, caplines, barlinecols = artist.lines
                     if barlinecols and caplines:
                         artist_bbox = artist.get_window_extent(renderer)
+                        artist_bbox = ensure_min_bbox_thickness(artist_bbox, min_size=4.0)
                         add_unique_annotation(reverse_map['error_bar'], artist_bbox)
                 except Exception as e:
                     if GENERATION_CONFIG.get('debug_mode', False):
@@ -4030,6 +4066,7 @@ def generate_single_chart(i, cfg, images_dir, labels_dir, output_dir):
             'aux_axes': aux_axes,
             'dual_axis_info': dual_axis_dict,
             'boxplot_dict': boxplot_dict,
+            'boxplot_artists': scale_axis_info.get('boxplot_raw') if isinstance(scale_axis_info, dict) else None,
             'scale_axis_info': scale_axis_info,
             'keypoint_info': keypoint_data,  
             'pie_geometry': keypoint_data if chart_type == 'pie' else None,
@@ -4265,34 +4302,15 @@ def generate_single_chart(i, cfg, images_dir, labels_dir, output_dir):
 
     # Save files
     base_filename = f"chart_{i:05d}"
-    val_split = cfg.get('val_split', 0.2)
-    if val_split > 0:
-        step = max(1, int(round(1.0 / val_split)))
-        split = 'val' if (i % step == 0) else 'train'
-    else:
-        split = 'train'
 
-    if cfg.get('dataset_format') == 'classification':
-        cls_img_dir = os.path.join(output_dir, split, primary_chart_type)
-        ensure_dir(cls_img_dir)
-        pil_img.save(os.path.join(cls_img_dir, f"{base_filename}_{primary_chart_type}.png"))
-        save_annotations_yolo(annotations, img_w, img_h, 
-                             os.path.join(labels_dir, f"{base_filename}.txt"))
-    elif cfg.get('dataset_format') == 'multi_chart_detection':
-        out_img_dir = os.path.join(output_dir, 'images', split)
-        out_lbl_dir = os.path.join(output_dir, 'labels', split)
-        ensure_dir(out_img_dir)
-        ensure_dir(out_lbl_dir)
-        pil_img.save(os.path.join(out_img_dir, f"{base_filename}.png"))
-        save_annotations_yolo(annotations, img_w, img_h, 
-                             os.path.join(out_lbl_dir, f"{base_filename}.txt"))
+    pil_img.save(os.path.join(images_dir, f"{base_filename}.png"))
+    save_annotations_yolo(annotations, img_w, img_h, 
+                         os.path.join(labels_dir, f"{base_filename}.txt"))
+
+    if cfg.get('dataset_format') == 'multi_chart_detection':
         iter_time = time.time() - iter_start
         print(f"    ✓ Image {i+1}/{cfg['num_images']} complete in {iter_time:.2f}s | Saved {len(annotations)} annotations")
         return
-    else:
-        pil_img.save(os.path.join(images_dir, f"{base_filename}.png"))
-        save_annotations_yolo(annotations, img_w, img_h, 
-                             os.path.join(labels_dir, f"{base_filename}.txt"))
 
     if primary_chart_type == 'area':
         # Save object detection format with CLASS_MAP_AREA_OBJ
@@ -4380,18 +4398,13 @@ def generate_single_chart(i, cfg, images_dir, labels_dir, output_dir):
             print(f"DEBUG: Saved {len(annotations_obj)} line object annotations")
             print(f"DEBUG: Saved {len(keypoint_annotations)} line pose annotations")
     
-    # NEW: Handle 5 specific chart types - save to dedicated directories
-    elif primary_chart_type in ['bar', 'histogram', 'scatter', 'box']:
+    # NEW: Handle specific chart types - save to dedicated directories
+    elif primary_chart_type in ['bar', 'histogram', 'scatter']:
         # Use the appropriate class map for each chart type
         cls_map_specific = CHART_CLASS_MAPS.get(primary_chart_type, CHART_CLASS_MAPS['bar'])
         annotations_obj = get_granular_annotations(fig, chart_info_map, cls_map_specific)
         
-        # Create directory name based on chart type
-        if primary_chart_type == 'box':
-            # Use 'box' for directory name instead of 'box'
-            obj_dir = os.path.join(output_dir, 'box_obj_labels')
-        else:
-            obj_dir = os.path.join(output_dir, f"{primary_chart_type}_obj_labels")
+        obj_dir = os.path.join(output_dir, f"{primary_chart_type}_obj_labels")
         
         ensure_dir(obj_dir)
         save_annotations_yolo(annotations_obj, img_w, img_h,
@@ -4400,8 +4413,72 @@ def generate_single_chart(i, cfg, images_dir, labels_dir, output_dir):
         if cfg['debug_mode']:
             print(f"DEBUG: Saved {len(annotations_obj)} {primary_chart_type} object annotations to {obj_dir}")
     # =========================================================================
-    # NEW: HEATMAP CASCADED EXPERT DOUBLE-ROUTING PIPELINE
+    # BOX PLOT DUAL-EXPERT ANNOTATION ROUTING (Elements vs Global Layout)
     # =========================================================================
+    # Dispatches the unified master annotations into two dedicated, separately-
+    # indexed annotation sets for training two specialist models:
+    #   Set 1 (Elements): box, range_indicator, median_line, outlier,
+    #                     significance_marker -> Model B / Structural Specialist
+    #   Set 2 (Global):   chart, axis_title, legend, chart_title,
+    #                     axis_labels         -> Model A / Global Layout
+    elif primary_chart_type == 'box':
+        cls_map_specific = CHART_CLASS_MAPS['box']
+
+        # 1. Define isolated re-indexed expert lookup tables
+        elements_expert_map = {
+            "box": 0,
+            "range_indicator": 1,
+            "median_line": 2,
+            "outlier": 3,
+            "significance_marker": 4
+        }
+        global_expert_map = {
+            "chart": 0,
+            "axis_title": 1,
+            "legend": 2,
+            "chart_title": 3,
+            "axis_labels": 4
+        }
+
+        anns_elements = []
+        anns_global = []
+
+        # 2. Sort master annotations into respective expert queues
+        for ann in annotations:
+            orig_class_id = str(ann['class_id'])
+            class_name = cls_map_specific.get(orig_class_id)
+
+            if class_name in elements_expert_map:
+                ann_copy = ann.copy()
+                ann_copy['class_id'] = elements_expert_map[class_name]
+                anns_elements.append(ann_copy)
+
+            if class_name in global_expert_map:
+                ann_copy = ann.copy()
+                ann_copy['class_id'] = global_expert_map[class_name]
+                anns_global.append(ann_copy)
+
+        # 3. Export Set 1: Data & Statistical Elements (box_elements_labels + box_obj_labels)
+        elements_dir = os.path.join(output_dir, 'box_elements_labels')
+        ensure_dir(elements_dir)
+        save_annotations_yolo(anns_elements, img_w, img_h,
+                            os.path.join(elements_dir, f"{base_filename}.txt"))
+
+        # Backward-compatible alias: box_obj_labels/
+        obj_dir = os.path.join(output_dir, 'box_obj_labels')
+        ensure_dir(obj_dir)
+        save_annotations_yolo(anns_elements, img_w, img_h,
+                            os.path.join(obj_dir, f"{base_filename}.txt"))
+
+        # 4. Export Set 2: Global & Layout Elements (box_global_labels)
+        global_dir = os.path.join(output_dir, 'box_global_labels')
+        ensure_dir(global_dir)
+        save_annotations_yolo(anns_global, img_w, img_h,
+                            os.path.join(global_dir, f"{base_filename}.txt"))
+
+        if cfg.get('debug_mode', False):
+            print(f"DEBUG: Saved {len(anns_elements)} box element annotations to {elements_dir} (+ {obj_dir})")
+            print(f"DEBUG: Saved {len(anns_global)} box global annotations to {global_dir}")
     # =========================================================================
     # NEW: HEATMAP CASCADED EXPERT DOUBLE-ROUTING PIPELINE WITH REGIONAL CROPS
     # =========================================================================
@@ -4764,17 +4841,10 @@ def main():
         ensure_dir(debug_dir)
     else:
         output_dir = cfg['output_dir']
-        if cfg.get('dataset_format') == 'multi_chart_detection':
-            images_dir = os.path.join(output_dir, 'images')
-            labels_dir = os.path.join(output_dir, 'labels')
-            for split_name in ['train', 'val']:
-                ensure_dir(os.path.join(output_dir, 'images', split_name))
-                ensure_dir(os.path.join(output_dir, 'labels', split_name))
-        else:
-            images_dir = os.path.join(output_dir, 'images')
-            labels_dir = os.path.join(output_dir, 'labels')
-            ensure_dir(images_dir)
-            ensure_dir(labels_dir)
+        images_dir = os.path.join(output_dir, 'images')
+        labels_dir = os.path.join(output_dir, 'labels')
+        ensure_dir(images_dir)
+        ensure_dir(labels_dir)
 
     if cfg['debug_mode']:
         print(f"DEBUG: Available chart types: {list(cfg['chart_types'].keys())}")
@@ -4812,16 +4882,14 @@ def main():
     print("\n=== DATASET STATISTICS ===")
     class_counts = defaultdict(int)
     if cfg.get('dataset_format') == 'multi_chart_detection':
-        for split in ['train', 'val']:
-            split_lbl_dir = os.path.join(output_dir, 'labels', split)
-            if os.path.exists(split_lbl_dir):
-                for fname in os.listdir(split_lbl_dir):
-                    if fname.endswith('.txt'):
-                        with open(os.path.join(split_lbl_dir, fname), 'r') as f:
-                            for line in f:
-                                if line.strip():
-                                    class_id = int(line.split()[0])
-                                    class_counts[class_id] += 1
+        if os.path.exists(labels_dir):
+            for fname in os.listdir(labels_dir):
+                if fname.endswith('.txt'):
+                    with open(os.path.join(labels_dir, fname), 'r') as f:
+                        for line in f:
+                            if line.strip():
+                                class_id = int(line.split()[0])
+                                class_counts[class_id] += 1
         cls_map = cfg.get('CLASS_MAP_CLASSIFICATION', GENERATION_CONFIG['CLASS_MAP_CLASSIFICATION'])
         for class_id_str, class_name in sorted(cls_map.items(), key=lambda x: int(x[0])):
             cid = int(class_id_str)
@@ -4840,29 +4908,17 @@ def main():
         for chart_type, chart_cls_map in CHART_CLASS_MAPS.items():
             if chart_type != 'pie':
                 for id_val, class_name in chart_cls_map.items():
-                    if id_val not in combined_cls_map:
-                        combined_cls_map[id_val] = class_name
+                    combined_cls_map[int(id_val)] = class_name
 
         for class_id, class_name in sorted(combined_cls_map.items(), key=lambda x: x[1]):
             print(f"  {class_name:20s}: {class_counts[class_id]:5d} instances")
-
-    if cfg.get('dataset_format') == 'classification':
-        print("\n=== CLASSIFICATION FOLDER SUMMARY ===")
-        for split_name in ['train', 'val']:
-            split_dir = os.path.join(output_dir, split_name)
-            if os.path.exists(split_dir):
-                print(f"  [{split_name.upper()}]")
-                for c_name in sorted(os.listdir(split_dir)):
-                    c_path = os.path.join(split_dir, c_name)
-                    if os.path.isdir(c_path):
-                        print(f"    - {c_path}: {len(os.listdir(c_path))} images")
 
     if cfg.get('dataset_format') == 'multi_chart_detection':
         yaml_path = os.path.join(output_dir, 'data.yaml')
         cls_map = cfg.get('CLASS_MAP_CLASSIFICATION', GENERATION_CONFIG['CLASS_MAP_CLASSIFICATION'])
         sorted_names = [cls_map[str(k)] for k in sorted(map(int, cls_map.keys()))]
         abs_output_dir = os.path.abspath(output_dir)
-        yaml_content = f"path: {abs_output_dir}\ntrain: images/train\nval: images/val\nnc: {len(sorted_names)}\nnames:\n"
+        yaml_content = f"path: {abs_output_dir}\ntrain: images\nval: images\nnc: {len(sorted_names)}\nnames:\n"
         for name in sorted_names:
             yaml_content += f"  - {name}\n"
         with open(yaml_path, 'w') as f:
