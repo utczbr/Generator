@@ -2,10 +2,8 @@ OCR_TRAINING_CONFIG = {
   "debug_mode": False,
   "num_images": 5000,
   "output_dir": "dataset_export",
-  "seed": 42,
+  "seed": 21,
   "dataset_format": "detection",  # "detection", "classification", or "multi_chart_detection"
-  "RESAMPLE_STRATEGY": "adaptive",  # "adaptive" | "uniform" 
-  "RESAMPLE_MAX_ANCHORS": 10,  # Max number of anchor points for adaptive resampling
   "CLASS_MAP_CLASSIFICATION": {
     "0": "area",
     "1": "bar",
@@ -34,11 +32,11 @@ OCR_TRAINING_CONFIG = {
     "3": "chart_title",
     "4": "data_label",
     "5": "connector_line"
-},
-"CLASS_MAP_PIE_POSE": {
-    "0": "slice_boundary",
-},
-"CLASS_MAP_LINE_OBJ": {
+  },
+  "CLASS_MAP_PIE_POSE": {
+    "0": "slice_boundary"
+  },
+  "CLASS_MAP_LINE_OBJ": {
     "0": "chart",
     "1": "line_segment",
     "2": "axis_title",
@@ -46,10 +44,27 @@ OCR_TRAINING_CONFIG = {
     "4": "chart_title",
     "5": "data_label",
     "6": "axis_labels"
-},
-"CLASS_MAP_LINE_POSE": {
-    "0": "line_boundary",
-},
+  },
+  "CLASS_MAP_LINE_SEG": {
+    "0": "line_series"
+  },
+  "CLASS_MAP_LINE_MARKERS": {
+    "0": "data_marker",
+    "1": "peak",
+    "2": "valley",
+    "3": "inflection"
+  },
+  "CLASS_MAP_AREA_OBJ": {
+    "0": "chart",
+    "1": "axis_title",
+    "2": "legend",
+    "3": "chart_title",
+    "4": "data_label",
+    "5": "axis_labels"
+  },
+  "CLASS_MAP_AREA_SEG": {
+    "0": "area_series"
+  },
   "CLASS_MAP_SCATTER": {
     "0": "chart",
     "1": "data_point",
@@ -93,17 +108,6 @@ OCR_TRAINING_CONFIG = {
     "7": "axis_labels",
     "8": "significance_marker"
   },
-  "CLASS_MAP_AREA_POSE": {
-    "0": "area_boundary",
-  },
-  "CLASS_MAP_AREA_OBJ": {
-    "0": "chart",
-    "1": "axis_title",
-    "2": "legend",
-    "3": "chart_title",
-    "4": "data_label",
-    "5": "axis_labels"
-  },
   "chart_types": {
     "bar": {
       "weight": 0,
@@ -118,7 +122,7 @@ OCR_TRAINING_CONFIG = {
       "enabled": True
     },
     "box": {
-      "weight": 100,
+      "weight": 0,
       "enabled": True
     },
     "pie": {
@@ -126,7 +130,7 @@ OCR_TRAINING_CONFIG = {
       "enabled": True
     },
     "area": {
-      "weight": 0,
+      "weight": 100,
       "enabled": True
     },
     "histogram": {

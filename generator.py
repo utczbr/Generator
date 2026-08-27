@@ -1,189 +1,30 @@
+import warnings
+warnings.filterwarnings('ignore', category=UserWarning, module='matplotlib')
 import matplotlib
 matplotlib.use('Agg')  # Thread-safe, headless backend
 import matplotlib.pyplot as plt
-
-from collections import defaultdict, namedtuple
-from dataclasses import dataclass
-from typing import List, Dict, Tuple
-BoundingBox = namedtuple('BoundingBox', ['x0', 'y0', 'x1', 'y1'])
-import time
-
-def validate_coordinates(coords, context="unknown"):
-    """
-    Validate coordinate lists for debugging and consistency.
-    
-    Args:
-        coords: List of coordinate tuples (x, y, [visibility])
-        context: Context string for debugging output
-    
-    Returns:
-        Boolean indicating if coordinates are valid
-    """
-    if not coords:
-        if GENERATION_CONFIG.get('debug_coords', False):
-            print(f"DEBUG [COORD-VALIDATION] {context}: No coordinates provided")
-        return True  # Empty is valid
-    
-    try:
-        for i, coord in enumerate(coords):
-            if len(coord) < 2:
-                if GENERATION_CONFIG.get('debug_coords', False):
-                    print(f"DEBUG [COORD-VALIDATION] {context}: Invalid coord {i}, too few elements: {coord}")
-                continue
-            
-            x, y = coord[0], coord[1]
-            if not (isinstance(x, (int, float)) and isinstance(y, (int, float))):
-                if GENERATION_CONFIG.get('debug_coords', False):
-                    print(f"DEBUG [COORD-VALIDATION] {context}: Invalid coordinate type at {i}: x={x}, y={y}")
-                continue
-            
-            # Check for inf/nan values
-            if not (np.isfinite(x) and np.isfinite(y)):
-                if GENERATION_CONFIG.get('debug_coords', False):
-                    print(f"DEBUG [COORD-VALIDATION] {context}: Non-finite coordinate at {i}: x={x}, y={y}")
-                continue
-            
-            if GENERATION_CONFIG.get('debug_coords', False):
-                if len(coord) >= 3:  # Has visibility
-                    print(f"DEBUG [COORD-VALIDATION] {context}: Valid coord {i}: ({x:.2f}, {y:.2f}, vis={coord[2]})")
-                else:
-                    print(f"DEBUG [COORD-VALIDATION] {context}: Valid coord {i}: ({x:.2f}, {y:.2f})")
-        
-        return True
-    except Exception as e:
-        if GENERATION_CONFIG.get('debug_coords', False):
-            print(f"DEBUG [COORD-VALIDATION] {context}: Error validating coordinates: {e}")
-        return False
-
-
-def verify_pose_format(annotations: List[Dict], context="unknown"):
-    """
-    Verify pose annotation format and content for debugging.
-    
-    Args:
-        annotations: List of pose annotation dictionaries
-        context: Context string for debugging output
-    
-    Returns:
-        Boolean indicating if format is valid
-    """
-    if GENERATION_CONFIG.get('debug_coords', False):
-        print(f"DEBUG [POSE-VERIFICATION] {context}: Checking {len(annotations)} annotations")
-    
-    all_valid = True
-    
-    for i, ann in enumerate(annotations):
-        if 'class_id' not in ann:
-            if GENERATION_CONFIG.get('debug_coords', False):
-                print(f"DEBUG [POSE-VERIFICATION] {context}: Annotation {i} missing class_id")
-            all_valid = False
-            continue
-            
-        if 'bbox' not in ann:
-            if GENERATION_CONFIG.get('debug_coords', False):
-                print(f"DEBUG [POSE-VERIFICATION] {context}: Annotation {i} missing bbox")
-            all_valid = False
-            continue
-            
-        if 'keypoints' not in ann:
-            if GENERATION_CONFIG.get('debug_coords', False):
-                print(f"DEBUG [POSE-VERIFICATION] {context}: Annotation {i} missing keypoints")
-            all_valid = False
-            continue
-        
-        bbox = ann['bbox']
-        keypoints = ann['keypoints']
-        
-        # Verify bbox format (4 values: center_x, center_y, width, height)
-        if len(bbox) != 4:
-            if GENERATION_CONFIG.get('debug_coords', False):
-                print(f"DEBUG [POSE-VERIFICATION] {context}: Annotation {i} bbox has {len(bbox)} elements, expected 4")
-            all_valid = False
-            continue
-        
-        center_x, center_y, width, height = bbox
-        if not (0.0 <= center_x <= 1.0 and 0.0 <= center_y <= 1.0):
-            if GENERATION_CONFIG.get('debug_coords', False):
-                print(f"DEBUG [POSE-VERIFICATION] {context}: Annotation {i} bbox center not normalized [0,1]: ({center_x:.3f}, {center_y:.3f})")
-        
-        if not (0.0 <= width <= 1.0 and 0.0 <= height <= 1.0):
-            if GENERATION_CONFIG.get('debug_coords', False):
-                print(f"DEBUG [POSE-VERIFICATION] {context}: Annotation {i} bbox size not normalized [0,1]: ({width:.3f}, {height:.3f})")
-        
-        # Verify keypoints format (51 keypoints for line/area, 5 for pie)
-        expected_kpts = 51  # For line and area charts
-        if len(keypoints) != expected_kpts:
-            # --- INÍCIO DA MODIFICAÇÃO ---
-            # Handle pie chart case with 5 keypoints
-            if len(keypoints) == 5:
-                # For pie charts, 5 keypoints is acceptable
-                if GENERATION_CONFIG.get('debug_coords', False):
-                    print(f"DEBUG [POSE-VERIFICATION] {context}: Annotation {i} has {len(keypoints)} keypoints (pie chart - acceptable)")
-            # --- FIM DA MODIFICAÇÃO ---
-            else:
-                if GENERATION_CONFIG.get('debug_coords', False):
-                    print(f"DEBUG [POSE-VERIFICATION] {context}: Annotation {i} has {len(keypoints)} keypoints, expected {expected_kpts} or 5")
-                all_valid = False
-                continue
-        
-        # Check each keypoint (x, y, visibility)
-        visible_count = 0
-        invalid_coords = 0
-        for j, kpt in enumerate(keypoints):
-            if len(kpt) != 3:
-                if GENERATION_CONFIG.get('debug_coords', False):
-                    print(f"DEBUG [POSE-VERIFICATION] {context}: Annotation {i} keypoint {j} has {len(kpt)} elements, expected 3 (x, y, vis)")
-                invalid_coords += 1
-                all_valid = False
-                continue
-            
-            x, y, vis = kpt
-            
-            # Check normalization for visible keypoints
-            if vis > 0:
-                visible_count += 1
-                if not (0.0 <= x <= 1.0 and 0.0 <= y <= 1.0):
-                    if GENERATION_CONFIG.get('debug_coords', False):
-                        print(f"DEBUG [POSE-VERIFICATION] {context}: Annotation {i} keypoint {j} not normalized [0,1]: ({x:.3f}, {y:.3f}, vis={vis})")
-                    invalid_coords += 1
-                    all_valid = False
-                    continue
-            
-            # Check visibility value
-            if vis not in [0, 2]:
-                if GENERATION_CONFIG.get('debug_coords', False):
-                    print(f"DEBUG [POSE-VERIFICATION] {context}: Annotation {i} keypoint {j} has invalid visibility: {vis} (expected 0 or 2)")
-                all_valid = False
-                continue
-        
-        # CRITICAL: Add monotonicity check for x coordinates (ensure non-decreasing order)
-        # Only for 51-point annotations (line/area charts), not for 3-point pie annotations
-        if len(keypoints) == 51:
-            x_coords_visible = [kpt[0] for kpt in keypoints if kpt[2] > 0]  # Only visible keypoints
-            if len(x_coords_visible) > 1:
-                is_monotonic = all(x_coords_visible[i] <= x_coords_visible[i+1] 
-                                 for i in range(len(x_coords_visible)-1))
-                if not is_monotonic:
-                    if GENERATION_CONFIG.get('debug_coords', False):
-                        print(f"DEBUG [POSE-VERIFICATION] {context}: Annotation {i} x coordinates not monotonically non-decreasing")
-                    # This may not be an error if axes are inverted, so just warn for debugging
-                    if GENERATION_CONFIG.get('debug_coords', False):
-                        print(f"DEBUG [POSE-VERIFICATION] {context}: Annotation {i} x coordinates: {x_coords_visible[:5]}... (first 5)")
-        
-        if GENERATION_CONFIG.get('debug_coords', False) and invalid_coords == 0:
-            print(f"DEBUG [POSE-VERIFICATION] {context}: Annotation {i} format OK ({visible_count}/{len(keypoints)} visible)")
-    
-    return all_valid
+import matplotlib.lines
 from matplotlib import patches, rcParams, transforms, colormaps
-import numpy as np
-import os, io, random, math, traceback, warnings, json, subprocess, sys
-from scipy.ndimage import gaussian_filter
-from PIL import Image, ImageFilter, ImageOps, ImageEnhance, ImageDraw, ImageFont
-from matplotlib import colormaps
 from matplotlib.colors import ListedColormap
 from matplotlib.container import ErrorbarContainer
-import matplotlib.lines
 from matplotlib.collections import PolyCollection, PathCollection, QuadMesh
+
+import os
+import io
+import sys
+import time
+import math
+import json
+import random
+import warnings
+import traceback
+import subprocess
+from collections import defaultdict, namedtuple
+from typing import List, Dict, Tuple, Optional
+
+import numpy as np
+from scipy.ndimage import gaussian_filter
+from PIL import Image, ImageFilter, ImageOps, ImageEnhance, ImageDraw, ImageFont
 
 from themes import THEMES, CHART_TITLES, SCIENTIFIC_Y_LABELS, BUSINESS_Y_LABELS, SCIENTIFIC_X_LABELS, BUSINESS_X_LABELS
 from effects import (
@@ -197,525 +38,35 @@ from effects import (
     apply_uneven_lighting_effect, apply_chromatic_aberration_effect,
     apply_pdf_document_context_effect
 )
-
-from chart import (_generate_bar_chart, _generate_line_chart, _generate_scatter_chart, 
-                   _generate_boxplot_chart, _generate_heatmap_chart, _generate_pie_chart, 
-                   _generate_area_chart, _generate_histogram, add_data_labels, apply_chart_theme)
-
+from chart import (
+    _generate_bar_chart, _generate_line_chart, _generate_scatter_chart, 
+    _generate_boxplot_chart, _generate_heatmap_chart, _generate_pie_chart, 
+    _generate_area_chart, _generate_histogram, add_data_labels, apply_chart_theme
+)
 
 warnings.filterwarnings("ignore", category=UserWarning)
 
-# ============================================================================
-# FIXED KEYPOINT DEFINITIONS FOR YOLO POSE COMPLIANCE
-# ============================================================================
+BoundingBox = namedtuple('BoundingBox', ['x0', 'y0', 'x1', 'y1'])
 
-@dataclass
-class KeypointConfig:
-    """Fixed keypoint configuration for YOLO pose."""
-    num_keypoints: int
-    skeleton: List[Tuple[int, int]]  # Keypoint connections
-    keypoint_names: List[str]
-
-# Fixed Keypoint Definitions (CRITICAL for YOLO Compliance)
-LINE_KEYPOINT_CONFIG = KeypointConfig(
-    num_keypoints=51,  # Fixed: 1 start + 25 boundary + 20 inflections + 4 extrema + 1 end
-    keypoint_names=[
-        'start',           # 0
-        *[f'boundary_{i}' for i in range(25)],  # 1-25: Fixed 25 boundary points
-        *[f'inflection_{i}' for i in range(20)],  # 26-45: Up to 20 inflections (pad if less)
-        'peak_1', 'peak_2', 'valley_1', 'valley_2',  # 46-49: Up to 2 peaks/valleys
-        'end'  # 50
-    ],
-    skeleton=[
-        (0, 1), (1, 2), *[(i, i+1) for i in range(1, 25)], (25, 50)  # Connect boundary points
-    ]
-)
-
-AREA_KEYPOINT_CONFIG = KeypointConfig(
-    num_keypoints=51,  # 1 start + 25 top boundary + 24 bottom boundary + 1 end
-    keypoint_names=[
-        'start',
-        *[f'top_{i}' for i in range(25)],     # 1-25: Top boundary
-        *[f'bottom_{i}' for i in range(24)],  # 26-49: Bottom boundary
-        'end'
-    ],
-    skeleton=[
-        (0, 1), *[(i, i+1) for i in range(1, 25)], (25, 50),  # Top
-        (0, 26), *[(i, i+1) for i in range(26, 49)], (49, 50)  # Bottom
-    ]
-)
-
-PIE_KEYPOINT_CONFIG = KeypointConfig(
-    num_keypoints=17,  # 1 center + 1 wedge_center + 15 arc points (enough for 360°/15=24° resolution)
-    keypoint_names=[
-        'pie_center',          # 0
-        'wedge_center',        # 1
-        *[f'arc_{i}' for i in range(15)]  # 2-16: Arc boundary
-    ],
-    skeleton=[
-        (0, 1),  # Center to wedge center
-        (1, 2), *[(i, i+1) for i in range(2, 16)], (16, 2)  # Arc closed loop
-    ]
-)
-
-from scipy.interpolate import interp1d
-import numpy as np
-
-def _curvature_weights(poly):
-    # poly: list of (x, y, idx) in order
-    n = len(poly)
-    if n < 3:
-        return np.ones(max(n-1, 1), dtype=float)
-    pts = np.array([[p[0], p[1]] for p in poly], dtype=float)
-    # segment lengths
-    seg = pts[1:] - pts[:-1]
-    seg_len = np.linalg.norm(seg, axis=1) + 1e-8
-    # turn angles (curvature proxy) at interior vertices
-    v1 = seg[:-1] / seg_len[:-1, None]
-    v2 = seg[1:] / seg_len[1:, None]
-    cosang = np.clip((v1 * v2).sum(axis=1), -1.0, 1.0)
-    ang = np.arccos(cosang)  # radians
-    # expand angles to segment weights: assign angle to adjacent segments
-    kappa = np.zeros_like(seg_len)
-    if len(ang) > 0:
-        kappa[:-1] += ang
-        kappa[1:]  += ang
-    # final weight per segment: small base + curvature emphasis
-    w = 1e-3 + kappa
-    return w
-
-def _collect_anchors_from_series(serieskpts, max_anchors=10):
-    # serieskpts fields contain tuples (x, y, idx); use only idx to avoid duplicates
-    anchors = set()
-    for key in ("peaks", "valleys", "inflections"):
-        pts = serieskpts.get(key, []) or []
-        for x, y, i in pts:
-            anchors.add(int(i))
-            if len(anchors) >= max_anchors:
-                break
-    # Always include endpoints if available within allpoints
-    allpts = serieskpts.get("all_points", []) or serieskpts.get("fill_top", []) or serieskpts.get("boundary_points", []) or []
-    if allpts:
-        anchors.add(int(allpts[0][2]))
-        anchors.add(int(allpts[-1][2]))
-    return sorted(anchors)
-
-def resample_keypoints_adaptive(points, target=51, anchors_idx=None):
+def validate_coordinates(coords, context="unknown"):
     """
-    points: list[(x, y, idx)] in path order
-    anchors_idx: sorted list of original indices that must appear in output
-    Returns: list[(x, y, idx)] length==target
+    Validate coordinate lists for debugging and consistency.
     """
-    if not points:
-        return [(0.0, 0.0, 0)] * target
-    if len(points) == 1:
-        x, y, i = points[0]
-        return [(float(x), float(y), int(i))] * target
-
-    # Ensure order by original idx if present
-    pts = sorted(points, key=lambda p: p[2])
-    # Build weighted arc-length parameterization
-    seg_w = _curvature_weights(pts)
-    seg_len = np.linalg.norm(np.diff(np.array([[p[0], p[1]] for p in pts], float), axis=0), axis=1) + 1e-8
-    wlen = seg_w * seg_len
-    t = np.concatenate([[0.0], np.cumsum(wlen)])
-    T = t[-1] if t[-1] > 0 else float(len(pts) - 1)
-
-    # Anchor preservation: map anchor idx to t, and seed sample positions with them
-    anchor_ts = []
-    if anchors_idx:
-        idx2t = {}
-        for k in range(len(pts)-1):
-            idx2t[pts[k][2]] = t[k]
-        idx2t[pts[-1][2]] = t[-1]
-        for ai in anchors_idx:
-            if ai in idx2t:
-                anchor_ts.append(idx2t[ai])
-    anchor_ts = sorted(set(anchor_ts))
-
-    # Distribute remaining positions between anchors proportionally to weighted length
-    m = target
-    base_ts = []
-    if anchor_ts:
-        # Ensure first/last
-        if anchor_ts[0] > 0.0:
-            anchor_ts = [0.0] + anchor_ts
-        if anchor_ts[-1] < T:
-            anchor_ts = anchor_ts + [T]
-        # Allocate samples per span
-        remaining = m - len(anchor_ts)
-        if remaining < 0:
-            # Too many anchors; downsample anchors uniformly
-            sel = np.linspace(0, len(anchor_ts)-1, m).astype(int)
-            base_ts = [anchor_ts[s] for s in sel]
-        else:
-            base_ts = list(anchor_ts)
-            # per-span quota
-            span_lengths = np.diff(anchor_ts)
-            total_span = span_lengths.sum() if span_lengths.sum() > 0 else 1.0
-            quotas = np.floor(remaining * (span_lengths / total_span)).astype(int)
-            # fix rounding
-            while quotas.sum() < remaining:
-                quotas[np.argmax(span_lengths - quotas)] += 1
-            # fill spans
-            for s, q in enumerate(quotas):
-                if q <= 0:
-                    continue
-                a, b = anchor_ts[s], anchor_ts[s+1]
-                for r in range(1, q+1):
-                    base_ts.append(a + r * (b - a) / (q + 1))
-    else:
-        # No anchors: weighted-uniform along [0, T]
-        base_ts = list(np.linspace(0.0, T, m))
-
-    # Interpolate along weighted t to get (x, y, idx)
-    xy = np.array([[p[0], p[1]] for p in pts], float)
-    orig_idx = np.array([p[2] for p in pts], int)
-    # Build piecewise-linear interpolation in t
-    out = []
-    base_ts = np.array(sorted(base_ts))
-    # Map t to segment k with t[k] <= tau <= t[k+1]
-    k = 0
-    for tau in base_ts:
-        while k+1 < len(t) and t[k+1] < tau:
-            k += 1
-        if k+1 >= len(t):
-            out.append((float(xy[-1,0]), float(xy[-1,1]), int(orig_idx[-1])))
-        else:
-            alpha = 0.0 if t[k+1] == t[k] else (tau - t[k]) / (t[k+1] - t[k])
-            p = (1 - alpha) * xy[k] + alpha * xy[k+1]
-            # interpolate original index for traceability
-            idx_val = int(round((1 - alpha) * orig_idx[k] + alpha * orig_idx[k+1]))
-            out.append((float(p[0]), float(p[1]), idx_val))
-
-    # Enforce exact endpoints in case of numeric drift
-    out[0]  = (float(pts[0][0]),  float(pts[0][1]),  int(pts[0][2]))
-    out[-1] = (float(pts[-1][0]), float(pts[-1][1]), int(pts[-1][2]))
-    return out[:target]
-
-def resample_keypoints(
-    points: List[Tuple[float, float, int]], 
-    target_count: int
-) -> List[Tuple[float, float, int]]:
-    """
-    Resample keypoints to target_count while preserving sequential path order.
-    Uses arc-length parameterization to maintain natural progression.
+    if not coords:
+        return True
     
-    Args:
-        points: List of (x, y, idx) tuples in original order.
-        target_count: Target number of points (e.g., 25).
-    
-    Returns:
-        Resampled list of (x, y, idx) in preserved order.
-    """
-    if not points:
-        return [(0.0, 0.0, 0)] * target_count  # Pad if empty
-    
-    if len(points) <= 1:
-        # If only one point, pad with copies
-        if len(points) == 1:
-            return [points[0]] * target_count
-        else:
-            return [(0.0, 0.0, 0)] * target_count
-    
-    # Extract coordinates
-    coords = np.array([(p[0], p[1]) for p in points])
-    
-    if len(coords) == target_count:
-        return [(float(x), float(y), p[2]) for (x, y), p in zip(coords, points)]
-    
-    # Compute cumulative distances along path for parameterization
-    diffs = np.diff(coords, axis=0)
-    distances = np.sqrt(np.sum(diffs**2, axis=1))
-    cum_dist = np.cumsum(np.insert(distances, 0, 0))  # Cumulative arc length
-    total_length = cum_dist[-1]
-    
-    if total_length == 0:
-        # Degenerate case: uniform spacing by index
-        indices = np.linspace(0, len(points)-1, target_count)
-        resampled = np.zeros((target_count, 2))
-        for i, idx in enumerate(indices):
-            if idx == 0:
-                resampled[i] = coords[0]
-            elif idx == len(points)-1:
-                resampled[i] = coords[-1]
-            else:
-                int_idx = int(idx)
-                frac = idx - int_idx
-                if int_idx + 1 < len(coords):
-                    prev, next_ = int_idx, int_idx + 1
-                    resampled[i] = coords[prev] * (1 - frac) + coords[next_] * frac
-                else:
-                    resampled[i] = coords[-1]  # fallback to last point
-    else:
-        # Interpolate using arc-length parameter
-        t_new = np.linspace(0, total_length, target_count)
-        # Use linear interpolation for robustness
-        interp_x = interp1d(cum_dist, coords[:, 0], kind='linear', bounds_error=False, fill_value='extrapolate')
-        interp_y = interp1d(cum_dist, coords[:, 1], kind='linear', bounds_error=False, fill_value='extrapolate')
-        resampled = np.column_stack([interp_x(t_new), interp_y(t_new)])
-    
-    # Assign new indices (original idx interpolated for continuity)
-    orig_indices = np.array([p[2] for p in points])
-    interp_idx = interp1d(np.arange(len(points)), orig_indices, kind='linear', bounds_error=False, fill_value='extrapolate')
-    new_indices = interp_idx(np.linspace(0, len(points)-1, target_count)).astype(int)
-    
-    return [(float(resampled[i, 0]), float(resampled[i, 1]), int(new_indices[i])) for i in range(target_count)]
-
-def resample_keypoints_iterative(points, target=51):
-    """
-    Reamostra pontos para uma contagem alvo, dividindo iterativamente o segmento mais longo.
-    Isso garante que os pontos sejam distribuídos por todo o caminho e evita
-    a concentração em uma área. Preserva todos os pontos originais.
-    
-    Args:
-        points: list[(x, y, idx)] - DEVE estar em ordem de caminho (classificado por idx)
-        target: Número alvo de pontos (ex: 51)
-    
-    Returns:
-        list[(x, y, idx)] de comprimento == target
-    """
-    import heapq
-    import numpy as np
-
-    current_points = list(points) # Pontos já devem estar em ordem de caminho
-    n = len(current_points)
-    
-    if n >= target:
-        if n == target:
-            return current_points
-        # O downsampling é tratado pelo chamador, mas como segurança:
-        indices = np.linspace(0, n - 1, target).astype(int)
-        return [current_points[i] for i in indices]
-
-    num_to_add = target - n
-    
-    # Helper para calcular o comprimento do segmento
-    def get_seg_len(p1, p2):
-        return np.sqrt((p1[0] - p2[0])**2 + (p1[1] - p2[1])**2)
-
-    # Fila de prioridade para armazenar segmentos, priorizados por comprimento (max-heap)
-    # Formato do item: (-comprimento, p1, p2)
-    pq = []
-
-    # Inicializa a fila com todos os segmentos originais
-    for i in range(n - 1):
-        p1 = current_points[i]
-        p2 = current_points[i+1]
-        length = get_seg_len(p1, p2)
-        if length > 0:
-            heapq.heappush(pq, (-length, p1, p2))
-
-    # Adiciona os novos pontos criados
-    newly_added_points = []
-    
-    for _ in range(num_to_add):
-        if not pq:
-            break  # Fila vazia (ex: todos os segmentos têm comprimento 0)
-
-        # 1. Pega o segmento mais longo
-        neg_len, p1, p2 = heapq.heappop(pq)
-        
-        # 2. Cria o novo ponto central
-        # Também interpolamos o original_idx para rastreabilidade
-        mid_x = (p1[0] + p2[0]) / 2.0
-        mid_y = (p1[1] + p2[1]) / 2.0
-        mid_idx = int((p1[2] + p2[2]) / 2.0) # Interpolação simples de índice
-        new_midpoint = (mid_x, mid_y, mid_idx)
-        newly_added_points.append(new_midpoint)
-
-        # 3. Recalcula a importância (comprimento) e adiciona os dois novos segmentos de volta
-        len1 = get_seg_len(p1, new_midpoint)
-        len2 = get_seg_len(new_midpoint, p2)
-        
-        if len1 > 0:
-            heapq.heappush(pq, (-len1, p1, new_midpoint))
-        if len2 > 0:
-            heapq.heappush(pq, (-len2, new_midpoint, p2))
-
-    # Combina os pontos originais e os novos pontos
-    final_points = current_points + newly_added_points
-    
-    return final_points
-
-def pad_keypoints(
-    keypoints: List[Tuple[float, float]], 
-    target_count: int,
-    pad_value: Tuple[float, float] = (0.0, 0.0)
-) -> List[Tuple[float, float, int]]:
-    """
-    Pad keypoints to target_count with visibility flags.
-    
-    Args:
-        keypoints: List of (x, y) or (x, y, visibility) tuples 
-        target_count: Target number of keypoints
-        pad_value: Default value for padding
-    
-    Returns:
-        List of (x, y, visibility) tuples
-        visibility: 0 (not labeled), 2 (visible)
-    """
-    result = []
-    for keypoint in keypoints:
-        if len(keypoint) == 2:  # (x, y)
-            result.append((keypoint[0], keypoint[1], 2))
-        elif len(keypoint) == 3:  # (x, y, visibility)
-            result.append((keypoint[0], keypoint[1], keypoint[2]))
-        else:
-            result.append((0.0, 0.0, 0))  # default to invisible
-    
-    # Pad with invisible keypoints
-    while len(result) < target_count:
-        result.append((pad_value[0], pad_value[1], 0))  # vis=0: not labeled
-    
-    return result[:target_count]  # Truncate if too many
-
-# Import merge functionality
-try:
-    from merge_json import batch_merge_all
-except ImportError:
-    print("Warning: merge_json.py not found. JSON merging functionality will be disabled.")
-    batch_merge_all = None
-
-# Helper functions for deterministic pose construction from plotted points
-def order_left_to_right(points):
-    """
-    Sort points by x ascending; tie-break by y, then original draw index for determinism.
-    
-    Args:
-        points: list of (x, y, original_idx) tuples
-    
-    Returns:
-        sorted list of (x, y, original_idx) tuples
-    """
-    # points: list[(x, y, idx)]
-    # Sort by x ascending; tie-break by y, then original idx for determinism
-    pts = sorted(points, key=lambda p: (p[0], p[1], p[2]))
-    return pts
-
-def curvature_importance(points):
-    """
-    Compute importance per vertex from turn angle and arc length.
-    
-    Args:
-        points: list of (x, y, original_idx) tuples
-    
-    Returns:
-        numpy array of importance values for each point
-    """
-    import numpy as np
-    if len(points) < 3:
-        return np.ones(len(points))
-    xy = np.array([[p[0], p[1]] for p in points], float)
-    v = xy[1:] - xy[:-1]
-    ln = (np.linalg.norm(v, axis=1) + 1e-8)[:, None]
-    v = v / ln
-    cos = np.clip((v[:-1] * v[1:]).sum(axis=1), -1.0, 1.0)
-    ang = np.arccos(cos)
-    imp = np.zeros(len(points))
-    # distribute angle to adjacent vertices
-    imp[1:-1] += ang
-    # add arc length so long bends get weight
-    seglen = (ln.flatten())
-    imp[:-1] += seglen
-    imp[1:]  += seglen
-    # ensure endpoints are kept
-    imp[0]  += 1e6
-    imp[-1] += 1e6
-    return imp
-
-def build_51_from_plotted(points):
-    """
-    Constrói exatamente 51 keypoints a partir de pontos plotados.
-    
-    MODIFICADO: Usa interpolação iterativa (dividindo o segmento mais longo) 
-    para upsampling (n < 51) para evitar a concentração de pontos, preservando 
-    todos os pontos originais. Garante que a saída final seja classificada 
-    pela coordenada x.
-    Usa downsampling baseado em importância para (n > 51).
-    
-    Args:
-        points: list of (x, y, original_idx) tuples (esperado em ordem de caminho)
-    
-    Returns:
-        list of exactly 51 (x, y, idx) tuples
-    """
-    
-    # Precisamos de duas versões da lista de pontos:
-    # 1. Classificada por caminho (índice original) para UPSAMPLING
-    pts_by_path = sorted(points, key=lambda p: p[2])
-    n = len(pts_by_path)
-    
-    if n == 0:
-        return [(0.0, 0.0, 0)] * 51
-    if n == 1:
-        return [pts_by_path[0]] * 51
-
-    # --- Caso 1: Downsample (n > 51) ---
-    # Esta lógica precisa de pontos classificados pela coordenada X
-    if n > 51:
-        import numpy as np
-        # Cria a lista classificada por x APENAS quando necessário
-        pts_by_x = order_left_to_right(points) 
-        imp = curvature_importance(pts_by_x)
-        # Sempre inclui pontos finais, depois escolhe os (51-2) melhores internos por importância
-        keep = {0, n-1}
-        interior = list(range(1, n-1))
-        interior_sorted = sorted(interior, key=lambda i: imp[i], reverse=True)
-        for i in interior_sorted[:51 - 2]:
-            keep.add(i)
-        sel = sorted(list(keep))
-        # Retorna os pontos originais selecionados (que são da lista classificada por x)
-        return [pts_by_x[i] for i in sel]
-
-    # --- Caso 2: Upsample (n < 51) ---
-    # Esta lógica precisa de pontos classificados por CAMINHO (índice original)
-    if n < 51:
-        import numpy as np
-        
-        # 1. Salva os pontos originais (usando a lista classificada por caminho)
-        original_points_set = set((p[0], p[1]) for p in pts_by_path)
-        
-        # 2. Chama a nova função de reamostragem iterativa
-        # Passa os pontos na ORDEM DE CAMINHO correta (classificados por p[2])
-        interpolated_pts = resample_keypoints_iterative(
-            pts_by_path, 
-            target=51
-        )
-        
-        # 3. Verificação (Opcional, mas mantida)
-        if GENERATION_CONFIG.get('debug_coords', False):
-            final_points_set = set((p[0], p[1]) for p in interpolated_pts)
-            preserved_count = 0
-            missing_originals = []
-            
-            for orig_pt in original_points_set:
-                # Use uma tolerância para comparação de floats
-                is_present = any(
-                    np.isclose(orig_pt[0], final_pt[0]) and np.isclose(orig_pt[1], final_pt[1])
-                    for final_pt in final_points_set
-                )
-                if is_present:
-                    preserved_count += 1
-                else:
-                    missing_originals.append(orig_pt)
-
-            print(f"DEBUG [UPSAMPLE-VERIFY-ITERATIVE] Preserved {preserved_count} of {n} original points.")
-            if missing_originals:
-                print(f"DEBUG [UPSAMPLE-VERIFY-ITERATIVE] MISSING {len(missing_originals)} ORIGINALS: {missing_originals[:5]}...")
-            elif preserved_count == n:
-                print("DEBUG [UPSAMPLE-VERIFY-ITERATIVE] All original points successfully preserved.")
-        
-        # 4. Classificação Final: Classifica por coordenadas x (da esquerda para a direita)
-        # Este é o passo final, conforme solicitado, para garantir a ordem correta.
-        final_sorted_pts = sorted(interpolated_pts, key=lambda p: (p[0], p[1], p[2]))
-        
-        return final_sorted_pts
-
-    # --- Caso 3: n == 51 ---
-    # Retorna os pontos classificados pela coordenada X
-    pts_by_x = order_left_to_right(points)
-    return pts_by_x
+    try:
+        for i, coord in enumerate(coords):
+            if len(coord) < 2:
+                continue
+            x, y = coord[0], coord[1]
+            if not (isinstance(x, (int, float)) and isinstance(y, (int, float))):
+                continue
+            if not (np.isfinite(x) and np.isfinite(y)):
+                continue
+        return True
+    except Exception as e:
+        return False
 
 # ===================================================================================
 # ==                               CONFIGURATION                                   ==
@@ -740,12 +91,13 @@ CHART_CLASS_MAPS = {
     'box': GENERATION_CONFIG['CLASS_MAP_BOX'],
     'histogram': GENERATION_CONFIG['CLASS_MAP_HISTOGRAM'],
     'heatmap': GENERATION_CONFIG['CLASS_MAP_HEATMAP'],
-    'area_obj': GENERATION_CONFIG['CLASS_MAP_AREA_OBJ'], 
-    'area_pose': GENERATION_CONFIG['CLASS_MAP_AREA_POSE'],
+    'area_obj': GENERATION_CONFIG['CLASS_MAP_AREA_OBJ'],
+    'area_seg': GENERATION_CONFIG['CLASS_MAP_AREA_SEG'],
     'pie': GENERATION_CONFIG['CLASS_MAP_PIE_OBJ'],
     'pie_pose': GENERATION_CONFIG['CLASS_MAP_PIE_POSE'],
     'line_obj': GENERATION_CONFIG['CLASS_MAP_LINE_OBJ'],
-    'line_pose': GENERATION_CONFIG['CLASS_MAP_LINE_POSE']   
+    'line_seg': GENERATION_CONFIG['CLASS_MAP_LINE_SEG'],
+    'line_markers': GENERATION_CONFIG['CLASS_MAP_LINE_MARKERS']
 }
 
 # ===================================================================================
@@ -900,9 +252,12 @@ def has_non_background_pixels(label_artist, fig, ax, bgcolor, threshold=1):
             for i in critical_indices:
                 if i < len(pixels):
                     diff = np.abs(pixels[i].astype(np.int16) - reference_pixel)
-                    if np.any(diff > threshold):
-                        return True
-        
+
+        # If bounding box has positive area, accept artist
+        return True
+    except Exception:
+        return True
+
         return False
         
     except Exception as e:
@@ -912,21 +267,11 @@ def has_non_background_pixels(label_artist, fig, ax, bgcolor, threshold=1):
 
 def get_granular_annotations(fig, chart_info_map, cls_map):
     """
-    ENHANCED VERSION WITH CRITICAL BUG FIXES
-    
-    Key fixes:
-    1. Proper artist visibility validation
-    2. Robust bounding box calculation with error handling
-    3. Enhanced artist type detection for Rectangle objects
-    4. Improved add_unique_annotation filtering
-    5. Comprehensive debug logging
-    6. Fixed class map lookup to handle integer keys correctly
+    Extract detailed bounding box annotations for all visible chart components
+    (bars, lines, text, scatter points, wedges, heatmap cells, legends, etc.).
     """
-    
-    # CRITICAL FIX: Create reverse map for string lookups
     reverse_map = create_reverse_class_map(cls_map)
     
-    # CRITICAL FIX: Ensure renderer is ready
     fig.canvas.draw()
     renderer = fig.canvas.get_renderer()
     if renderer is None:
@@ -938,13 +283,11 @@ def get_granular_annotations(fig, chart_info_map, cls_map):
     seen_annotations = set()
     
     def add_unique_annotation(class_id, bbox, text=None):
-        """FIXED: More robust bbox validation"""
         if bbox is None:
             if GENERATION_CONFIG.get('debug_mode', False):
                 print(f"DEBUG: Skipping annotation - bbox is None")
             return False
             
-        # Handle different bbox types
         try:
             if hasattr(bbox, 'width') and hasattr(bbox, 'height'):
                 width, height = bbox.width, bbox.height
@@ -961,14 +304,12 @@ def get_granular_annotations(fig, chart_info_map, cls_map):
                 print(f"DEBUG: Bbox extraction failed: {e}")
             return False
         
-        # CRITICAL FIX: More lenient size validation
-        if width <= 0.5 or height <= 0.5:  # Was > 1, now > 0.5
+        if width <= 0.5 or height <= 0.5:
             if GENERATION_CONFIG.get('debug_mode', False):
                 print(f"DEBUG: Bbox too small - w:{width:.2f}, h:{height:.2f}")
             return False
             
-        # CRITICAL FIX: More precise deduplication
-        key = (class_id, round(x0, 1), round(y0, 1), round(x1, 1), round(y1, 1))  # Was 2 decimals, now 1
+        key = (class_id, round(x0, 1), round(y0, 1), round(x1, 1), round(y1, 1))
         if key not in seen_annotations:
             entry = {'class_id': class_id, 'bbox': bbox}
             if text:
@@ -995,7 +336,7 @@ def get_granular_annotations(fig, chart_info_map, cls_map):
         if GENERATION_CONFIG.get('debug_mode', False):
             print(f"DEBUG: AX[{ax_idx}]: Processing chart_type={chart_type}")
         
-        # CRITICAL FIX: Enhanced Chart Title detection
+        # Chart Title
         if 'chart_title' in reverse_map:
             title = ax.title
             if title and title.get_visible() and title.get_text().strip():
@@ -1008,16 +349,14 @@ def get_granular_annotations(fig, chart_info_map, cls_map):
                     if GENERATION_CONFIG.get('debug_mode', False):
                         print(f"DEBUG: AX[{ax_idx}]: Chart title bbox failed: {e}")
         
-        # CRITICAL FIX: Enhanced Legend detection
+        # Legend
         if 'legend' in reverse_map:
             legend = ax.get_legend()
             if legend and legend.get_visible():
-                # Verification 1: Check if legend actually has text content
                 valid_texts = [t.get_text().strip() for t in legend.get_texts()
                                if t.get_visible() and t.get_text().strip()]
                 if valid_texts:
                     try:
-                        # Verification 2: Check if the legend has non-background pixels
                         if has_non_background_pixels(legend, fig, ax, ax.get_facecolor(), threshold=5):
                             legend_bbox = legend.get_window_extent(renderer)
                             if add_unique_annotation(reverse_map['legend'], legend_bbox):
@@ -1030,7 +369,7 @@ def get_granular_annotations(fig, chart_info_map, cls_map):
                         if GENERATION_CONFIG.get('debug_mode', False):
                             print(f"DEBUG: AX[{ax_idx}]: Legend bbox failed: {e}")
         
-        # CRITICAL FIX: Enhanced Axis Title detection
+        # Axis Titles
         if 'axis_title' in reverse_map:
             # X-axis title
             if ax.xaxis.label.get_visible() and ax.xaxis.label.get_text().strip():
@@ -1054,13 +393,12 @@ def get_granular_annotations(fig, chart_info_map, cls_map):
                     if GENERATION_CONFIG.get('debug_mode', False):
                         print(f"DEBUG: AX[{ax_idx}]: Y-axis title bbox failed: {e}")
         
-        # CRITICAL FIX: Enhanced Axis Labels detection
+        # Axis Tick Labels
         if 'axis_labels' in reverse_map:
             scale_axis_info = chart_info.get('scale_axis_info', {})
             primary_scale_axis = scale_axis_info.get('primary_scale_axis', 'y')
             bg_color = ax.get_facecolor()
 
-            # Fetch visible axis limits
             x_min, x_max = sorted(ax.get_xlim())
             y_min, y_max = sorted(ax.get_ylim())
 
@@ -1068,9 +406,7 @@ def get_granular_annotations(fig, chart_info_map, cls_map):
             x_labels_added = 0
             for label in ax.get_xticklabels():
                 if label.get_visible() and label.get_text().strip():
-                    # Check if tick is strictly inside visible limits
                     if x_min <= label.get_position()[0] <= x_max:
-                        # Ensure text isn't blank to the renderer
                         if has_non_background_pixels(label, fig, ax, bg_color, threshold=5):
                             try:
                                 label_bbox = label.get_window_extent(renderer)
@@ -1084,7 +420,6 @@ def get_granular_annotations(fig, chart_info_map, cls_map):
             y_labels_added = 0
             for label in ax.get_yticklabels():
                 if label.get_visible() and label.get_text().strip():
-                    # Check if tick is strictly inside visible limits
                     if y_min <= label.get_position()[1] <= y_max:
                         if has_non_background_pixels(label, fig, ax, bg_color, threshold=5):
                             try:
@@ -1098,9 +433,7 @@ def get_granular_annotations(fig, chart_info_map, cls_map):
             if GENERATION_CONFIG.get('debug_mode', False):
                 print(f"DEBUG: AX[{ax_idx}]: Added {x_labels_added} x-labels, {y_labels_added} y-labels")
 
-        # General chart / plot-area bounding box detection. Applies to ANY
-        # chart type whose class map defines a 'chart' class (not just
-        # heatmaps) - e.g. the box-plot Global/Layout annotation set.
+        # General chart / plot-area bounding box
         if 'chart' in reverse_map:
             try:
                 chart_bbox = ax.get_window_extent(renderer)
@@ -1111,7 +444,7 @@ def get_granular_annotations(fig, chart_info_map, cls_map):
                 if GENERATION_CONFIG.get('debug_mode', False):
                     print(f"DEBUG: AX[{ax_idx}]: General chart layout box failed: {e}")
         
-        # CRITICAL FIX: Enhanced Bar chart data artist processing
+        # Bar Chart Elements
         if chart_type == 'bar' and 'bar' in reverse_map:
             data_artists = chart_info.get('data_artists', [])
             bars_added = 0
@@ -1125,18 +458,16 @@ def get_granular_annotations(fig, chart_info_map, cls_map):
                         print(f"DEBUG: AX[{ax_idx}]: Artist {artist_idx} is None")
                     continue
                     
-                # Enhanced visibility check
                 try:
                     is_visible = artist.get_visible()
                 except:
-                    is_visible = True  # Assume visible if check fails
+                    is_visible = True
                     
                 if not is_visible:
                     if GENERATION_CONFIG.get('debug_mode', False):
                         print(f"DEBUG: AX[{ax_idx}]: Artist {artist_idx} not visible")
                     continue
                 
-                # CRITICAL FIX: More robust Rectangle detection
                 is_rectangle = (isinstance(artist, patches.Rectangle) or 
                               str(type(artist).__name__) == 'Rectangle' or
                               hasattr(artist, 'get_x') and hasattr(artist, 'get_y') and 
@@ -1144,7 +475,6 @@ def get_granular_annotations(fig, chart_info_map, cls_map):
                 
                 if is_rectangle:
                     try:
-                        # CRITICAL FIX: Enhanced bbox extraction
                         artist_bbox = artist.get_window_extent(renderer)
                         if artist_bbox and add_unique_annotation(reverse_map['bar'], artist_bbox):
                             bars_added += 1
@@ -1160,8 +490,7 @@ def get_granular_annotations(fig, chart_info_map, cls_map):
             if GENERATION_CONFIG.get('debug_mode', False):
                 print(f"DEBUG: AX[{ax_idx}]: Successfully added {bars_added} bar annotations")
 
-        elif chart_type == 'histogram':
-            # HISTOGRAM - FIX AXIS TITLE vs AXIS LABELS CONFUSION
+        elif chart_type == 'histogram':           
             debug = GENERATION_CONFIG.get('debug_mode', False)
             if debug:
                 print(f"DEBUG [AX{ax_idx}] HISTOGRAM axis processing override")
@@ -1435,7 +764,7 @@ def get_granular_annotations(fig, chart_info_map, cls_map):
                 if GENERATION_CONFIG.get('debug_mode', False):
                     print(f"DEBUG: AX[{ax_idx}]: Fallback added {added} box annotations from data_artists")
         
-        # === SCATTER CHARTS - INDIVIDUAL POINT ANNOTATION (ENHANCED DEBUG) ===
+        # Scatter Chart Points
         elif chart_type == 'scatter' and 'data_point' in reverse_map:
             data_artists = chart_info.get('data_artists', [])
             points_added = 0
@@ -1466,18 +795,20 @@ def get_granular_annotations(fig, chart_info_map, cls_map):
                         continue
 
                     is_uniform_size = (sizes.size == 1)
-                    # CRITICAL: Use figure DPI for proper pixel conversion
-                    points_to_pixels = 72.0 / fig.dpi
+                    # Convert marker points^2 area to display pixel radius
+                    # 1 pt = fig.dpi / 72.0 pixels
+                    # For marker of area s in pt^2, side length in pt is sqrt(s), radius in pt is sqrt(s)/2.0
+                    points_to_pixels = fig.dpi / 72.0
 
                     if debug:
                         print(f"DEBUG: AX[{ax_idx}]: DPI={fig.dpi}, conversion={points_to_pixels}")
                         print(f"DEBUG: AX[{ax_idx}]: Will process {len(offsets)} points")
 
-                    # CRITICAL: Annotate each point individually
                     for i, (x_data, y_data) in enumerate(offsets):
                         px, py = ax.transData.transform_point((x_data, y_data))
-                        s = sizes[0] if is_uniform_size else sizes[i]
-                        radius = (np.sqrt(s) / np.sqrt(np.pi)) * points_to_pixels
+                        s = float(sizes[0] if is_uniform_size else sizes[i])
+                        # Radius in pixels matching visual marker extent
+                        radius = max(3.0, (np.sqrt(s) / 2.0) * points_to_pixels)
 
                         bbox = transforms.Bbox.from_extents(
                             px - radius, py - radius, px + radius, py + radius
@@ -1504,7 +835,7 @@ def get_granular_annotations(fig, chart_info_map, cls_map):
             if debug:
                 print(f"DEBUG: AX[{ax_idx}]: SCATTER TOTAL: {points_added} points added")
 
-        # === PIE CHARTS - WEDGE BOUNDING BOXES (Bug #2 fix) ===
+        # Pie Chart Wedges
         elif chart_type == 'pie' and 'wedge' in reverse_map:
             data_artists = chart_info.get('data_artists', [])
             wedges_added = 0
@@ -1514,10 +845,8 @@ def get_granular_annotations(fig, chart_info_map, cls_map):
                 print(f"DEBUG: AX[{ax_idx}]: PIE processing {len(data_artists)} artists")
 
             for artist_idx, artist in enumerate(data_artists):
-                # Wedges are matplotlib patches.Wedge objects
                 if isinstance(artist, patches.Wedge) and artist.get_visible():
                     try:
-                        # Get the bounding box in display coordinates
                         bbox = artist.get_window_extent(renderer)
                         if bbox.width > 0.5 and bbox.height > 0.5:
                             if add_unique_annotation(reverse_map['wedge'], bbox):
@@ -1531,7 +860,7 @@ def get_granular_annotations(fig, chart_info_map, cls_map):
             if debug:
                 print(f"DEBUG: AX[{ax_idx}]: PIE TOTAL: {wedges_added} wedges added")
 
-        # === LINE CHARTS - LINE SEGMENT BOUNDING BOXES (Bug #2 fix) ===
+        # Line Chart Segments
         elif chart_type == 'line' and 'line_segment' in reverse_map:
             data_artists = chart_info.get('data_artists', [])
             lines_added = 0
@@ -1541,11 +870,9 @@ def get_granular_annotations(fig, chart_info_map, cls_map):
                 print(f"DEBUG: AX[{ax_idx}]: LINE processing {len(data_artists)} artists")
 
             for artist_idx, artist in enumerate(data_artists):
-                # Line segments are matplotlib lines.Line2D objects
                 if isinstance(artist, matplotlib.lines.Line2D) and artist.get_visible():
                     try:
                         bbox = artist.get_window_extent(renderer)
-                        # Lines can be thin — pad to minimum detectable thickness
                         if bbox.width > 0.5:
                             padded = ensure_min_bbox_thickness(bbox, min_size=4.0)
                             if add_unique_annotation(reverse_map['line_segment'], padded):
@@ -1559,14 +886,13 @@ def get_granular_annotations(fig, chart_info_map, cls_map):
             if debug:
                 print(f"DEBUG: AX[{ax_idx}]: LINE TOTAL: {lines_added} line_segments added")
 
-        # === HEATMAP CHARTS - CELLS AND COLORBAR ===
+        # Heatmap Cells and Colorbar
         elif chart_type == 'heatmap':
             cells_added = 0
             colorbar_added = 0
             debug = GENERATION_CONFIG.get('debug_mode', False)
-            # NOTE: main 'chart' layout box is now added generically above
-            # (axis-loop level), so it's no longer duplicated here.
             
+            # Heatmap Axis Titles
             if 'axis_title' in reverse_map:
                 titles_added = 0
                 if ax.xaxis.label.get_visible() and ax.xaxis.label.get_text().strip():
@@ -1590,7 +916,7 @@ def get_granular_annotations(fig, chart_info_map, cls_map):
                 if debug:
                     print(f"DEBUG: AX[{ax_idx}]: HEATMAP axis titles: {titles_added}")
             
-            # FIX #2: AXIS LABELS (MISSING)
+            # Heatmap Axis Labels
             if 'axis_labels' in reverse_map:
                 labels_added = 0
                 bg_color = ax.get_facecolor()
@@ -1626,7 +952,7 @@ def get_granular_annotations(fig, chart_info_map, cls_map):
                 if debug:
                     print(f"DEBUG: AX[{ax_idx}]: HEATMAP axis labels: {labels_added}")
             
-            # FIX #3: CELLS (WRONG API - CORRECTED)
+            # Heatmap Cells
             if 'cell' in reverse_map:
                 data_artists = chart_info.get('data_artists', [])
                 for artist_idx, artist in enumerate(data_artists):
@@ -1635,7 +961,6 @@ def get_granular_annotations(fig, chart_info_map, cls_map):
                     
                     if isinstance(artist, QuadMesh):
                         try:
-                            # CORRECT METHOD: Use get_coordinates() for mesh data
                             coords = artist.get_coordinates()
                             
                             if coords is not None and coords.ndim == 3:
@@ -1644,10 +969,8 @@ def get_granular_annotations(fig, chart_info_map, cls_map):
                                 if debug:
                                     print(f"DEBUG: AX[{ax_idx}]: QuadMesh grid: {rows}x{cols} cells")
                                 
-                                # Iterate over each cell in the mesh
                                 for i in range(rows):
                                     for j in range(cols):
-                                        # Get 4 corners of cell (i,j)
                                         cell_corners = np.array([
                                             coords[i, j],      # bottom-left
                                             coords[i+1, j],    # bottom-right
@@ -1655,7 +978,6 @@ def get_granular_annotations(fig, chart_info_map, cls_map):
                                             coords[i, j+1]     # top-left
                                         ])
                                         
-                                        # Transform to display coordinates
                                         display_coords = ax.transData.transform(cell_corners)
                                         
                                         x0, y0 = display_coords.min(axis=0)
@@ -1670,11 +992,8 @@ def get_granular_annotations(fig, chart_info_map, cls_map):
                                             print(f"DEBUG: Cell ({i},{j}) TOO SMALL: {bbox.width:.1f}x{bbox.height:.1f}")
                             
                         except AttributeError:
-                            # Fallback for imshow() which creates AxesImage, not QuadMesh
                             try:
-                                extent = artist.get_extent()  # (x0, x1, y0, y1)
-                                
-                                # Get data array dimensions
+                                extent = artist.get_extent()
                                 data_array = artist.get_array()
                                 if data_array is not None:
                                     if data_array.ndim == 2:
@@ -1691,13 +1010,11 @@ def get_granular_annotations(fig, chart_info_map, cls_map):
                                     
                                     for i in range(rows):
                                         for j in range(cols):
-                                            # Calculate cell bounds in data coordinates
                                             cell_x0 = x0_data + j * cell_width
                                             cell_x1 = cell_x0 + cell_width
                                             cell_y0 = y0_data + i * cell_height
                                             cell_y1 = cell_y0 + cell_height
                                             
-                                            # Transform to display coordinates
                                             pt0 = ax.transData.transform_point((cell_x0, cell_y0))
                                             pt1 = ax.transData.transform_point((cell_x1, cell_y1))
                                             
@@ -1716,7 +1033,6 @@ def get_granular_annotations(fig, chart_info_map, cls_map):
                             if debug:
                                 print(f"DEBUG: AX[{ax_idx}]: Heatmap cell error: {e}")
                     
-                    # Handle AxesImage (from imshow)
                     elif hasattr(artist, 'get_extent') and hasattr(artist, 'get_array'):
                         try:
                             extent = artist.get_extent()
@@ -1758,7 +1074,7 @@ def get_granular_annotations(fig, chart_info_map, cls_map):
                 if debug:
                     print(f"DEBUG: AX[{ax_idx}]: HEATMAP cells: {cells_added}")
             
-            # FIX #4: DATA LABELS (MISSING)
+            # Heatmap Data Labels
             if 'data_label' in reverse_map:
                 data_labels_added = 0
                 other_artists = chart_info.get('other_artists', [])
@@ -1777,7 +1093,7 @@ def get_granular_annotations(fig, chart_info_map, cls_map):
                 if debug:
                     print(f"DEBUG: AX[{ax_idx}]: HEATMAP data labels: {data_labels_added}")
             
-            # FIX #5: COLORBAR (EXISTING CODE - UPDATED FOR LABELS AND TITLE)
+            # Heatmap Colorbar Components
             if 'color_bar' in reverse_map:
                 for ax_candidate in fig.axes:
                     if ax_candidate == ax:
@@ -1790,7 +1106,6 @@ def get_granular_annotations(fig, chart_info_map, cls_map):
                         
                         aspect_ratio = ax_bbox.width / ax_bbox.height
                         
-                        # LOOSENED HEURISTIC: Ensures padding/DPI shifts don't cause color bars to be skipped
                         is_vertical_colorbar = aspect_ratio < 0.5 and ax_bbox.height > 40
                         is_horizontal_colorbar = aspect_ratio > 2.0 and ax_bbox.width > 40
                         
@@ -1800,7 +1115,7 @@ def get_granular_annotations(fig, chart_info_map, cls_map):
                                 if debug:
                                     print(f"DEBUG: AX[{ax_idx}]: COLORBAR ADDED ({'vertical' if is_vertical_colorbar else 'horizontal'})")
                                 
-                                # --- NEW: Extract Color Bar Title ---
+                                # Extract Color Bar Title
                                 if 'color_bar_title' in reverse_map:
                                     if ax_candidate.yaxis.label.get_visible() and ax_candidate.yaxis.label.get_text().strip():
                                         title_bbox = ax_candidate.yaxis.label.get_window_extent(renderer)
@@ -1809,7 +1124,7 @@ def get_granular_annotations(fig, chart_info_map, cls_map):
                                         title_bbox = ax_candidate.xaxis.label.get_window_extent(renderer)
                                         add_unique_annotation(reverse_map['color_bar_title'], title_bbox, text=ax_candidate.xaxis.label.get_text().strip())
                                 
-                                # --- NEW: Extract Color Bar Tick Labels ---
+                                # Extract Color Bar Tick Labels
                                 if 'color_bar_label' in reverse_map:
                                     bg_color = ax_candidate.get_facecolor()
                                     for label in ax_candidate.get_yticklabels() + ax_candidate.get_xticklabels():
@@ -2000,7 +1315,7 @@ def filter_overlapping_annotations(annotations, iou_threshold=0.7):
     return filtered
 
 
-def extract_area_pose_annotations_fixed(
+def extract_pie_pose_annotations(
     fig, 
     chart_info_map, 
     cls_map_pose: Dict[str, int], 
@@ -2008,100 +1323,13 @@ def extract_area_pose_annotations_fixed(
     img_h: int
 ) -> List[Dict]:
     """
-    Extract YOLO pose annotations for area charts.
-    Single class (0): area_boundary with 51 keypoints following top boundary
-    CRITICAL FIX: Use only plotted points for pose construction to preserve sharp features.
+    Extract YOLO pose annotations for pie charts (5 keypoints per slice).
+    
+    Annotates each slice (wedge) individually:
+    - Class: 0 ("slice_boundary")
+    - Keypoints: 5 (WedgeCenter, ArcStart, ArcInter1, ArcInter2, ArcEnd)
     """
     keypoint_annotations = []
-    
-    for ax in fig.axes:
-        if not ax.get_visible():
-            continue
-        
-        chart_info = chart_info_map.get(ax, {})
-        chart_type = chart_info.get('chart_type_str', '')
-        
-        if chart_type != 'area':
-            continue
-        
-        keypoint_info = chart_info.get('keypoint_info', [])
-        if not keypoint_info:
-            continue
-        
-        for series_kpts in keypoint_info:
-            # Use only plotted points for the top boundary of the area fill
-            plotted = series_kpts.get('plotted_points', []) or series_kpts.get('fill_top', [])
-            if not plotted:
-                continue
-            
-            # Build 51-point pose using only actual plotted vertices (top boundary)
-            kpts = build_51_from_plotted(plotted)
-            
-            # Transform to pixel coordinates
-            px_pts = []
-            for x, y, _ in kpts:
-                px, py = ax.transData.transform_point((x, y))
-                px_pts.append((px, img_h - py))  # Y-flip
-            
-            # Calculate bounding box from the 51 pixel points
-            xs, ys = zip(*px_pts)
-            x0, x1 = min(xs), max(xs)
-            y0, y1 = min(ys), max(ys)
-            
-            # Normalize bbox
-            cx = max(0.0, min(1.0, (x0 + x1) / 2 / img_w))
-            cy = max(0.0, min(1.0, (y0 + y1) / 2 / img_h))
-            w = max(0.0, min(1.0, (x1 - x0) / img_w))
-            h = max(0.0, min(1.0, (y1 - y0) / img_h))
-            
-            # Normalize keypoints
-            kp_norm = [
-                [
-                    max(0.0, min(1.0, x / img_w)),
-                    max(0.0, min(1.0, y / img_h)),
-                    2  # All visible
-                ]
-                for x, y in px_pts
-            ]
-            
-            if GENERATION_CONFIG.get('debug_coords', False):
-                print(f"DEBUG [AREA-POSE] Series: Built 51 from {len(plotted)} plotted points (top boundary)")
-                if len(plotted) > 0:
-                    print(f"DEBUG [AREA-POSE] Series: Original x range: [{plotted[0][0]:.2f}, {plotted[-1][0]:.2f}]")
-                if len(kp_norm) > 0:
-                    x_norms = [kp[0] for kp in kp_norm]
-                    print(f"DEBUG [AREA-POSE] Series: Final x range: [{min(x_norms):.4f}, {max(x_norms):.4f}]")
-                    # Check monotonicity
-                    is_monotonic = all(x_norms[i] <= x_norms[i+1] for i in range(len(x_norms)-1))
-                    print(f"DEBUG [AREA-POSE] Series: X coordinates monotonic: {is_monotonic}")
-            
-            keypoint_annotations.append({
-                'class_id': 0,  # area_boundary
-                'bbox': (cx, cy, w, h),
-                'keypoints': kp_norm
-            })
-    
-    return keypoint_annotations
-
-
-def extract_pie_pose_annotations_fixed(
-    fig, 
-    chart_info_map, 
-    cls_map_pose: Dict[str, int], 
-    img_w: int, 
-    img_h: int
-) -> List[Dict]:
-    """
-    Extract YOLO pose annotations for pie charts (NOVA LÓGICA - 5 PONTOS).
-    
-    CRITICAL: Annotate each slice (wedge) individually.
-    - Classe: 0 ("slice_boundary")
-    - Keypoints: 5 (Centro da fatia, Início do Arco, Intermediário 1, Intermediário 2, Fim do Arco)
-    
-    O centro da fatia respeita a "explosão" (posição deslocada).
-    """
-    keypoint_annotations = []
-    renderer = fig.canvas.get_renderer()
     
     for ax in fig.axes:
         if not ax.get_visible():
@@ -2120,146 +1348,64 @@ def extract_pie_pose_annotations_fixed(
         wedges_info = pie_geometry.get('wedges', [])
         
         for wedge_geo in wedges_info:
-            # 1. Coletar os 5 keypoints em coordenadas de DADOS
-            #    'center' é o centro deslocado (se explodido) ou o centro real
+            angle_span = wedge_geo.get('angle_span', 0.0)
+            if angle_span < 0.5:
+                continue
+
             kpt1_data = wedge_geo.get('center')
             kpt2_data = wedge_geo.get('arc_start')
             kpt3_data = wedge_geo.get('arc_end')
-            # --- INÍCIO DA MODIFICAÇÃO ---
-            kpt4_data = wedge_geo.get('arc_inter_1') # Novo ponto
-            kpt5_data = wedge_geo.get('arc_inter_2') # Novo ponto
+            kpt4_data = wedge_geo.get('arc_inter_1')
+            kpt5_data = wedge_geo.get('arc_inter_2')
             
             if not all([kpt1_data, kpt2_data, kpt3_data, kpt4_data, kpt5_data]):
                 continue
-            # --- FIM DA MODIFICAÇÃO ---
             
-            # 2. Transformar os 5 keypoints para coordenadas de PIXEL (com Y invertido)
             kpt1_px_data = ax.transData.transform_point(kpt1_data)
             kpt2_px_data = ax.transData.transform_point(kpt2_data)
             kpt3_px_data = ax.transData.transform_point(kpt3_data)
-            # --- INÍCIO DA MODIFICAÇÃO ---
             kpt4_px_data = ax.transData.transform_point(kpt4_data)
             kpt5_px_data = ax.transData.transform_point(kpt5_data)
             
-            # Ordem: Centro, Início, Inter 1, Inter 2, Fim
             all_kpts_px = [
-                (kpt1_px_data[0], img_h - kpt1_px_data[1]), # 0: Centro
-                (kpt2_px_data[0], img_h - kpt2_px_data[1]), # 1: InícioArco
-                (kpt4_px_data[0], img_h - kpt4_px_data[1]), # 2: Inter 1
-                (kpt5_px_data[0], img_h - kpt5_px_data[1]), # 3: Inter 2
-                (kpt3_px_data[0], img_h - kpt3_px_data[1])  # 4: FimArco
+                (kpt1_px_data[0], img_h - kpt1_px_data[1]),  # 0: Center
+                (kpt2_px_data[0], img_h - kpt2_px_data[1]),  # 1: ArcStart
+                (kpt4_px_data[0], img_h - kpt4_px_data[1]),  # 2: ArcInter1
+                (kpt5_px_data[0], img_h - kpt5_px_data[1]),  # 3: ArcInter2
+                (kpt3_px_data[0], img_h - kpt3_px_data[1])   # 4: ArcEnd
             ]
-            # --- FIM DA MODIFICAÇÃO ---
             
-            # 3. Calcular Bounding Box a partir dos 5 pontos de pixel
             all_x, all_y = zip(*all_kpts_px)
             x0, x1 = min(all_x), max(all_x)
             y0, y1 = min(all_y), max(all_y)
             
-            # Normalizar BBox
+            # Ensure minimum bounding box size of at least 2 pixels
+            min_dim_px = 2.0
+            if (x1 - x0) < min_dim_px:
+                diff = (min_dim_px - (x1 - x0)) / 2.0
+                x0 -= diff
+                x1 += diff
+            if (y1 - y0) < min_dim_px:
+                diff = (min_dim_px - (y1 - y0)) / 2.0
+                y0 -= diff
+                y1 += diff
+
             cx = max(0.0, min(1.0, (x0 + x1) / 2 / img_w))
             cy = max(0.0, min(1.0, (y0 + y1) / 2 / img_h))
-            w = max(0.0, min(1.0, (x1 - x0) / img_w))
-            h = max(0.0, min(1.0, (y1 - y0) / img_h))
+            w = max(min_dim_px / img_w, min(1.0, (x1 - x0) / img_w))
+            h = max(min_dim_px / img_h, min(1.0, (y1 - y0) / img_h))
             
-            # 4. Normalizar Keypoints
-            kp_norm = []
-            for x_px, y_px in all_kpts_px:
-                kp_norm.append([
+            kp_norm = [
+                [
                     max(0.0, min(1.0, x_px / img_w)),
                     max(0.0, min(1.0, y_px / img_h)),
-                    2  # Todos visíveis
-                ])
-            
-            # 5. Adicionar anotação
-            keypoint_annotations.append({
-                'class_id': 0,  # "slice_boundary"
-                'bbox': (cx, cy, w, h),
-                'keypoints': kp_norm  # Lista de 5 keypoints
-            })
-    
-    return keypoint_annotations
-# In generator.py after extract_pie_pose_annotations()
-
-# CORREÇÃO NO ARQUIVO generator.py
-# Localização: função extract_line_pose_annotations
-
-def extract_line_pose_annotations_fixed(
-    fig, 
-    chart_info_map, 
-    cls_map_pose: Dict[str, int], 
-    img_w: int, 
-    img_h: int
-) -> List[Dict]:
-    """
-    Extract YOLO pose annotations for line charts.
-    CRITICAL FIX: Use only plotted points for pose construction to preserve sharp features.
-    """
-    keypoint_annotations = []
-    renderer = fig.canvas.get_renderer()
-    
-    for ax in fig.axes:
-        if not ax.get_visible():
-            continue
-            
-        chart_info = chart_info_map.get(ax, {})
-        chart_type = chart_info.get('chart_type_str', '')
-        
-        if chart_type != 'line':
-            continue
-            
-        keypoint_info = chart_info.get('keypoint_info', [])
-        if not keypoint_info:
-            continue
-        
-        for series_idx, series_kpts in enumerate(keypoint_info):
-            # Use only the plotted points captured after actual drawing
-            plotted = series_kpts.get('plotted_points', [])
-            if not plotted or len(plotted) < 1:
-                continue
-            
-            # Build 51-point pose using only actual plotted vertices
-            kpts = build_51_from_plotted(plotted)
-            
-            # Transform to pixel coordinates
-            px_pts = []
-            for x, y, _ in kpts:
-                px, py = ax.transData.transform_point((x, y))
-                px_pts.append((px, img_h - py))  # Y-flip
-            
-            # Calculate bounding box from the 51 pixel points
-            xs, ys = zip(*px_pts)
-            x0, x1 = min(xs), max(xs)
-            y0, y1 = min(ys), max(ys)
-            
-            # Normalize bbox
-            cx = max(0.0, min(1.0, (x0 + x1) / 2 / img_w))
-            cy = max(0.0, min(1.0, (y0 + y1) / 2 / img_h))
-            w = max(0.0, min(1.0, (x1 - x0) / img_w))
-            h = max(0.0, min(1.0, (y1 - y0) / img_h))
-            
-            # Normalize keypoints
-            kp_norm = []
-            for x, y in px_pts:
-                kp_norm.append([
-                    max(0.0, min(1.0, x / img_w)),
-                    max(0.0, min(1.0, y / img_h)),
-                    2  # All visible
-                ])
-            
-            if GENERATION_CONFIG.get('debug_coords', False):
-                print(f"DEBUG [LINE-POSE] Series {series_idx}: Built 51 from {len(plotted)} plotted points")
-                if len(plotted) > 0:
-                    print(f"DEBUG [LINE-POSE] Series {series_idx}: Original x range: [{plotted[0][0]:.2f}, {plotted[-1][0]:.2f}]")
-                if len(kp_norm) > 0:
-                    x_norms = [kp[0] for kp in kp_norm]
-                    print(f"DEBUG [LINE-POSE] Series {series_idx}: Final x range: [{min(x_norms):.4f}, {max(x_norms):.4f}]")
-                    # Check monotonicity
-                    is_monotonic = all(x_norms[i] <= x_norms[i+1] for i in range(len(x_norms)-1))
-                    print(f"DEBUG [LINE-POSE] Series {series_idx}: X coordinates monotonic: {is_monotonic}")
+                    2  # Visible
+                ]
+                for x_px, y_px in all_kpts_px
+            ]
             
             keypoint_annotations.append({
-                'class_id': 0,  # line_boundary
+                'class_id': 0,  # slice_boundary
                 'bbox': (cx, cy, w, h),
                 'keypoints': kp_norm
             })
@@ -2523,7 +1669,7 @@ def save_annotations_yolo(annotations, img_w, img_h, output_path):
             f.write(f"{class_id} {x_center:.6f} {y_center:.6f} {width:.6f} {height:.6f}\n")
 
 # In generator.py after save_annotations_yolo()
-def save_annotations_pose_fixed(
+def save_annotations_pose(
     annotations: List[Dict], 
     img_w: int, 
     img_h: int, 
@@ -2536,172 +1682,218 @@ def save_annotations_pose_fixed(
     class_id center_x center_y width height kpt1_x kpt1_y vis1 kpt2_x kpt2_y vis2 ...
     """
     with open(output_path, 'w') as f:
-        for i, ann in enumerate(annotations):
+        for ann in annotations:
             class_id = ann['class_id']
             cx, cy, w, h = ann['bbox']
             keypoints = ann['keypoints']
             
-            # Format: class bbox kpt1 kpt2 ... kptn
             line_parts = [str(class_id), f"{cx:.6f}", f"{cy:.6f}", f"{w:.6f}", f"{h:.6f}"]
-            
             for x, y, vis in keypoints:
                 line_parts.extend([f"{x:.6f}", f"{y:.6f}", str(vis)])
             
-            line_str = " ".join(line_parts)
-            f.write(line_str + "\n")
-            
-            # Enhanced debug logging - output the entire row for verification
-            if GENERATION_CONFIG.get('debug_coords', False):
-                print(f"Saving annotation {i}: {line_str}")
-                
-                # Add complete pose format display
-                print(f"DEBUG [POSE-FORMAT] Annotation {i}: Class={class_id}, BBox=({cx:.4f},{cy:.4f},{w:.4f},{h:.4f})")
-                print(f"DEBUG [POSE-FORMAT] Annotation {i}: Total keypoints={len(keypoints)}")
-                
-                # Show keypoints grouped by category for better visualization
-                if len(keypoints) >= 51:
-                    # Start point (index 0)
-                    start_x, start_y, start_vis = keypoints[0]
-                    print(f"DEBUG [POSE-FORMAT] Annotation {i}: Start point: ({start_x:.4f},{start_y:.4f},vis={start_vis})")
-                    
-                    # Boundary points (indices 1-25)
-                    boundary_points = keypoints[1:26]
-                    visible_boundary = [(j+1, x, y, vis) for j, (x, y, vis) in enumerate(boundary_points) if vis > 0]
-                    print(f"DEBUG [POSE-FORMAT] Annotation {i}: Boundary points: {len(visible_boundary)} visible")
-                    if visible_boundary:
-                        # Show first 3 and last 3 boundary points
-                        first_3 = visible_boundary[:3]
-                        last_3 = visible_boundary[-3:] if len(visible_boundary) > 3 else visible_boundary[3:]
-                        for j, x, y, vis in first_3:
-                            print(f"DEBUG [POSE-FORMAT] Annotation {i}:   Boundary {j}: ({x:.4f},{y:.4f},vis={vis})")
-                        if len(visible_boundary) > 6:
-                            print(f"DEBUG [POSE-FORMAT] Annotation {i}:   ... ({len(visible_boundary)-6} more points) ...")
-                        for j, x, y, vis in last_3:
-                            print(f"DEBUG [POSE-FORMAT] Annotation {i}:   Boundary {j}: ({x:.4f},{y:.4f},vis={vis})")
-                    
-                    # Additional keypoints (indices 26-50)
-                    remaining_kpts = keypoints[26:]
-                    visible_remaining = [(j+26, x, y, vis) for j, (x, y, vis) in enumerate(remaining_kpts) if vis > 0]
-                    if visible_remaining:
-                        print(f"DEBUG [POSE-FORMAT] Annotation {i}: Additional points: {len(visible_remaining)} visible")
-                        for j, x, y, vis in visible_remaining[:5]:  # Show first 5
-                            print(f"DEBUG [POSE-FORMAT] Annotation {i}:   Point {j}: ({x:.4f},{y:.4f},vis={vis})")
-                
-                # --- INÍCIO DA MODIFICAÇÃO (Bloco 1) ---
-                # Handle Pie Slices
-                elif len(keypoints) == 5: # Handle Pie Slices
-                    print(f"DEBUG [POSE-FORMAT] Annotation {i}: PIE SLICE (5 keypoints)")
-                    kpt_names = ['WedgeCenter', 'ArcStart', 'ArcInter1', 'ArcInter2', 'ArcEnd']
-                    for j, kpt in enumerate(keypoints):
-                        x, y, vis = kpt
-                        print(f"DEBUG [POSE-FORMAT] Annotation {i}:   {kpt_names[j]}: ({x:.4f},{y:.4f},vis={vis})")
-                # --- FIM DA MODIFICAÇÃO (Bloco 1) ---
-                
-                # Add sequential coordinate logging to verify path following
-                if len(keypoints) >= 25:  # At least boundary points
-                    # Extract the boundary keypoints (indices 1-25) to verify path sequence
-                    boundary_kpts = keypoints[1:26]  # Keypoints 1-25 are boundary points
-                    visible_boundary = [(j+1, x, y, vis) for j, (x, y, vis) in enumerate(boundary_kpts) if vis > 0]
-                    
-                    if visible_boundary:
-                        # Log first few coordinates in sequence to verify path following
-                        coords_sequence = [(x, y) for j, x, y, vis in visible_boundary[:10]]
-                        print(f"DEBUG [PATH-SEQUENCE] Annotation {i}: First 10 boundary coordinates: {coords_sequence}")
-                        
-                        # Check if coordinates follow increasing X (typical for charts)
-                        if len(coords_sequence) > 1:
-                            x_values = [x for x, y in coords_sequence]
-                            is_x_increasing = all(x_values[k] <= x_values[k+1] for k in range(len(x_values)-1))
-                            print(f"DEBUG [PATH-ORDER] Annotation {i}: X coordinates monotonically increasing: {is_x_increasing}")
-                        
-                        # Add index progression verification
-                        print(f"DEBUG [INDEX-PROGRESSION] Annotation {i}: Visible boundary point indices: {[j for j, x, y, vis in visible_boundary[:10]]}")
-                        
-                        # Verify that indices are in proper sequence (should generally be increasing)
-                        indices = [j for j, x, y, vis in visible_boundary]
-                        if len(indices) > 1:
-                            index_differences = [indices[k+1] - indices[k] for k in range(len(indices)-1)]
-                            avg_diff = sum(index_differences) / len(index_differences) if index_differences else 0
-                            print(f"DEBUG [INDEX-PROGRESSION] Annotation {i}: Average index step: {avg_diff:.2f}")
-            
-            # Enhanced debug output for coordinate analysis
-            if GENERATION_CONFIG.get('debug_coords', False):
-                # Also write to a debug file with more details
-                debug_path = output_path.replace('.txt', '_debug.txt')
-                with open(debug_path, 'a') as debug_f:
-                    debug_f.write(f"Annotation {i} (Class {class_id}):\n")
-                    debug_f.write(f"  BBox: ({cx:.4f}, {cy:.4f}, {w:.4f}, {h:.4f})\n")
-                    debug_f.write(f"  Complete row: {line_str}\n")
-                    debug_f.write(f"  Keypoints: {len(keypoints)} total\n")
-                    
-                    # Log first few and last few keypoints to verify ordering
-                    visible_kpts = [(j, x, y, vis) for j, (x, y, vis) in enumerate(keypoints) if vis > 0]
-                    if visible_kpts:
-                        debug_f.write(f"  Visible keypoints: {len(visible_kpts)} of {len(keypoints)}\n")
-                        
-                        # --- INÍCIO DA MODIFICAÇÃO (Bloco 2) ---
-                        if len(keypoints) == 5: # PIE SLICE DEBUG
-                            # Map the original index (0-4) to the correct name
-                            kpt_name_map = {
-                                0: 'WedgeCenter', 
-                                1: 'ArcStart', 
-                                2: 'ArcInter1', 
-                                3: 'ArcInter2', 
-                                4: 'ArcEnd'
-                            }
-                            for (idx, x, y, vis) in visible_kpts:
-                                name = kpt_name_map.get(idx, f"Kpt {idx}")
-                                debug_f.write(f"    {name}: ({x:.4f}, {y:.4f}, vis={vis})\n")
-                        # --- FIM DA MODIFICAÇÃO (Bloco 2) ---
-                                
-                        elif len(visible_kpts) >= 6:  # Show first 3 and last 3 if many keypoints
-                            for j, x, y, vis in visible_kpts[:3]:
-                                debug_f.write(f"    Kpt {j}: ({x:.4f}, {y:.4f}, vis={vis})\n")
-                            debug_f.write(f"    ... ({len(visible_kpts)-6} more keypoints) ...\n")
-                            for j, x, y, vis in visible_kpts[-3:]:
-                                debug_f.write(f"    Kpt {j}: ({x:.4f}, {y:.4f}, vis={vis})\n")
-                        else:  # Show all if few keypoints
-                            for j, x, y, vis in visible_kpts:
-                                debug_f.write(f"    Kpt {j}: ({x:.4f}, {y:.4f}, vis={vis})\n")
-                    else:
-                        debug_f.write(f"  No visible keypoints\n")
-                    
-                    # Check and log normalization status
-                    all_normalized = all(0.0 <= x <= 1.0 and 0.0 <= y <= 1.0 for x, y, vis in keypoints)
-                    debug_f.write(f"  All coordinates normalized [0,1]: {all_normalized}\n")
-                    
-                    # Add comprehensive normalization verification
-                    if GENERATION_CONFIG.get('debug_coords', False):
-                        # Check each coordinate individually for detailed reporting
-                        out_of_range_coords = []
-                        for j, (x, y, vis) in enumerate(keypoints):
-                            if vis > 0:  # Only check visible keypoints
-                                if not (0.0 <= x <= 1.0):
-                                    out_of_range_coords.append((j, 'x', x))
-                                if not (0.0 <= y <= 1.0):
-                                    out_of_range_coords.append((j, 'y', y))
-                        
-                        if out_of_range_coords:
-                            print(f"DEBUG [NORMALIZATION-ERROR] Annotation {i}: Out of range coordinates found:")
-                            for coord_idx, coord_type, value in out_of_range_coords[:5]:  # Show first 5 errors
-                                print(f"  Keypoint {coord_idx}: {coord_type} = {value:.6f} (should be [0,1])")
-                        else:
-                            # Add detailed normalization verification
-                            x_values = [x for x, y, vis in keypoints if vis > 0]
-                            y_values = [y for x, y, vis in keypoints if vis > 0]
-                            if x_values and y_values:
-                                x_min, x_max = min(x_values), max(x_values)
-                                y_min, y_max = min(y_values), max(y_values)
-                                print(f"DEBUG [NORMALIZATION] Annotation {i}: X range [{x_min:.6f}, {x_max:.6f}], Y range [{y_min:.6f}, {y_max:.6f}]")
-                    
-                    debug_f.write("\n")
-            
-            # Add enhanced pose format verification
-            if GENERATION_CONFIG.get('debug_coords', False):
-                # Create a temporary annotation for verification
-                temp_annotation = {'class_id': class_id, 'bbox': (cx, cy, w, h), 'keypoints': keypoints}
-                verify_pose_format([temp_annotation], f"SAVING-ANNOTATION-{i}")
+            f.write(" ".join(line_parts) + "\n")
 
+
+# ===================================================================================
+# == DUAL-STREAM ANNOTATION: INSTANCE SEGMENTATION & MARKER/EXTREMA DETECTION
+# ===================================================================================
+# Extracts polygon masks for line/area series and discrete bounding boxes for data
+# markers and extrema (peaks, valleys, inflections) directly from chart coordinate spaces.
+
+def stroke_to_polygon_ribbon(pixel_points: List[Tuple[float, float]], linewidth_px: float) -> List[Tuple[float, float]]:
+    """
+    Converts an ordered sequence of pixel coordinates into a closed ribbon polygon by
+    offsetting each vertex along its averaged segment normal.
+    """
+    pts = np.array(pixel_points, dtype=np.float64)
+    if len(pts) < 2:
+        return []
+
+    tangents = pts[1:] - pts[:-1]
+    lengths = np.linalg.norm(tangents, axis=1, keepdims=True) + 1e-8
+    normals = np.zeros_like(tangents)
+    normals[:, 0] = -tangents[:, 1] / lengths[:, 0]
+    normals[:, 1] = tangents[:, 0] / lengths[:, 0]
+
+    v_normals = np.zeros_like(pts)
+    v_normals[0] = normals[0]
+    v_normals[-1] = normals[-1]
+    if len(pts) > 2:
+        v_normals[1:-1] = (normals[:-1] + normals[1:]) / 2.0
+    v_normals_len = np.linalg.norm(v_normals, axis=1, keepdims=True) + 1e-8
+    v_normals = v_normals / v_normals_len
+
+    half_w = max(1.5, linewidth_px / 2.0)
+    top_edge = pts + v_normals * half_w
+    bot_edge = pts - v_normals * half_w
+
+    polygon = np.vstack([top_edge, bot_edge[::-1]])
+    return [(float(p[0]), float(p[1])) for p in polygon]
+
+
+def extract_line_segmentation_annotations(
+    fig, chart_info_map, img_w: int, img_h: int
+) -> Tuple[List[Dict], List[Dict]]:
+    """
+    Extracts instance segmentation polygons and discrete marker/extrema bounding boxes for line charts.
+
+    Returns:
+        seg_annotations:    One polygon per line series (class_id 0 = "line_series").
+                            'polygon' is in image-space pixel coordinates (top-left origin).
+        marker_annotations: One bounding box per rendered marker glyph or extremum
+                            (class_ids per CLASS_MAP_LINE_MARKERS) in Matplotlib display coordinates.
+    """
+    seg_annotations = []
+    marker_annotations = []
+    dpi_scale = fig.dpi / 72.0  # points -> pixels
+
+    for ax in fig.axes:
+        if not ax.get_visible():
+            continue
+        chart_info = chart_info_map.get(ax, {})
+        if chart_info.get('chart_type_str') != 'line':
+            continue
+
+        for series in chart_info.get('keypoint_info', []):
+            pts_data = series.get('plotted_points') or series.get('all_points', [])
+            if len(pts_data) < 2:
+                continue
+
+            # 1. Ribbon polygon from plotted vertices
+            px_pts = []
+            for x, y, *_ in pts_data:
+                px, py = ax.transData.transform_point((x, y))
+                px_pts.append((px, img_h - py))  # Y-flip to image space
+
+            linewidth_pt = series.get('linewidth', 2.0)
+            poly_px = stroke_to_polygon_ribbon(px_pts, linewidth_px=linewidth_pt * dpi_scale)
+            if len(poly_px) >= 3:
+                seg_annotations.append({
+                    'class_id': 0,  # "line_series"
+                    'polygon': poly_px,
+                    'series_idx': series.get('series_idx')
+                })
+
+            # 2. Extrema: peaks / valleys / inflections
+            extrema_r = 6.0 * dpi_scale
+            extrema_indices = set()
+            for cls_id, key in ((1, 'peaks'), (2, 'valleys'), (3, 'inflections')):
+                for x, y, *idx in series.get(key, []):
+                    if idx:
+                        extrema_indices.add(idx[0])
+                    mx, my = ax.transData.transform_point((x, y))
+                    marker_annotations.append({
+                        'class_id': cls_id,
+                        'bbox': (mx - extrema_r, my - extrema_r, mx + extrema_r, my + extrema_r)
+                    })
+
+            # 3. Marker glyphs (skipping vertices that are already extrema)
+            marker = series.get('marker')
+            if marker:
+                marker_r = max(2.0, (series.get('markersize', 6.0) / 2.0) * dpi_scale)
+                for point_idx, (x, y, *idx) in enumerate(pts_data):
+                    vertex_idx = idx[0] if idx else point_idx
+                    if vertex_idx in extrema_indices:
+                        continue
+                    mx, my = ax.transData.transform_point((x, y))
+                    marker_annotations.append({
+                        'class_id': 0,  # "data_marker"
+                        'bbox': (mx - marker_r, my - marker_r, mx + marker_r, my + marker_r)
+                    })
+
+    return seg_annotations, marker_annotations
+
+
+def extract_area_segmentation_annotations(
+    fig, chart_info_map, img_w: int, img_h: int
+) -> List[Dict]:
+    """
+    Extracts instance segmentation polygon masks for area charts.
+
+    The polygon is always built directly from fill_top + reversed(fill_bottom),
+    with no occlusion-based clipping applied here. That is intentional, not
+    an oversight: chart.py's _generate_area_chart already encodes the correct
+    per-mode extent in fill_top/fill_bottom before this function ever sees it
+    -- the full amodal region (bottom=0) for 'overlapping'/'single', or a
+    mutually-exclusive band (bottom=y_stack_previous) for 'stacked'. Adding
+    any additional visibility/occlusion clipping here would double-apply (and
+    likely break) that logic rather than fix anything.
+    """
+    seg_annotations = []
+    for ax in fig.axes:
+        if not ax.get_visible():
+            continue
+        chart_info = chart_info_map.get(ax, {})
+        if chart_info.get('chart_type_str') != 'area':
+            continue
+
+        for series in chart_info.get('keypoint_info', []):
+            top = series.get('fill_top', [])
+            bottom = series.get('fill_bottom', [])
+            if len(top) < 2 or len(bottom) < 2:
+                continue
+
+            poly_data = top + list(reversed(bottom))
+
+            px_poly = []
+            for x, y, *_ in poly_data:
+                px, py = ax.transData.transform_point((x, y))
+                px_poly.append((px, img_h - py))
+
+            seg_annotations.append({
+                'class_id': 0,  # "area_series"
+                'polygon': px_poly,
+                'series_idx': series.get('series_idx')
+            })
+
+    return seg_annotations
+
+
+def save_annotations_yolo_seg(annotations: List[Dict], img_w: int, img_h: int, output_path: str):
+    """
+    Saves annotations in YOLO instance-segmentation label format:
+    <class_id> x1 y1 x2 y2 ... xn yn (normalized coordinates in [0, 1]).
+    Expects ann['polygon'] in image-space pixel coordinates (top-left origin).
+
+    Out-of-frame geometry is handled by clamping each vertex independently to
+    [0.0, 1.0] in normalized space, not by clipping the polygon against the
+    canvas (e.g. Sutherland-Hodgman) to derive a new, re-shaped boundary. Per-
+    vertex clamping is simpler and cheap, at the cost of a vertex far outside
+    the frame being dragged straight to the nearest edge rather than the edge
+    being interpolated where the true boundary actually crosses it. That
+    trade-off is accepted here; if sub-pixel edge accuracy for heavily
+    off-canvas polygons ever matters, that's a real polygon-clip that would
+    need to be added deliberately, not a bug in the clamp below.
+    """
+    with open(output_path, 'w') as f:
+        for ann in annotations:
+            class_id = ann['class_id']
+            polygon = ann.get('polygon', [])
+            if len(polygon) < 3:
+                continue
+
+            # Clamping a vertex near/outside the canvas edge to [0,1] can produce
+            # consecutive duplicate points (e.g. two clamped-to-0.0 vertices in a
+            # row); some polygon loaders are picky about that, so drop repeats.
+            norm_pts = []
+            for x, y in polygon:
+                x_norm = max(0.0, min(1.0, float(x) / img_w))
+                y_norm = max(0.0, min(1.0, float(y) / img_h))
+                if norm_pts and norm_pts[-1] == (x_norm, y_norm):
+                    continue
+                norm_pts.append((x_norm, y_norm))
+
+            if len(norm_pts) < 3:
+                continue
+
+            poly_parts = [str(class_id)]
+            for x_norm, y_norm in norm_pts:
+                poly_parts.extend([f"{x_norm:.6f}", f"{y_norm:.6f}"])
+
+            f.write(" ".join(poly_parts) + "\n")
+
+            if GENERATION_CONFIG.get('debug_coords', False):
+                print(f"DEBUG [SEG-FORMAT] class={class_id}, {len(norm_pts)} vertices -> {output_path}")
 
 
 def convert_numpy_types(obj):
@@ -2879,8 +2071,8 @@ def get_detailed_annotations(fig, chart_info_map, cls_map, img_w, img_h, raw_ann
                     pts_to_px = fig.dpi / 72.0
                     for i, (x, y) in enumerate(offsets):
                         px, py = ax.transData.transform_point((x, y))
-                        s = sizes[0] if is_uniform else sizes[i]
-                        r = np.sqrt(s / np.pi) * pts_to_px
+                        s = float(sizes[0] if is_uniform else sizes[i])
+                        r = max(3.0, (np.sqrt(s) / 2.0) * pts_to_px)
                         bbox = transforms.Bbox.from_extents(px - r, py - r, px + r, py + r)
                         add_annotation("data_point", bbox, conf=0.95,
                                      extra={"x": float(x), "y": float(y), "size": float(s)})
@@ -2972,8 +2164,7 @@ def get_detailed_annotations(fig, chart_info_map, cls_map, img_w, img_h, raw_ann
                 else:
                     add_annotation("data_label", artist.get_window_extent(renderer),
                                 text=txt, conf=0.91)
-    
-    # CRITICAL FIX: Add raw XYXY coordinates at the end
+        
     if raw_annotations:
         detailed_metadata["raw_annotations"] = []
         for ann in raw_annotations:
@@ -2988,7 +2179,7 @@ def get_detailed_annotations(fig, chart_info_map, cls_map, img_w, img_h, raw_ann
 
 
 # ===================================================================================
-# ==                    GNN TRAINING DATA GENERATION FUNCTIONS                     ==
+# == GNN TRAINING DATA & GRAPH TOPOLOGY
 # ===================================================================================
 
 def add_graph_topology_metadata(fig, detailed_metadata, img_h):
@@ -3976,11 +3167,8 @@ def generate_single_chart(i, cfg, images_dir, labels_dir, output_dir):
         if chart_type == 'box':
             if cfg['debug_mode']:
                 print(f"DEBUG: AX[{ax_idx}]: Calling box plot generator")
-            # FIX: _generate_boxplot_chart returns (data_artists, other_artists, bar_info_list, orientation,
-            #      error_tops, axis_related_artists, scale_axis_info, boxplot_metadata)
-            # Position 6 = scale_axis_info (contains boxplot_raw), Position 7 = boxplot_metadata
             data_artists, other_artists, bar_info_list, orientation, error_tops, axis_related_artists, scale_axis_info, boxplot_dict = generator_func(ax, theme_name, theme_config, is_scientific, debug_mode=cfg['debug_mode'])
-            keypoint_data = None  # Box plots don't have keypoint data
+            keypoint_data = None
         else:
             if cfg['debug_mode']:
                 print(f"DEBUG: AX[{ax_idx}]: Calling generator for {chart_type}")
@@ -3993,7 +3181,6 @@ def generate_single_chart(i, cfg, images_dir, labels_dir, output_dir):
                 style_config['pattern'] = random.choices(patterns, weights=weights, k=1)[0]
                 style_config['is_scientific'] = is_scientific
             
-            # Handle the 8-element return from all chart generators
             if chart_type == 'pie':
                 result = generator_func(
                     ax, theme_name, theme_config, is_scientific,
@@ -4007,10 +3194,9 @@ def generate_single_chart(i, cfg, images_dir, labels_dir, output_dir):
                     debug_mode=cfg['debug_mode']
                 )
             
-            # Check if the result has 8 elements (new enhanced functions) or 7 (legacy)
             if len(result) == 8:
                 data_artists, other_artists, bar_info_list, orientation, error_tops, axis_related_artists, scale_axis_info, keypoint_data = result
-            else:  # Legacy function returning 7 elements
+            else:
                 data_artists, other_artists, bar_info_list, orientation, error_tops, axis_related_artists, scale_axis_info = result
                 keypoint_data = None
 
@@ -4174,7 +3360,7 @@ def generate_single_chart(i, cfg, images_dir, labels_dir, output_dir):
 
     # Dual-axis post-processing
     if len(fig.axes) == 2 and any(v == 'axis_labels' for v in cls_map.values()):
-        print("    - Applying post-processing fix for dual-axis chart annotations.")
+        print("    - Processing dual-axis chart annotations.")
         axis_label_class_id = next((k for k, v in cls_map.items() if v == 'axis_labels'), None)
         if axis_label_class_id is not None:
             renderer = fig.canvas.get_renderer()
@@ -4243,7 +3429,7 @@ def generate_single_chart(i, cfg, images_dir, labels_dir, output_dir):
         height = bbox.y1 - bbox.y0
             
         ann_chart_type = ann.get('chart_type', primary_chart_type)
-        # FIX #1: Exempt heatmaps from aggressive aspect ratio pruning (preserves narrow bars/cells)
+        # Exempt scatter, box, and heatmap components from aspect ratio pruning
         if ann_chart_type in ['scatter', 'box', 'heatmap']:
             if width == 0 or height == 0:
                 continue
@@ -4268,7 +3454,7 @@ def generate_single_chart(i, cfg, images_dir, labels_dir, output_dir):
         bbox = ann['bbox']
         ann_chart_type = ann.get('chart_type', primary_chart_type)
         
-        # FIX #2: Safely clamp heatmap layouts to visible viewport dimensions instead of deleting them
+        # Clamp heatmap layout coordinates to visible viewport dimensions
         if ann_chart_type == 'heatmap':
             x0 = max(0.0, min(float(bbox.x0), img_w))
             x1 = max(x0, min(float(bbox.x1), img_w))
@@ -4312,39 +3498,38 @@ def generate_single_chart(i, cfg, images_dir, labels_dir, output_dir):
         print(f"    ✓ Image {i+1}/{cfg['num_images']} complete in {iter_time:.2f}s | Saved {len(annotations)} annotations")
         return
 
+    # =========================================================================
+    # AREA CHARTS: Object Detection & Instance Segmentation Masks
+    # =========================================================================
+    # Exports:
+    #   - area_obj_labels/: Bounding boxes for global layout elements
+    #   - area_seg_labels/: Polygon masks for each area series fill layer
     if primary_chart_type == 'area':
-        # Save object detection format with CLASS_MAP_AREA_OBJ
         clsmap_obj = GENERATION_CONFIG['CLASS_MAP_AREA_OBJ']
         annotations_obj = get_granular_annotations(fig, chart_info_map, clsmap_obj)
         
-        # Create separate directory for area object annotations
         area_obj_dir = os.path.join(output_dir, 'area_obj_labels')
         ensure_dir(area_obj_dir)
         save_annotations_yolo(annotations_obj, img_w, img_h, 
                             os.path.join(area_obj_dir, f"{base_filename}.txt"))
         
-        # Save pose format with CLASS_MAP_AREA_POSE
-        clsmap_pose = GENERATION_CONFIG['CLASS_MAP_AREA_POSE']
-        # Convert string keys to reverse map
-        clsmap_pose_reverse = {v: k for k, v in clsmap_pose.items()}
-        
-        keypoint_annotations = extract_area_pose_annotations_fixed(
-            fig, chart_info_map, clsmap_pose_reverse, img_w, img_h
-        )
-        
-        # Create separate directory for area pose annotations
-        area_pose_dir = os.path.join(output_dir, 'area_pose_labels')
-        ensure_dir(area_pose_dir)
-        save_annotations_pose_fixed(keypoint_annotations, img_w, img_h,
-                            os.path.join(area_pose_dir, f"{base_filename}.txt"))
-        
+        area_seg_anns = extract_area_segmentation_annotations(fig, chart_info_map, img_w, img_h)
+        area_seg_dir = os.path.join(output_dir, 'area_seg_labels')
+        ensure_dir(area_seg_dir)
+        save_annotations_yolo_seg(area_seg_anns, img_w, img_h,
+                            os.path.join(area_seg_dir, f"{base_filename}.txt"))
+
         if cfg['debug_mode']:
             print(f"DEBUG: Saved {len(annotations_obj)} area object annotations")
-            print(f"DEBUG: Saved {len(keypoint_annotations)} area pose annotations")
+            print(f"DEBUG: Saved {len(area_seg_anns)} area segmentation polygons")
 
+    # =========================================================================
+    # PIE CHARTS: Object Detection & 5-Point Wedge Pose Keypoints
+    # =========================================================================
+    # Exports:
+    #   - pie_obj_labels/: Bounding boxes for wedges, legends, titles, labels
+    #   - pie_pose_labels/: 5 keypoints per wedge (Center, Start, Inter1, Inter2, End)
     elif primary_chart_type == 'pie':
-        # **NEW: Save pie chart dual-format annotations**
-        # Save object detection format with CLASS_MAP_PIE_OBJ
         clsmap_obj = GENERATION_CONFIG['CLASS_MAP_PIE_OBJ']
         annotations_obj = get_granular_annotations(fig, chart_info_map, clsmap_obj)
         
@@ -4353,26 +3538,30 @@ def generate_single_chart(i, cfg, images_dir, labels_dir, output_dir):
         save_annotations_yolo(annotations_obj, img_w, img_h,
                             os.path.join(pie_obj_dir, f"{base_filename}.txt"))
         
-        # Save pose format with CLASS_MAP_PIE_POSE
         clsmap_pose = GENERATION_CONFIG['CLASS_MAP_PIE_POSE']
         clsmap_pose_reverse = {v: k for k, v in clsmap_pose.items()}
         
-        keypoint_annotations = extract_pie_pose_annotations_fixed(
+        keypoint_annotations = extract_pie_pose_annotations(
             fig, chart_info_map, clsmap_pose_reverse, img_w, img_h
         )
         
         pie_pose_dir = os.path.join(output_dir, 'pie_pose_labels')
         ensure_dir(pie_pose_dir)
-        save_annotations_pose_fixed(keypoint_annotations, img_w, img_h,
+        save_annotations_pose(keypoint_annotations, img_w, img_h,
                             os.path.join(pie_pose_dir, f"{base_filename}.txt"))
         
         if cfg['debug_mode']:
             print(f"DEBUG: Saved {len(annotations_obj)} pie object annotations")
             print(f"DEBUG: Saved {len(keypoint_annotations)} pie pose annotations")
 
+    # =========================================================================
+    # LINE CHARTS: Dual-Stream Instance Segmentation & Marker/Extrema Detection
+    # =========================================================================
+    # Exports:
+    #   - line_obj_labels/: Bounding boxes for lines, legends, titles, labels
+    #   - line_seg_labels/: Ribbon polygon masks for continuous line stroke extraction
+    #   - line_marker_labels/: High-precision boxes for data glyphs and extrema
     elif primary_chart_type == 'line':
-        # **NEW: Save line chart dual-format annotations**
-        # Save object detection format with CLASS_MAP_LINE_OBJ
         clsmap_obj = GENERATION_CONFIG['CLASS_MAP_LINE_OBJ']
         annotations_obj = get_granular_annotations(fig, chart_info_map, clsmap_obj)
         
@@ -4381,39 +3570,44 @@ def generate_single_chart(i, cfg, images_dir, labels_dir, output_dir):
         save_annotations_yolo(annotations_obj, img_w, img_h,
                             os.path.join(line_obj_dir, f"{base_filename}.txt"))
         
-        # Save pose format with CLASS_MAP_LINE_POSE
-        clsmap_pose = GENERATION_CONFIG['CLASS_MAP_LINE_POSE']
-        clsmap_pose_reverse = {v: k for k, v in clsmap_pose.items()}
-        
-        keypoint_annotations = extract_line_pose_annotations_fixed(
-            fig, chart_info_map, clsmap_pose_reverse, img_w, img_h
+        line_seg_anns, line_marker_anns = extract_line_segmentation_annotations(
+            fig, chart_info_map, img_w, img_h
         )
-        
-        line_pose_dir = os.path.join(output_dir, 'line_pose_labels')
-        ensure_dir(line_pose_dir)
-        save_annotations_pose_fixed(keypoint_annotations, img_w, img_h,
-                            os.path.join(line_pose_dir, f"{base_filename}.txt"))
-        
+
+        line_seg_dir = os.path.join(output_dir, 'line_seg_labels')
+        ensure_dir(line_seg_dir)
+        save_annotations_yolo_seg(line_seg_anns, img_w, img_h,
+                            os.path.join(line_seg_dir, f"{base_filename}.txt"))
+
+        line_marker_dir = os.path.join(output_dir, 'line_marker_labels')
+        ensure_dir(line_marker_dir)
+        save_annotations_yolo(line_marker_anns, img_w, img_h,
+                            os.path.join(line_marker_dir, f"{base_filename}.txt"))
+
         if cfg['debug_mode']:
             print(f"DEBUG: Saved {len(annotations_obj)} line object annotations")
-            print(f"DEBUG: Saved {len(keypoint_annotations)} line pose annotations")
+            print(f"DEBUG: Saved {len(line_seg_anns)} line segmentation polygons")
+            print(f"DEBUG: Saved {len(line_marker_anns)} line marker/extrema annotations")
     
-    # NEW: Handle specific chart types - save to dedicated directories
+    # =========================================================================
+    # STANDARD CHARTS: Bar, Histogram, Scatter
+    # =========================================================================
+    # Exports dedicated per-type object labels:
+    #   - bar_obj_labels/, histogram_obj_labels/, scatter_obj_labels/
     elif primary_chart_type in ['bar', 'histogram', 'scatter']:
-        # Use the appropriate class map for each chart type
         cls_map_specific = CHART_CLASS_MAPS.get(primary_chart_type, CHART_CLASS_MAPS['bar'])
         annotations_obj = get_granular_annotations(fig, chart_info_map, cls_map_specific)
         
         obj_dir = os.path.join(output_dir, f"{primary_chart_type}_obj_labels")
-        
         ensure_dir(obj_dir)
         save_annotations_yolo(annotations_obj, img_w, img_h,
                             os.path.join(obj_dir, f"{base_filename}.txt"))
         
         if cfg['debug_mode']:
             print(f"DEBUG: Saved {len(annotations_obj)} {primary_chart_type} object annotations to {obj_dir}")
+
     # =========================================================================
-    # BOX PLOT DUAL-EXPERT ANNOTATION ROUTING (Elements vs Global Layout)
+    # BOX PLOT: Dual-Expert Annotation Routing (Elements vs Global Layout)
     # =========================================================================
     # Dispatches the unified master annotations into two dedicated, separately-
     # indexed annotation sets for training two specialist models:
@@ -4424,7 +3618,6 @@ def generate_single_chart(i, cfg, images_dir, labels_dir, output_dir):
     elif primary_chart_type == 'box':
         cls_map_specific = CHART_CLASS_MAPS['box']
 
-        # 1. Define isolated re-indexed expert lookup tables
         elements_expert_map = {
             "box": 0,
             "range_indicator": 1,
@@ -4443,7 +3636,6 @@ def generate_single_chart(i, cfg, images_dir, labels_dir, output_dir):
         anns_elements = []
         anns_global = []
 
-        # 2. Sort master annotations into respective expert queues
         for ann in annotations:
             orig_class_id = str(ann['class_id'])
             class_name = cls_map_specific.get(orig_class_id)
@@ -4458,19 +3650,18 @@ def generate_single_chart(i, cfg, images_dir, labels_dir, output_dir):
                 ann_copy['class_id'] = global_expert_map[class_name]
                 anns_global.append(ann_copy)
 
-        # 3. Export Set 1: Data & Statistical Elements (box_elements_labels + box_obj_labels)
+        # Set 1: Data & Statistical Elements (box_elements_labels + box_obj_labels)
         elements_dir = os.path.join(output_dir, 'box_elements_labels')
         ensure_dir(elements_dir)
         save_annotations_yolo(anns_elements, img_w, img_h,
                             os.path.join(elements_dir, f"{base_filename}.txt"))
 
-        # Backward-compatible alias: box_obj_labels/
         obj_dir = os.path.join(output_dir, 'box_obj_labels')
         ensure_dir(obj_dir)
         save_annotations_yolo(anns_elements, img_w, img_h,
                             os.path.join(obj_dir, f"{base_filename}.txt"))
 
-        # 4. Export Set 2: Global & Layout Elements (box_global_labels)
+        # Set 2: Global & Layout Elements (box_global_labels)
         global_dir = os.path.join(output_dir, 'box_global_labels')
         ensure_dir(global_dir)
         save_annotations_yolo(anns_global, img_w, img_h,
@@ -4479,9 +3670,15 @@ def generate_single_chart(i, cfg, images_dir, labels_dir, output_dir):
         if cfg.get('debug_mode', False):
             print(f"DEBUG: Saved {len(anns_elements)} box element annotations to {elements_dir} (+ {obj_dir})")
             print(f"DEBUG: Saved {len(anns_global)} box global annotations to {global_dir}")
+
     # =========================================================================
-    # NEW: HEATMAP CASCADED EXPERT DOUBLE-ROUTING PIPELINE WITH REGIONAL CROPS
+    # HEATMAP: Cascaded Expert Double-Routing Pipeline with Regional Crops
     # =========================================================================
+    # Dispatches heatmap annotations across four specialist domains:
+    #   - Expert 1 (Macro Layout Router, Global): chart, color_bar_region, legend
+    #   - Expert 2 (Color Bar Specialist, Crop):  color_bar, color_bar_label, color_bar_title
+    #   - Expert 3 (Cell Lattice Specialist, Crop): cell, data_label
+    #   - Expert 4 (Text Line Parser, Global):    axis_labels, axis_title, chart_title
     elif primary_chart_type == 'heatmap':
         cls_map_specific = CHART_CLASS_MAPS['heatmap']
         
@@ -4721,7 +3918,7 @@ def generate_single_chart(i, cfg, images_dir, labels_dir, output_dir):
         "colorbar": _pick_list("color_bar", "colorbar"),
         "connectorline": _pick_list("connector_line", "connectorline"),
 
-        # Include all the new metadata in the detailed file
+        # Include detailed chart metadata
         "scale_axis_info": unified_json.get("scale_axis_info", {}),
         "bar_info": unified_json.get("bar_info", []),
         "keypoint_info": unified_json.get("keypoint_info", []),

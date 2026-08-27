@@ -1,3 +1,5 @@
+import warnings
+warnings.filterwarnings('ignore', category=UserWarning, module='matplotlib')
 import matplotlib
 from matplotlib import patches, rcParams, transforms, colormaps
 import matplotlib.pyplot as plt
@@ -13,16 +15,52 @@ from scipy.ndimage import gaussian_filter
 from scipy.spatial.distance import cdist, pdist
 from scipy.cluster.hierarchy import linkage, optimal_leaf_ordering, leaves_list
 from scipy.linalg import eigh, block_diag, toeplitz
-try:
-    from sklearn.datasets import make_biclusters, make_checkerboard
-except Exception:
-    make_biclusters = None
-    make_checkerboard = None
+def make_biclusters(shape, n_clusters, noise=0.0, minval=-5.0, maxval=5.0, shuffle=True, random_state=None):
+    """Pure NumPy bicluster matrix generator."""
+    if random_state is not None:
+        np.random.seed(random_state)
+    rows, cols = shape
+    n_cl = int(n_clusters[0]) if isinstance(n_clusters, (list, tuple)) else int(n_clusters)
+    r_clusters = max(1, n_cl)
+    c_clusters = max(1, n_cl)
+    row_groups = np.array_split(np.arange(rows), r_clusters)
+    col_groups = np.array_split(np.arange(cols), c_clusters)
+    matrix = np.random.normal(0, noise, (rows, cols))
+    for idx, r_idx in enumerate(row_groups):
+        c_idx = col_groups[idx % len(col_groups)]
+        base_val = np.random.uniform(minval, maxval)
+        matrix[np.ix_(r_idx, c_idx)] += base_val
+    if shuffle:
+        r_perm = np.random.permutation(rows)
+        c_perm = np.random.permutation(cols)
+        matrix = matrix[np.ix_(r_perm, c_perm)]
+    return matrix, None, None
 
-try:
-    from statsmodels.tsa.statespace.sarimax import SARIMAX
-except Exception:
-    SARIMAX = None
+
+def make_checkerboard(shape, n_clusters, noise=0.0, minval=-5.0, maxval=5.0, shuffle=True, random_state=None):
+    """Pure NumPy checkerboard matrix generator."""
+    if random_state is not None:
+        np.random.seed(random_state)
+    rows, cols = shape
+    if isinstance(n_clusters, (list, tuple)):
+        n_r, n_c = int(n_clusters[0]), int(n_clusters[1])
+    else:
+        n_r, n_c = int(n_clusters), int(n_clusters)
+    row_groups = np.array_split(np.arange(rows), max(1, n_r))
+    col_groups = np.array_split(np.arange(cols), max(1, n_c))
+    matrix = np.random.normal(0, noise, (rows, cols))
+    for r_i, r_idx in enumerate(row_groups):
+        for c_j, c_idx in enumerate(col_groups):
+            if (r_i + c_j) % 2 == 0:
+                base_val = np.random.uniform(minval, maxval)
+                matrix[np.ix_(r_idx, c_idx)] += base_val
+    if shuffle:
+        r_perm = np.random.permutation(rows)
+        c_perm = np.random.permutation(cols)
+        matrix = matrix[np.ix_(r_perm, c_perm)]
+    return matrix, None, None
+
+
 from themes import THEMES, SCIENTIFIC_Y_LABELS, BUSINESS_Y_LABELS, SCIENTIFIC_X_LABELS, BUSINESS_X_LABELS, COMPARATIVE_LABELS, HISTOGRAM_Y_LABELS, FONT_FAMILIES, HEATMAP_XLABELS_SCIENTIFIC, HEATMAP_YLABELS_SCIENTIFIC, HEATMAP_XLABELS_BUSINESS, HEATMAP_YLABELS_BUSINESS, COLORBAR_TITLES_SCIENTIFIC, COLORBAR_TITLES_BUSINESS, HEATMAP_CHART_TITLES, HEATMAP_ANNOTATION_FORMATS, SCIENTIFIC_DOMAIN_DICT, BUSINESS_DOMAIN_DICT, CONTEXT_CONFIGURATIONS, STRUCTURAL_THEMES
 
 # ===================================================================================
@@ -1016,6 +1054,10 @@ def generate_pie_composition(pie_config=None, debug_mode=False):
     else:
         comp_final, labels_final = np.asarray(comp_agg, dtype=float), list(labels_agg)
 
+    # Enforce minimum slice threshold of 3.5% so every slice is visually distinct with well-formed keypoints
+    comp_final = np.maximum(0.035, comp_final)
+    comp_final = comp_final / np.sum(comp_final)
+
     polar_coords = compute_polar_coordinates(comp_final)
 
     meta = {
@@ -1310,7 +1352,7 @@ def _generate_bar_chart(ax, theme_name, theme_config, style_config, debug_mode=F
         
         data_artists = list(rects1) + list(rects2)
         
-        # CRITICAL: Store complete metadata for BOTH axis groups
+        #  Store complete metadata for BOTH axis groups
         bar_info_list_1, bar_info_list_2 = [], []
         
         for i, r in enumerate(rects1):
@@ -1345,7 +1387,7 @@ def _generate_bar_chart(ax, theme_name, theme_config, style_config, debug_mode=F
         ax.set_ylabel(random.choice(SCIENTIFIC_Y_LABELS))
         ax2.set_ylabel(random.choice(SCIENTIFIC_Y_LABELS))
         
-        # CRITICAL: Atomic position and label setting
+        #  Atomic position and label setting
         ax.set_xticks(all_positions)
         ax.set_xticklabels(all_labels, rotation=45, ha='right')
         
@@ -1464,7 +1506,7 @@ def _generate_bar_chart(ax, theme_name, theme_config, style_config, debug_mode=F
                 rects2 = ax.bar(indices + bar_width/2, y_values2, width=bar_width, 
                                label='Series 2', color=colors[1], zorder=3)
                 
-                # CRITICAL: Store metadata for BOTH series
+                #  Store metadata for BOTH series
                 for i in range(num_bars):
                     bar_info_list.append({
                         'center': indices[i] - bar_width/2, 
@@ -1531,7 +1573,7 @@ def _generate_bar_chart(ax, theme_name, theme_config, style_config, debug_mode=F
             ticks_setter(indices, categories)
             data_artists.extend(list(rects1) + list(rects2))
             
-            # CRITICAL: Store metadata for EACH stacked segment
+            #  Store metadata for EACH stacked segment
             for i in range(num_bars):
                 center_pos = indices[i]
                 # Bottom segment
@@ -1549,8 +1591,8 @@ def _generate_bar_chart(ax, theme_name, theme_config, style_config, debug_mode=F
                     'center': center_pos, 
                     'height': y_values2[i], 
                     'width': bar_width,
-                    'bottom': y_values1[i],  # CRITICAL: Bottom of top segment
-                    'top': y_values1[i] + y_values2[i],  # CRITICAL: Cumulative top
+                    'bottom': y_values1[i],  #  Bottom of top segment
+                    'top': y_values1[i] + y_values2[i],  #  Cumulative top
                     'series_idx': 1,
                     'bar_idx': i
                 })
@@ -1651,7 +1693,7 @@ def _generate_bar_chart(ax, theme_name, theme_config, style_config, debug_mode=F
     theme = apply_chart_theme(ax, theme_name, orientation)
     apply_typography_variation(ax, domain='scientific' if is_scientific else 'business')
     
-    # CRITICAL: Ensure all code paths return complete metadata
+    #  Ensure all code paths return complete metadata
     if not bar_info_list:
         # Emergency fallback: extract from data_artists
         for artist in data_artists:
@@ -1678,13 +1720,13 @@ def _generate_bar_chart(ax, theme_name, theme_config, style_config, debug_mode=F
         print(f"DEBUG: Scale axis info: {scale_axis_info}")
     
     return data_artists, other_artists, bar_info_list, orientation, error_tops, \
-           axis_related_artists, scale_axis_info, None  # No keypoint data for bar charts
+           axis_related_artists, scale_axis_info, None
 
-'''
 def _generate_line_chart(ax, theme_name, theme_config, is_scientific, debug_mode=False):
-    """Enhanced line chart with keypoint detection."""
+    """
+    Generate a line chart with realistic trend data and keypoint detection.
+    """
     theme = apply_chart_theme(ax, theme_name)
-    
     num_series = random.randint(1, 4)
     num_points = random.randint(8, 25)
     max_scale = random.choice([50, 100, 500, 1000])
@@ -1692,177 +1734,62 @@ def _generate_line_chart(ax, theme_name, theme_config, is_scientific, debug_mode
     data_artists = []
     other_artists = []
     keypoint_info = []
+    
     x = np.arange(num_points)
     
-    # ========================================================================
-    # FIX: Generate colors as a LIST, not a generator
-    # ========================================================================
     palette = theme.get('palette', 'viridis')
     
     if isinstance(palette, list):
-        # Case 1: Palette is already a list
-        # Extend it cyclically if num_series > len(palette)
         colors = [palette[i % len(palette)] for i in range(num_series)]
     else:
-        # Case 2: Palette is a colormap name (string)
         try:
             cmap = colormaps.get(palette)
-            # Generate num_series colors from the colormap (normalized 0-1)
             colors = [cmap(i / max(1, num_series - 1)) for i in range(num_series)]
         except (ValueError, KeyError):
-            # Fallback: Use viridis if palette name invalid
             cmap = colormaps.get('viridis')
             colors = [cmap(i / max(1, num_series - 1)) for i in range(num_series)]
     
-    # Verify colors generated correctly
     if debug_mode:
         print(f"DEBUG LINE: Generated {len(colors)} colors for {num_series} series")
         print(f"DEBUG LINE: Palette: {palette}, Type: {type(palette)}")
     
-    # Ensure we have at least num_series colors (shouldn't happen, but safety check)
     if len(colors) < num_series:
-        # Extend cyclically
         colors = colors * ((num_series // len(colors)) + 1)
     
-    colors = colors[:num_series]  # Truncate to exact num_series
+    colors = colors[:num_series]
     
     for series_idx in range(num_series):
         y_data = generate_realistic_data(num_points, max_scale, allow_negative=is_scientific,
                                         domain='scientific' if is_scientific else 'business')
         
-        line, = ax.plot(x, y_data, marker='o', markersize=5, linewidth=2,
-                       color=colors[series_idx], label=f'Series {series_idx+1}', zorder=3)
-        data_artists.append(line)
+        # Determine marker visibility and style
+        has_markers = random.random() < 0.6
+        marker = random.choice(['o', 's', '^', 'v', 'D', 'p', '*']) if has_markers else None
+        markersize = random.uniform(4.0, 7.0) if has_markers else 0.0
         
-        # After line generation, ensure data coordinates are valid
-        y_data_validated = np.clip(y_data, -max_scale * 1.5, max_scale * 1.5)
-
-        inflection_pts = detect_inflection_points(x, y_data_validated, threshold=0.1)
-        # Adaptive prominence: higher for noisy data
-        prominence_factor = 0.08 if is_scientific else 0.05
-        peaks, valleys = detect_extrema(x, y_data_validated, prominence_factor=prominence_factor)
-
-        keypoint_info.append({
-            'series_idx': series_idx,
-            'start': (float(x[0]), float(y_data_validated[0]), 0),
-            'end': (float(x[-1]), float(y_data_validated[-1]), len(x)-1),
-            'inflections': [(float(x_val), float(y_val), int(idx)) for x_val, y_val, idx in inflection_pts],
-            'peaks': [(float(x_val), float(y_val), int(idx)) for x_val, y_val, idx in peaks],
-            'valleys': [(float(x_val), float(y_val), int(idx)) for x_val, y_val, idx in valleys],
-            'boundary_points': [(float(x[i]), float(y_data_validated[i]), int(i)) for i in range(len(x))],
-            'all_points': [(float(x[i]), float(y_data_validated[i]), int(i)) for i in range(len(x))]
-        })
-    
-    ax.set_xlabel(random.choice(SCIENTIFIC_X_LABELS if is_scientific else BUSINESS_X_LABELS))
-    ax.set_ylabel(random.choice(SCIENTIFIC_Y_LABELS if is_scientific else BUSINESS_Y_LABELS))
-    
-    if num_series > 1 and random.random() < 0.7:
-        # Substitui a chamada simples por nossa nova função
-        legend = apply_legend_variation(ax, num_series)
-        other_artists.append(legend)
-    
-    return data_artists, other_artists, [], 'vertical', None, [], {'primary_scale_axis': 'y'}, keypoint_info
-'''
-
-def _generate_line_chart(ax, theme_name, theme_config, is_scientific, debug_mode=False):
-    """
-    CRITICAL FIX: Ensure y_data used for plotting MATCHES y_data used for keypoint annotation.
-    The bug was: plot(x, y_data) but annotate with y_data_validated (created AFTER plot).
-    """
-    theme = apply_chart_theme(ax, theme_name)
-    num_series = random.randint(1, 4)
-    num_points = random.randint(8, 25)
-    max_scale = random.choice([50, 100, 500, 1000])
-    
-    data_artists = []
-    other_artists = []
-    keypoint_info = []
-    
-    x = np.arange(num_points)
-    
-    # ========================================================================
-    # FIX: Generate colors as a LIST, not a generator
-    # ========================================================================
-    palette = theme.get('palette', 'viridis')
-    
-    if isinstance(palette, list):
-        # Case 1: Palette is already a list
-        # Extend it cyclically if num_series > len(palette)
-        colors = [palette[i % len(palette)] for i in range(num_series)]
-    else:
-        # Case 2: Palette is a colormap name (string)
-        try:
-            cmap = colormaps.get(palette)
-            # Generate num_series colors from the colormap (normalized 0-1)
-            colors = [cmap(i / max(1, num_series - 1)) for i in range(num_series)]
-        except (ValueError, KeyError):
-            # Fallback: Use viridis if palette name invalid
-            cmap = colormaps.get('viridis')
-            colors = [cmap(i / max(1, num_series - 1)) for i in range(num_series)]
-    
-    # Verify colors generated correctly
-    if debug_mode:
-        print(f"DEBUG LINE: Generated {len(colors)} colors for {num_series} series")
-        print(f"DEBUG LINE: Palette: {palette}, Type: {type(palette)}")
-    
-    # Ensure we have at least num_series colors (shouldn't happen, but safety check)
-    if len(colors) < num_series:
-        # Extend cyclically
-        colors = colors * ((num_series // len(colors)) + 1)
-    
-    colors = colors[:num_series]  # Truncate to exact num_series
-    
-    line_styles = ['-', '--', '-.', ':']
-    markers = [None, 'o', '^', 's', 'D', 'v', 'p', '*']
-    
-    for series_idx in range(num_series):
-        # Generate raw data
-        y_data_raw = generate_realistic_data(num_points, max_scale, allow_negative=is_scientific,
-                                        domain='scientific' if is_scientific else 'business')
-        
-        # CRITICAL FIX: Validate and clip data BEFORE plotting and annotation
-        # This ensures the plotted data and annotated data are IDENTICAL
-        y_data = np.clip(y_data_raw, -max_scale * 1.5, max_scale * 1.5)
-        
-        # Ensure data is finite (no NaN or inf)
-        y_data = np.nan_to_num(y_data, nan=0.0, posinf=max_scale, neginf=-max_scale)
-        
-        if debug_mode:
-            print(f"DEBUG [LINE] Series {series_idx}: Generated {len(y_data)} points, range [{np.min(y_data):.2f}, {np.max(y_data):.2f}]")
-        
-        linestyle = random.choice(line_styles)
-        marker = random.choice(markers)
+        # Determine line styling
+        linestyle = random.choice(['-', '--', '-.', ':']) if random.random() < 0.3 else '-'
         linewidth = random.uniform(1.5, 3.0)
         
-        # Plot with the VALIDATED data
-        line, = ax.plot(x, y_data, marker=marker, markersize=6 if marker else 0, linewidth=linewidth,
+        line, = ax.plot(x, y_data, marker=marker, markersize=markersize, linewidth=linewidth,
                        linestyle=linestyle, color=colors[series_idx], label=f'Series {series_idx+1}', zorder=3)
         data_artists.append(line)
         
-        # Detect keypoints using the SAME validated data
+        plotted = [(float(x[i]), float(y_data[i]), int(i)) for i in range(len(y_data))]
+        
         inflection_pts = detect_inflection_points(x, y_data, threshold=0.1)
-        # Adaptive prominence: higher for noisy data
         prominence_factor = 0.08 if is_scientific else 0.05
         peaks, valleys = detect_extrema(x, y_data, prominence_factor=prominence_factor)
         
-        # CRITICAL FIX: Capture the exact plotted arrays after plotting to build pose keypoints
-        # Use only the coordinates actually plotted for this series to build pose keypoints
-        plotted = [(float(x[i]), float(y_data[i]), int(i)) for i in range(len(y_data))]
-        series_info = {"plotted_points": plotted}
-        
         if debug_mode:
-            print(f"DEBUG [LINE] Series {series_idx}: Detected {len(inflection_pts)} inflection points, {len(peaks)} peaks, {len(valleys)} valleys")
-            # Log coordinate values in data space 
-            print(f"DEBUG [LINE] Series {series_idx}: Data space coords - x: [{x[0]:.2f}, {x[-1]:.2f}], y: [{np.min(y_data):.2f}, {np.max(y_data):.2f}]")
-            if len(inflection_pts) > 0:
-                print(f"DEBUG [LINE] Series {series_idx}: First inflection - x: {inflection_pts[0][0]:.2f}, y: {inflection_pts[0][1]:.2f}")
-            if len(peaks) > 0:
+            print(f"DEBUG [LINE] Series {series_idx}: Raw data points: {len(y_data)}")
+            print(f"DEBUG [LINE] Series {series_idx}: Found {len(inflection_pts)} inflections, {len(peaks)} peaks, {len(valleys)} valleys")
+            if peaks:
                 print(f"DEBUG [LINE] Series {series_idx}: First peak - x: {peaks[0][0]:.2f}, y: {peaks[0][1]:.2f}")
-            if len(valleys) > 0:
+            if valleys:
                 print(f"DEBUG [LINE] Series {series_idx}: First valley - x: {valleys[0][0]:.2f}, y: {valleys[0][1]:.2f}")
             print(f"DEBUG [LINE] Series {series_idx}: Captured {len(plotted)} plotted points for pose construction")
         
-        # CRITICAL FIX: Store keypoints with explicit float conversion and validation
         keypoint_info.append({
             'series_idx': series_idx,
             'start': (float(x[0]), float(y_data[0]), 0),
@@ -1872,12 +1799,15 @@ def _generate_line_chart(ax, theme_name, theme_config, is_scientific, debug_mode
             'valleys': [(float(x_val), float(y_val), int(idx)) for x_val, y_val, idx in valleys],
             'boundary_points': [(float(x[i]), float(y_data[i]), int(i)) for i in range(len(x))],
             'all_points': [(float(x[i]), float(y_data[i]), int(i)) for i in range(len(x))],
-            'plotted_points': plotted  # Add the plotted points for pose construction
+            'plotted_points': plotted,
+            'linewidth': linewidth,
+            'linestyle': linestyle,
+            'marker': marker,
+            'markersize': markersize
         })
         
         if debug_mode:
             print(f"DEBUG [LINE] Series {series_idx}: Keypoint info stored - start={keypoint_info[-1]['start']}, end={keypoint_info[-1]['end']}")
-            # Log all_points for verification
             if keypoint_info[-1]['all_points']:
                 print(f"DEBUG [LINE] Series {series_idx}: First point: ({keypoint_info[-1]['all_points'][0][0]:.2f}, {keypoint_info[-1]['all_points'][0][1]:.2f}), Last point: ({keypoint_info[-1]['all_points'][-1][0]:.2f}, {keypoint_info[-1]['all_points'][-1][1]:.2f})")
     
@@ -1885,18 +1815,15 @@ def _generate_line_chart(ax, theme_name, theme_config, is_scientific, debug_mode
     ax.set_ylabel(random.choice(SCIENTIFIC_Y_LABELS if is_scientific else BUSINESS_Y_LABELS))
     
     if num_series > 1 and random.random() < 0.7:
-        # Substitui a chamada simples por nossa nova função
         legend = apply_legend_variation(ax, num_series)
         other_artists.append(legend)
     
     apply_typography_variation(ax, domain='scientific' if is_scientific else 'business')
     
-    # --- INÍCIO DA MODIFICAÇÃO ---
-    # Coleta o valor y mínimo de todas as séries para verificar a escala de log
+    # Collect minimum y value across all series for axis scaling
     all_y_vals = [pt[1] for kpi in keypoint_info for pt in kpi['plotted_points']]
     data_min = np.min(all_y_vals) if all_y_vals else 0
     apply_axis_scaling(ax, data_min=data_min, orientation='vertical')
-    # --- FIM DA MODIFICAÇÃO ---
     
     return data_artists, other_artists, [], 'vertical', None, [], {'primary_scale_axis': 'y'}, keypoint_info
 
@@ -2041,15 +1968,20 @@ def _generate_scatter_chart(ax, theme_name, theme_config, is_scientific, debug_m
         'marker': np.random.choice(['o', 's', '^', 'D', '+'])
     }
     
-    # Size scaling with sample size (larger datasets = smaller points)
-    if num_points < 30:
-        scatter_kwargs['s'] = np.random.randint(60, 100)
-    elif num_points < 100:
-        scatter_kwargs['s'] = np.random.randint(30, 60)
-    elif num_points < 500:
-        scatter_kwargs['s'] = np.random.randint(15, 30)
+    # Size scaling with sample size (larger datasets = smaller points, with support for bubble variations)
+    is_bubble = (random.random() < 0.25)
+    if is_bubble:
+        base_s = np.random.randint(40, 90)
+        scatter_kwargs['s'] = np.random.uniform(base_s * 0.4, base_s * 2.2, num_points)
     else:
-        scatter_kwargs['s'] = np.random.randint(5, 15)
+        if num_points < 30:
+            scatter_kwargs['s'] = np.random.randint(70, 150)
+        elif num_points < 100:
+            scatter_kwargs['s'] = np.random.randint(40, 90)
+        elif num_points < 500:
+            scatter_kwargs['s'] = np.random.randint(20, 50)
+        else:
+            scatter_kwargs['s'] = np.random.randint(12, 30)
     
     # Store point size for radius calculation
     point_size = scatter_kwargs['s']
@@ -2130,10 +2062,8 @@ def _generate_scatter_chart(ax, theme_name, theme_config, is_scientific, debug_m
     
     apply_typography_variation(ax, domain='scientific' if is_scientific else 'business')
     
-    # --- INÍCIO DA MODIFICAÇÃO ---
     data_min = np.min(y_data)
     apply_axis_scaling(ax, data_min=data_min, orientation='vertical')
-    # --- FIM DA MODIFICAÇÃO ---
     
     return data_artists, other_artists, [], 'vertical', [], [], \
            {'primary_scale_axis': 'x', 'secondary_scale_axis': 'y'}, scatter_metadata
@@ -2147,12 +2077,12 @@ def _generate_boxplot_chart(ax, theme_name, theme_config, is_scientific,
     if not theme:
         theme = {'palette': 'viridis'}
     
-    # MODIFICATION: 15% chance for horizontal boxplot with more boxes
+    # Determine orientation (15% chance for horizontal boxplot with more boxes)
     is_horizontal = random.random() < 0.15
     
     # Generate realistic data - more groups for horizontal orientation
     if is_horizontal:
-        num_groups = random.randint(6, 12)  # More boxes for horizontal
+        num_groups = random.randint(6, 12)
     else:
         num_groups = random.randint(3, 8)
     
@@ -2166,9 +2096,9 @@ def _generate_boxplot_chart(ax, theme_name, theme_config, is_scientific,
     if not datas or any(len(d) == 0 for d in datas):
         return [], [], [], 'vertical', [], [], {}, None
     
-    # MODIFICATION: Create boxplot with orientation parameter
+    # Create boxplot with orientation parameter
     bp = ax.boxplot(datas, patch_artist=True, widths=box_width,
-                   vert=not is_horizontal,  # CRITICAL: vert=False for horizontal
+                   vert=not is_horizontal,
                    flierprops={'marker': {'circle': 'o', 'star': '*', 'diamond': 'D'}.get(outlier_style, 'o'),
                               'markersize': 5, 'alpha': 0.6})
     
@@ -2176,7 +2106,7 @@ def _generate_boxplot_chart(ax, theme_name, theme_config, is_scientific,
     data_artists = _apply_box_styles(bp, theme, is_scientific)
     _apply_line_styles(bp)  # Median, whisker, cap styles
     
-    # MODIFICATION: Jitter overlay adapted for orientation
+    # Jitter overlay adapted for orientation
     if is_scientific and random.random() < 0.2:
         for i, d in enumerate(datas):
             if is_horizontal:
@@ -2186,7 +2116,7 @@ def _generate_boxplot_chart(ax, theme_name, theme_config, is_scientific,
                 x_coords = np.random.normal(i + 1, 0.04, size=len(d))
                 ax.plot(x_coords, d, '.', color='black', alpha=0.3, zorder=10)
     
-    # MODIFICATION: Set labels based on orientation
+    # Set axis labels based on orientation
     if is_horizontal:
         ax.set_xlabel(random.choice(SCIENTIFIC_Y_LABELS if is_scientific else BUSINESS_Y_LABELS))
         ax.set_ylabel(random.choice(SCIENTIFIC_X_LABELS if is_scientific else BUSINESS_X_LABELS))
@@ -2205,7 +2135,7 @@ def _generate_boxplot_chart(ax, theme_name, theme_config, is_scientific,
         ]
         error_groups.append(group_artists)
     
-    # MODIFICATION: Add significance markers with correct orientation
+    # Add significance markers with correct orientation
     bar_info_list = []
     sig_artists = []
     orientation_str = 'horizontal' if is_horizontal else 'vertical'
@@ -2243,7 +2173,7 @@ def _generate_boxplot_chart(ax, theme_name, theme_config, is_scientific,
     if sig_artists:
         other_artists_list.extend(sig_artists)
     
-    # MODIFICATION: Extract median line coordinates adapted for orientation
+    # Extract median line coordinates adapted for orientation
     median_metadata = []
     
     for group_idx, median_line in enumerate(bp['medians']):
@@ -2252,10 +2182,9 @@ def _generate_boxplot_chart(ax, theme_name, theme_config, is_scientific,
         
         if len(x_coords) >= 2 and len(y_coords) >= 2:
             if is_horizontal:
-                # Horizontal boxplot: median is vertical line (x constant, y varies)
                 lower_left = {'x': float(x_coords[0]), 'y': float(y_coords[0])}
                 upper_right = {'x': float(x_coords[-1]), 'y': float(y_coords[-1])}
-                median_value = float(x_coords[0])  # Constant x-coordinate
+                median_value = float(x_coords[0])
                 center_y = float((y_coords[0] + y_coords[-1]) / 2.0)
                 line_length = float(y_coords[-1] - y_coords[0])
                 
@@ -2270,7 +2199,6 @@ def _generate_boxplot_chart(ax, theme_name, theme_config, is_scientific,
                     'orientation': 'horizontal'
                 })
             else:
-                # Vertical boxplot: median is horizontal line (y constant, x varies)
                 lower_left = {'x': float(x_coords[0]), 'y': float(y_coords[0])}
                 upper_right = {'x': float(x_coords[-1]), 'y': float(y_coords[-1])}
                 median_value = float(y_coords[0])
@@ -2288,7 +2216,7 @@ def _generate_boxplot_chart(ax, theme_name, theme_config, is_scientific,
                     'orientation': 'vertical'
                 })
     
-    # MODIFICATION: Build complete boxplot metadata with orientation info
+    # Build complete boxplot metadata with orientation info
     boxplot_metadata = {
         'num_groups': num_groups,
         'box_width': box_width,
@@ -2296,7 +2224,6 @@ def _generate_boxplot_chart(ax, theme_name, theme_config, is_scientific,
         'orientation': orientation_str
     }
     
-    # MODIFICATION: Return correct orientation and swapped scale axes for horizontal
     if is_horizontal:
         scale_axis_info = {'primary_scale_axis': 'x', 'boxplot_raw': bp}
     else:
@@ -2958,20 +2885,37 @@ def _generate_histogram(ax, theme_name, theme_config, is_scientific, debug_mode=
 
 def _generate_area_chart(ax, theme_name, theme_config, is_scientific, debug_mode=False):
     """
-    CRITICAL FIX: Garante que boundary_y usado para plotar CORRESPONDE a boundary_y usado para anotação.
-    NOVO: Adiciona 'stacking_mode' para 'stacked', 'overlapping', ou 'percentage'.
-    CORREÇÃO (Usuário): Garante que os dados da série não excedam a escala da série individual,
-                     evitando que a soma empilhada exceda o max_scale total.
-    CORREÇÃO (Definitiva 2): Usa o MÁXIMO DE DADOS REAIS (y_stack ou all_series_data)
-                             para definir o ylim, em vez do max_scale teórico.
+    Generate an area chart with realistic continuous data, supporting stacked,
+    overlapping, and percentage stacking modes with accurate boundary annotations.
+
+    Segmentation semantics (area_seg) are stacking-mode dependent:
+
+    - 'overlapping' / 'single': fill_bottom = 0, fill_top = data. Each series'
+      polygon is amodal — it covers the full geometric area down to the zero
+      baseline regardless of what other series draw on top of it. This is
+      intentional even though layers are alpha-blended (alpha=0.55): the
+      annotation is the complete underlying shape, not just the visible,
+      mutually-exclusive surface a viewer would see.
+    - 'stacked': fill_bottom = y_stack_previous (cumulative sum of underlying
+      layers), fill_top = y_stack_previous + data. Each polygon is an isolated
+      band sitting strictly on top of previous layers, so by construction
+      there is no occluded region under it.
+
+    Do not "simplify" the stacked branch to reuse the zero baseline from the
+    overlapping branch, and do not clip the overlapping branch's polygon to
+    only the visible surface — either change would silently invert the
+    intended amodal/band distinction above.
     """
     theme = apply_chart_theme(ax, theme_name)
     num_series = random.randint(1, 4)
     num_points = random.randint(8, 25)
     max_scale = random.choice([50, 100, 500, 1000])
     
-    # --- NOVA LÓGICA DE MODO DE EMPILHAMENTO ---
-    stacking_mode = random.choice(['stacked', 'overlapping', 'percentage'])
+    if num_series == 1:
+        stacking_mode = 'single'
+    else:
+        stacking_mode = random.choices(['stacked', 'overlapping'], weights=[0.65, 0.35], k=1)[0]
+
     if debug_mode:
         print(f"DEBUG [AREA] Stacking Mode: {stacking_mode}")
 
@@ -2980,9 +2924,6 @@ def _generate_area_chart(ax, theme_name, theme_config, is_scientific, debug_mode
     keypoint_info = []
     x = np.arange(num_points)
     
-    # ========================================================================
-    # FIX: Gerar cores como uma LISTA
-    # ========================================================================
     palette = theme.get('palette', 'viridis')
     
     if isinstance(palette, list):
@@ -3003,18 +2944,12 @@ def _generate_area_chart(ax, theme_name, theme_config, is_scientific, debug_mode
     
     colors = colors[:num_series]
     
-    # --- 1. GERAR TODOS OS DADOS PRIMEIRO ---
-    all_series_data = []  # Ensure initialized
+    # 1. Generate series data
+    all_series_data = []
     
-    # Determine per-series max_scale based on stacking mode
     if stacking_mode == 'stacked':
-        # For stacked: each series max ~ max_scale / num_series to keep total ~ max_scale
         series_max = max_scale / max(1, num_series)
-    elif stacking_mode == 'overlapping':
-        # For overlapping: each series max ~ max_scale (independent)
-        series_max = max_scale
-    else:  # 'percentage'
-        # For percentage: generate with max_scale, will normalize later
+    else:  # 'overlapping' or 'single'
         series_max = max_scale
 
     if debug_mode:
@@ -3022,60 +2957,40 @@ def _generate_area_chart(ax, theme_name, theme_config, is_scientific, debug_mode
         print(f"DEBUG AREA: Num series={num_series}, Per-series max={series_max:.2f}")
 
     for series_idx in range(num_series):
-        # Generate raw data with appropriate per-series scale
         data_raw = generate_realistic_data(num_points, series_max, 
                                           allow_negative=False,
                                           domain='scientific' if is_scientific else 'business')
-        
-        if stacking_mode == 'percentage':
-            # For percentage mode, generate positive values only (will normalize later)
-            data = np.maximum(0, data_raw)
-        else:
-            # For stacked/overlapping, allow realistic values but clip to per-series max
-            data = np.clip(np.maximum(0, data_raw), 0, series_max * 1.1)
-        
+        # Ensure smooth continuous variation without flat ceiling clipping
+        data = np.maximum(0.02 * series_max, data_raw)
         all_series_data.append(data.copy())
         
         if debug_mode:
             print(f"DEBUG AREA: Series {series_idx} data range: {np.min(data):.2f} to {np.max(data):.2f}")
 
-    # For percentage mode: Normalize after all series generated
-    if stacking_mode == 'percentage':
-        total_sum_y = np.sum(all_series_data, axis=0)  # Sum across series at each x-point
-        total_sum_y = np.maximum(total_sum_y, 1e-6)  # Avoid division by zero
-        
-        normalized_data = []
-        for data in all_series_data:
-            # Normalize each series to percentage of total at each x-point
-            normalized = (data / total_sum_y) * 100.0
-            normalized_data.append(normalized)
-        
-        all_series_data = normalized_data
-        
-        if debug_mode:
-            print(f"DEBUG AREA: Percentage mode - Normalized data sums to 100%")
-            # Verify normalization
-            for i, data in enumerate(all_series_data):
-                total_at_x = np.sum([d[i] for d in all_series_data], axis=0)
-                print(f"DEBUG AREA: Series {i} normalization check - max sum: {np.max(total_at_x):.2f}")
-
-
-
-    # --- 3. LOOP DE PLOTAGEM E ANOTAÇÃO ---
-    y_stack = np.zeros(num_points) # Base para 'stacked' e 'percentage'
+    # 2. Plotting and annotation
+    y_stack = np.zeros(num_points)
 
     for series_idx, data in enumerate(all_series_data):
         color = colors[series_idx]
         
-        # --- LÓGICA DE EMPILHAMENTO ---
-        if stacking_mode == 'overlapping':
+        if stacking_mode in ['overlapping', 'single']:
+            # Amodal: full geometric area down to the zero baseline, regardless
+            # of alpha-blended occlusion from other series drawn on top.
             y_stack_previous = np.zeros(num_points) 
             boundary_y = data 
-            alpha = 0.5 
-        else: # 'stacked' or 'percentage'
-            y_stack_previous = y_stack
+            alpha = 0.55 if stacking_mode == 'overlapping' else 0.75
+        else:
+            # Mutually-exclusive band: bounded below by the cumulative sum of
+            # underlying layers, so there is no occluded region beneath it.
+            # .copy() here is deliberate: y_stack is mutated in-place below
+            # (`y_stack += data`), and this array is captured verbatim into
+            # keypoint_info['fill_bottom']. Without the copy, this still reads
+            # correctly today only because extraction happens before the
+            # mutation on the last line of the loop body -- an implicit
+            # ordering dependency that a future edit could easily break.
+            y_stack_previous = y_stack.copy()
             boundary_y = y_stack + data
-            alpha = 0.7 
+            alpha = 0.75 
         
         if debug_mode:
             print(f"DEBUG [AREA] Series {series_idx}: y_stack_previous range [{np.min(y_stack_previous):.2f}, {np.max(y_stack_previous):.2f}]")
@@ -3104,13 +3019,14 @@ def _generate_area_chart(ax, theme_name, theme_config, is_scientific, debug_mode
             'boundary_points': [(float(x[i]), float(boundary_y[i]), int(i)) for i in range(len(x))],
             'fill_bottom': [(float(x[i]), float(y_stack_previous[i]), int(i)) for i in range(len(x))], 
             'fill_top': [(float(x[i]), float(boundary_y[i]), int(i)) for i in range(len(x))],
-            'plotted_points': plotted
+            'plotted_points': plotted,
+            'stacking_mode': stacking_mode
         })
         
         if stacking_mode != 'overlapping':
             y_stack += data
     
-    # --- 4. CONFIGURAÇÃO FINAL DO EIXO ---
+    # 3. Axis configuration
     ax.set_xlabel(random.choice(SCIENTIFIC_X_LABELS if is_scientific else BUSINESS_X_LABELS))
     
     if stacking_mode == 'percentage':
@@ -3124,47 +3040,33 @@ def _generate_area_chart(ax, theme_name, theme_config, is_scientific, debug_mode
     
     apply_typography_variation(ax, domain='scientific' if is_scientific else 'business')
     
-    # --- INÍCIO DA CORREÇÃO DEFINITIVA (SUA LÓGICA) ---
-    
-    # 1. Aplicar a escala (log/symlog/linear) PRIMEIRO
     if stacking_mode != 'percentage':
         apply_axis_scaling(ax, data_min=0.01, orientation='vertical')
     
-    # 2. Obter a escala que foi definida (pode ser 'log', 'symlog', ou 'linear')
     current_scale = ax.get_yscale()
 
-    # 3. AGORA, definir os limites (ylim)
     if stacking_mode == 'percentage':
         ax.set_ylim(0, 100)
     else:
-        # (Minha Lógica) Definir o limite inferior com base na escala
-        bottom_limit = None # Deixa o Matplotlib decidir o 'bottom' se for log
+        bottom_limit = None
         if current_scale != 'log':
-            bottom_limit = 0 # Define o 'bottom' como 0 para 'linear' e 'symlog'
+            bottom_limit = 0
         
-        # (Sua Lógica) Calcular o limite superior com base nos DADOS REAIS
         if stacking_mode == 'stacked':
-            # Para empilhado: usar o máximo do y_stack cumulativo
-            actual_max = np.max(y_stack)
-        elif stacking_mode == 'overlapping':
-            # Para sobreposto: usar o máximo de todas as séries individuais
-            actual_max = max(np.max(series) for series in all_series_data)
+            actual_max = float(np.max(y_stack))
+        else:  # 'overlapping' or 'single'
+            actual_max = float(max(np.max(series) for series in all_series_data))
         
-        # Definir limite superior com 15% de preenchimento
         top_limit = actual_max * 1.15 
         
-        # Verificação de segurança
         if not np.isfinite(top_limit) or top_limit <= 0:
-            top_limit = max_scale * 1.2  # Fallback
+            top_limit = max_scale * 1.2
         
-        # Aplicar os limites calculados
         ax.set_ylim(bottom=bottom_limit, top=top_limit)
         
         if debug_mode:
             print(f"DEBUG [AREA_YLIM] Mode={stacking_mode}, Scale={current_scale}, ActualMax={actual_max:.2f}, TopLimit={top_limit:.2f}, BottomLimit={bottom_limit}")
             
-    # --- FIM DA CORREÇÃO DEFINITIVA ---
-    
     return data_artists, other_artists, [], 'vertical', None, [], {'primary_scale_axis': 'y'}, keypoint_info
 
 def _generate_heatmap_chart(ax, theme_name, theme_config, is_scientific, debug_mode=False):
@@ -3691,19 +3593,6 @@ class BiclusterStructuralGenerator:
         else:
             n_clusters = int(clusters)
 
-        if make_biclusters is None:
-            rows, cols = shape
-            r_clusters = max(1, n_clusters)
-            c_clusters = max(1, n_clusters)
-            row_groups = np.array_split(np.arange(rows), r_clusters)
-            col_groups = np.array_split(np.arange(cols), c_clusters)
-            matrix = np.random.normal(0, noise, (rows, cols))
-            for idx, r_idx in enumerate(row_groups):
-                c_idx = col_groups[idx % len(col_groups)]
-                base_val = np.random.uniform(-5.0, 5.0)
-                matrix[np.ix_(r_idx, c_idx)] += base_val
-            return matrix, None, None
-
         matrix, rows, cols = make_biclusters(
             shape=shape,
             n_clusters=n_clusters,
@@ -3814,26 +3703,15 @@ class SpatioTemporalMatrixGenerator:
     """SARIMA temporal rows with SAR spatial dependence across columns."""
 
     @staticmethod
-    def generate_sarima_matrix(n_steps, n_series, order, seasonal_order):
-        if SARIMAX is None:
-            matrix = np.zeros((n_steps, n_series))
-            phi = 0.6
-            for j in range(n_series):
-                eps = np.random.normal(0, 1, n_steps)
-                series = np.zeros(n_steps)
-                for t in range(1, n_steps):
-                    series[t] = phi * series[t - 1] + eps[t]
-                matrix[:, j] = series
-            return matrix
-
+    def generate_sarima_matrix(n_steps, n_series, order=(1, 0, 0), seasonal_order=(1, 0, 0, 4)):
         matrix = np.zeros((n_steps, n_series))
-
+        phi = 0.6
         for j in range(n_series):
-            innovations = np.random.normal(0, 1, n_steps)
-            model = SARIMAX(innovations, order=order, seasonal_order=seasonal_order)
-            simulated = model.simulate(nsimulations=n_steps, initial_state=np.zeros(model.k_states))
-            matrix[:, j] = simulated
-
+            eps = np.random.normal(0, 1, n_steps)
+            series = np.zeros(n_steps)
+            for t in range(1, n_steps):
+                series[t] = phi * series[t - 1] + eps[t]
+            matrix[:, j] = series
         return matrix
 
     @staticmethod
@@ -4660,7 +4538,7 @@ def calculate_pie_geometry(wedges, ax, debug_mode=False):
     wedge_geometry = []
     
     for idx, wedge in enumerate(wedges):
-        # CRITICAL: Use this wedge's specific center.
+        #  Use this wedge's specific center.
         # This is (0,0) for non-exploded wedges and (dx, dy) for exploded ones.
         wedge_cx, wedge_cy = wedge.center 
         
@@ -4669,19 +4547,14 @@ def calculate_pie_geometry(wedges, ax, debug_mode=False):
         theta2 = np.deg2rad(wedge.theta2)
         thetamid = (theta1 + theta2) / 2
         
-        # --- INÍCIO DA MODIFICAÇÃO ---
-        # Calcular pontos intermediários a 1/3 e 2/3 do arco
+        # Calculate intermediate arc sample points at 1/3 and 2/3 of the arc
         theta_inter_1 = theta1 + (theta2 - theta1) / 3.0
         theta_inter_2 = theta1 + 2 * (theta2 - theta1) / 3.0
-        # --- FIM DA MODIFICAÇÃO ---
         
-        # CRITICAL FIX: Calculate arc_boundary with proper sampling
         angle_span = wedge.theta2 - wedge.theta1
-        num_arc_points = max(5, int(angle_span / 15))  # 1 point per 15 degrees
+        num_arc_points = max(5, int(angle_span / 15))
         theta_samples = np.linspace(theta1, theta2, num_arc_points)
         
-        # CRITICAL FIX: Use the wedge's specific center (wedge_cx, wedge_cy)
-        # for all arc point calculations.
         arc_boundary_points = [
             (float(wedge_cx + radius * np.cos(theta)), 
              float(wedge_cy + radius * np.sin(theta)))
@@ -4690,34 +4563,32 @@ def calculate_pie_geometry(wedges, ax, debug_mode=False):
         
         wedge_geometry.append({
             'wedge_idx': idx,
-            'center': (float(wedge_cx), float(wedge_cy)), # Displaced center
-            'original_center': (original_centerx, original_centery), # TRUE center (0,0)
+            'center': (float(wedge_cx), float(wedge_cy)),
+            'original_center': (original_centerx, original_centery),
             'radius': float(radius),
             'theta1_deg': float(wedge.theta1),
             'theta2_deg': float(wedge.theta2),
             'arc_start': (
-                float(wedge_cx + radius * np.cos(theta1)), # Use displaced center
+                float(wedge_cx + radius * np.cos(theta1)),
                 float(wedge_cy + radius * np.sin(theta1))
             ),
             'arc_end': (
-                float(wedge_cx + radius * np.cos(theta2)), # Use displaced center
+                float(wedge_cx + radius * np.cos(theta2)),
                 float(wedge_cy + radius * np.sin(theta2))
             ),
-            # --- INÍCIO DA MODIFICAÇÃO ---
             'arc_inter_1': (
-                float(wedge_cx + radius * np.cos(theta_inter_1)), # Use displaced center
+                float(wedge_cx + radius * np.cos(theta_inter_1)),
                 float(wedge_cy + radius * np.sin(theta_inter_1))
             ),
             'arc_inter_2': (
-                float(wedge_cx + radius * np.cos(theta_inter_2)), # Use displaced center
+                float(wedge_cx + radius * np.cos(theta_inter_2)),
                 float(wedge_cy + radius * np.sin(theta_inter_2))
             ),
-            # --- FIM DA MODIFICAÇÃO ---
             'arc_mid': (
-                float(wedge_cx + radius * np.cos(thetamid)), # Use displaced center
+                float(wedge_cx + radius * np.cos(thetamid)),
                 float(wedge_cy + radius * np.sin(thetamid))
             ),
-            'arc_boundary': arc_boundary_points,  # FIXED: Now correctly calculated
+            'arc_boundary': arc_boundary_points,
             'wedge_label_point': (
                 float(wedge_cx + radius * 0.7 * np.cos(thetamid)),
                 float(wedge_cy + radius * 0.7 * np.sin(thetamid))
