@@ -49,10 +49,7 @@ OCR_TRAINING_CONFIG = {
     "0": "line_series"
   },
   "CLASS_MAP_LINE_MARKERS": {
-    "0": "data_marker",
-    "1": "peak",
-    "2": "valley",
-    "3": "inflection"
+    "0": "data_marker"
   },
   "CLASS_MAP_AREA_OBJ": {
     "0": "chart",
@@ -114,7 +111,7 @@ OCR_TRAINING_CONFIG = {
       "enabled": True
     },
     "line": {
-      "weight": 0,
+      "weight": 100,
       "enabled": True
     },
     "scatter": {
@@ -130,7 +127,7 @@ OCR_TRAINING_CONFIG = {
       "enabled": True
     },
     "area": {
-      "weight": 100,
+      "weight": 0,
       "enabled": True
     },
     "histogram": {

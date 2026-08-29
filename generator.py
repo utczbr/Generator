@@ -1774,27 +1774,11 @@ def extract_line_segmentation_annotations(
                     'series_idx': series.get('series_idx')
                 })
 
-            # 2. Extrema: peaks / valleys / inflections
-            extrema_r = 6.0 * dpi_scale
-            extrema_indices = set()
-            for cls_id, key in ((1, 'peaks'), (2, 'valleys'), (3, 'inflections')):
-                for x, y, *idx in series.get(key, []):
-                    if idx:
-                        extrema_indices.add(idx[0])
-                    mx, my = ax.transData.transform_point((x, y))
-                    marker_annotations.append({
-                        'class_id': cls_id,
-                        'bbox': (mx - extrema_r, my - extrema_r, mx + extrema_r, my + extrema_r)
-                    })
-
-            # 3. Marker glyphs (skipping vertices that are already extrema)
+            # 2. Marker glyphs (only when markers are rendered on the series)
             marker = series.get('marker')
             if marker:
-                marker_r = max(2.0, (series.get('markersize', 6.0) / 2.0) * dpi_scale)
+                marker_r = max(2.5, (series.get('markersize', 6.0) / 2.0) * dpi_scale)
                 for point_idx, (x, y, *idx) in enumerate(pts_data):
-                    vertex_idx = idx[0] if idx else point_idx
-                    if vertex_idx in extrema_indices:
-                        continue
                     mx, my = ax.transData.transform_point((x, y))
                     marker_annotations.append({
                         'class_id': 0,  # "data_marker"
