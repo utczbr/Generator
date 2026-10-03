@@ -1,0 +1,8233 @@
+domain_id: business
+display_name: Business, Finance & SaaS Analytics
+is_scientific: false
+default_weight: 0.8
+metrics:
+- label: Acquisition Channel
+  scale_type: categorical
+  role: independent
+  concept_stem: acquisition_channel
+  unit:
+  concept_group: acquisition_source
+  domain_tags:
+  - business
+  pools:
+  - legacy
+- label: Active Users
+  scale_type: discrete_count
+  role: dependent
+  concept_stem: active_users
+  unit:
+  concept_group: user_count_metric
+  domain_tags:
+  - business
+  pools:
+  - legacy
+- label: Audience
+  scale_type: categorical
+  role: independent
+  concept_stem: audience
+  unit:
+  concept_group: audience_dimension
+  domain_tags:
+  - business
+  pools:
+  - legacy
+- label: Average Order Value ($)
+  scale_type: continuous
+  role: dependent
+  concept_stem: average_order_value
+  unit: $
+  concept_group: order_value_metric
+  domain_tags:
+  - business
+  - finance
+  - sales
+  pools:
+  - legacy
+- label: Avg. Resolution Time (hrs)
+  scale_type: continuous
+  role: bidirectional
+  concept_stem: avg_resolution_time
+  unit: hrs
+  concept_group: business_duration
+  domain_tags:
+  - business
+  pools:
+  - legacy
+- label: Bounce Rate (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: bounce_rate
+  unit: '%'
+  concept_group: engagement_rate
+  domain_tags:
+  - business
+  - digital
+  - marketing
+  pools:
+  - legacy
+- label: Business Unit
+  scale_type: categorical
+  role: independent
+  concept_stem: business_unit
+  unit:
+  concept_group: org_dimension
+  domain_tags:
+  - business
+  - general
+  pools:
+  - legacy
+- label: CAC ($)
+  scale_type: continuous
+  role: dependent
+  concept_stem: cac
+  unit: $
+  concept_group: cost_metric
+  domain_tags:
+  - business
+  pools:
+  - legacy
+- label: Campaign
+  scale_type: categorical
+  role: independent
+  concept_stem: campaign
+  unit:
+  concept_group: marketing_campaign
+  domain_tags:
+  - business
+  pools:
+  - legacy
+- label: Category
+  scale_type: categorical
+  role: independent
+  concept_stem: category
+  unit:
+  concept_group: category_dimension
+  domain_tags:
+  - business
+  pools:
+  - legacy
+- label: Channel
+  scale_type: categorical
+  role: independent
+  concept_stem: channel
+  unit:
+  concept_group: acquisition_source
+  domain_tags:
+  - business
+  pools:
+  - legacy
+- label: Churn Rate (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: churn_rate
+  unit: '%'
+  concept_group: retention_churn_metric
+  domain_tags:
+  - business
+  pools:
+  - legacy
+- label: City
+  scale_type: categorical
+  role: independent
+  concept_stem: city
+  unit:
+  concept_group: geographic_location
+  domain_tags:
+  - business
+  pools:
+  - legacy
+- label: Click-Through Rate (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: clickthrough_rate
+  unit: '%'
+  concept_group: conversion_metric
+  domain_tags:
+  - business
+  - digital
+  - marketing
+  pools:
+  - legacy
+- label: Clicks
+  scale_type: discrete_count
+  role: dependent
+  concept_stem: clicks
+  unit:
+  concept_group: click_metric
+  domain_tags:
+  - business
+  - digital
+  - marketing
+  pools:
+  - legacy
+- label: Cohort Start Date
+  scale_type: temporal
+  role: independent
+  concept_stem: cohort_start_date
+  unit:
+  concept_group: business_temporal
+  domain_tags:
+  - business
+  pools:
+  - legacy
+- label: Contract Length (months)
+  scale_type: discrete_count
+  role: bidirectional
+  concept_stem: contract_length
+  unit: months
+  concept_group: business_duration
+  domain_tags:
+  - business
+  - customer
+  - marketing
+  pools:
+  - legacy
+- label: Conversion Rate (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: conversion_rate
+  unit: '%'
+  concept_group: conversion_metric
+  domain_tags:
+  - business
+  - digital
+  - marketing
+  pools:
+  - legacy
+- label: Cost of Goods Sold (COGS $)
+  scale_type: continuous
+  role: dependent
+  concept_stem: cost_of_goods_sold
+  unit: COGS $
+  concept_group: cost_metric
+  domain_tags:
+  - business
+  pools:
+  - legacy
+- label: Cost per Acquisition ($)
+  scale_type: continuous
+  role: dependent
+  concept_stem: cost_per_acquisition
+  unit: $
+  concept_group: cost_metric
+  domain_tags:
+  - business
+  - digital
+  - marketing
+  pools:
+  - legacy
+- label: Cost per Click (CPC $)
+  scale_type: continuous
+  role: dependent
+  concept_stem: cost_per_click
+  unit: CPC $
+  concept_group: cost_metric
+  domain_tags:
+  - business
+  pools:
+  - legacy
+- label: Country
+  scale_type: categorical
+  role: independent
+  concept_stem: country
+  unit:
+  concept_group: geographic_location
+  domain_tags:
+  - business
+  - general
+  - demographic
+  pools:
+  - legacy
+- label: Customer Cohort
+  scale_type: categorical
+  role: independent
+  concept_stem: customer_cohort
+  unit:
+  concept_group: cohort_dimension
+  domain_tags:
+  - business
+  pools:
+  - legacy
+- label: Customer Count
+  scale_type: discrete_count
+  role: dependent
+  concept_stem: customer_count
+  unit:
+  concept_group: user_count_metric
+  domain_tags:
+  - business
+  - customer
+  - marketing
+  pools:
+  - legacy
+- label: Customer Lifetime Value (LTV $)
+  scale_type: continuous
+  role: dependent
+  concept_stem: customer_lifetime_value
+  unit: LTV $
+  concept_group: ltv_metric
+  domain_tags:
+  - business
+  pools:
+  - legacy
+- label: Customer Satisfaction (CSAT)
+  scale_type: continuous
+  role: dependent
+  concept_stem: customer_satisfaction
+  unit: CSAT
+  concept_group: satisfaction_metric
+  domain_tags:
+  - business
+  pools:
+  - legacy
+- label: Daily Active Users (DAU)
+  scale_type: discrete_count
+  role: dependent
+  concept_stem: daily_active_users
+  unit: DAU
+  concept_group: user_count_metric
+  domain_tags:
+  - business
+  pools:
+  - legacy
+- label: Department
+  scale_type: categorical
+  role: independent
+  concept_stem: department
+  unit:
+  concept_group: org_dimension
+  domain_tags:
+  - business
+  - hr
+  - people
+  pools:
+  - legacy
+- label: Device
+  scale_type: categorical
+  role: independent
+  concept_stem: device
+  unit:
+  concept_group: technology_device
+  domain_tags:
+  - business
+  pools:
+  - legacy
+- label: Distribution Center
+  scale_type: categorical
+  role: independent
+  concept_stem: distribution_center
+  unit:
+  concept_group: logistics_facility
+  domain_tags:
+  - business
+  pools:
+  - legacy
+- label: EBITDA ($)
+  scale_type: continuous
+  role: dependent
+  concept_stem: ebitda
+  unit: $
+  concept_group: profit_metric
+  domain_tags:
+  - accounting
+  - business
+  - finance
+  pools:
+  - legacy
+- label: Employee Headcount
+  scale_type: discrete_count
+  role: dependent
+  concept_stem: employee_headcount
+  unit:
+  concept_group: headcount_metric
+  domain_tags:
+  - business
+  pools:
+  - legacy
+- label: Engagement Rate (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: engagement_rate
+  unit: '%'
+  concept_group: engagement_rate
+  domain_tags:
+  - business
+  pools:
+  - legacy
+- label: Fiscal Quarter
+  scale_type: temporal
+  role: bidirectional
+  concept_stem: fiscal_quarter
+  unit:
+  concept_group: business_temporal
+  domain_tags:
+  - business
+  - market
+  - strategy
+  pools:
+  - legacy
+- label: Fiscal Week
+  scale_type: temporal
+  role: bidirectional
+  concept_stem: fiscal_week
+  unit:
+  concept_group: business_temporal
+  domain_tags:
+  - business
+  pools:
+  - legacy
+- label: Forecast Accuracy (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: forecast_accuracy
+  unit: '%'
+  concept_group: forecast_metric
+  domain_tags:
+  - business
+  pools:
+  - legacy
+- label: Fulfillment Time (days)
+  scale_type: continuous
+  role: bidirectional
+  concept_stem: fulfillment_time
+  unit: days
+  concept_group: business_duration
+  domain_tags:
+  - business
+  pools:
+  - legacy
+- label: Funnel Stage
+  scale_type: categorical
+  role: independent
+  concept_stem: funnel_stage
+  unit:
+  concept_group: funnel_stage
+  domain_tags:
+  - business
+  pools:
+  - legacy
+- label: Gross Margin (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: gross_margin
+  unit: '%'
+  concept_group: margin_metric
+  domain_tags:
+  - accounting
+  - business
+  - finance
+  pools:
+  - legacy
+- label: Gross Profit ($)
+  scale_type: continuous
+  role: dependent
+  concept_stem: gross_profit
+  unit: $
+  concept_group: profit_metric
+  domain_tags:
+  - accounting
+  - business
+  - finance
+  pools:
+  - legacy
+- label: Impressions
+  scale_type: discrete_count
+  role: dependent
+  concept_stem: impressions
+  unit:
+  concept_group: impression_metric
+  domain_tags:
+  - business
+  - digital
+  - marketing
+  pools:
+  - legacy
+- label: Inventory (units)
+  scale_type: discrete_count
+  role: dependent
+  concept_stem: inventory
+  unit: units
+  concept_group: inventory_metric
+  domain_tags:
+  - business
+  pools:
+  - legacy
+- label: Lead Source
+  scale_type: categorical
+  role: independent
+  concept_stem: lead_source
+  unit:
+  concept_group: acquisition_source
+  domain_tags:
+  - business
+  - finance
+  - sales
+  pools:
+  - legacy
+- label: Lead Time (days)
+  scale_type: continuous
+  role: bidirectional
+  concept_stem: lead_time
+  unit: days
+  concept_group: business_duration
+  domain_tags:
+  - business
+  - engineering
+  - operations
+  - project_management
+  pools:
+  - legacy
+- label: Market Share (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: market_share
+  unit: '%'
+  concept_group: market_share_metric
+  domain_tags:
+  - business
+  - customer
+  - marketing
+  pools:
+  - legacy
+- label: Marketing Channel
+  scale_type: categorical
+  role: independent
+  concept_stem: marketing_channel
+  unit:
+  concept_group: acquisition_source
+  domain_tags:
+  - business
+  pools:
+  - legacy
+- label: Month
+  scale_type: temporal
+  role: bidirectional
+  concept_stem: month
+  unit:
+  concept_group: business_temporal
+  domain_tags:
+  - biomedical
+  - business
+  - engineering
+  - general
+  pools:
+  - legacy
+- label: Monthly Active Users (MAU)
+  scale_type: discrete_count
+  role: dependent
+  concept_stem: monthly_active_users
+  unit: MAU
+  concept_group: user_count_metric
+  domain_tags:
+  - business
+  pools:
+  - legacy
+- label: Net Income ($)
+  scale_type: continuous
+  role: dependent
+  concept_stem: net_income
+  unit: $
+  concept_group: profit_metric
+  domain_tags:
+  - accounting
+  - business
+  - finance
+  pools:
+  - legacy
+- label: Net Promoter Score (NPS)
+  scale_type: continuous
+  role: dependent
+  concept_stem: net_promoter_score
+  unit: NPS
+  concept_group: satisfaction_metric
+  domain_tags:
+  - business
+  pools:
+  - legacy
+- label: Operating Expenses ($)
+  scale_type: continuous
+  role: dependent
+  concept_stem: operating_expenses
+  unit: $
+  concept_group: cost_metric
+  domain_tags:
+  - accounting
+  - business
+  - finance
+  pools:
+  - legacy
+- label: Order Date
+  scale_type: temporal
+  role: independent
+  concept_stem: order_date
+  unit:
+  concept_group: business_temporal
+  domain_tags:
+  - business
+  pools:
+  - legacy
+- label: Page Views
+  scale_type: discrete_count
+  role: dependent
+  concept_stem: page_views
+  unit:
+  concept_group: page_views_metric
+  domain_tags:
+  - business
+  pools:
+  - legacy
+- label: Persona
+  scale_type: categorical
+  role: independent
+  concept_stem: persona
+  unit:
+  concept_group: persona_dimension
+  domain_tags:
+  - business
+  pools:
+  - legacy
+- label: Pipeline Value ($)
+  scale_type: continuous
+  role: dependent
+  concept_stem: pipeline_value
+  unit: $
+  concept_group: pipeline_metric
+  domain_tags:
+  - business
+  - finance
+  - sales
+  pools:
+  - legacy
+- label: Platform
+  scale_type: categorical
+  role: independent
+  concept_stem: platform
+  unit:
+  concept_group: platform_dimension
+  domain_tags:
+  - business
+  pools:
+  - legacy
+- label: Price Band
+  scale_type: categorical
+  role: bidirectional
+  concept_stem: price_band
+  unit:
+  concept_group: pricing_tier
+  domain_tags:
+  - business
+  pools:
+  - legacy
+- label: Product
+  scale_type: categorical
+  role: independent
+  concept_stem: product
+  unit:
+  concept_group: product_dimension
+  domain_tags:
+  - business
+  pools:
+  - legacy
+- label: Profit Margin (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: profit_margin
+  unit: '%'
+  concept_group: margin_metric
+  domain_tags:
+  - business
+  pools:
+  - legacy
+- label: Project
+  scale_type: categorical
+  role: independent
+  concept_stem: project
+  unit:
+  concept_group: project_dimension
+  domain_tags:
+  - business
+  pools:
+  - legacy
+- label: Promotion
+  scale_type: categorical
+  role: independent
+  concept_stem: promotion
+  unit:
+  concept_group: promotion_dimension
+  domain_tags:
+  - business
+  pools:
+  - legacy
+- label: Quarter
+  scale_type: temporal
+  role: bidirectional
+  concept_stem: quarter
+  unit:
+  concept_group: business_temporal
+  domain_tags:
+  - biomedical
+  - business
+  - engineering
+  - general
+  pools:
+  - legacy
+- label: Region
+  scale_type: categorical
+  role: independent
+  concept_stem: region
+  unit:
+  concept_group: geographic_location
+  domain_tags:
+  - business
+  - general
+  - demographic
+  pools:
+  - legacy
+- label: Retention Rate (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: retention_rate
+  unit: '%'
+  concept_group: retention_churn_metric
+  domain_tags:
+  - business
+  pools:
+  - legacy
+- label: Return on Ad Spend (ROAS)
+  scale_type: continuous
+  role: dependent
+  concept_stem: return_on_ad_spend
+  unit: ROAS
+  concept_group: roas_metric
+  domain_tags:
+  - business
+  pools:
+  - legacy
+- label: Return on Investment (ROI %)
+  scale_type: percentage
+  role: dependent
+  concept_stem: return_on_investment
+  unit: ROI %
+  concept_group: roi_metric
+  domain_tags:
+  - business
+  pools:
+  - legacy
+- label: Revenue ($)
+  scale_type: continuous
+  role: dependent
+  concept_stem: revenue
+  unit: $
+  concept_group: revenue_metric
+  domain_tags:
+  - business
+  pools:
+  - legacy
+- label: Revenue (USD)
+  scale_type: continuous
+  role: dependent
+  concept_stem: revenue
+  unit: USD
+  concept_group: revenue_metric
+  domain_tags:
+  - business
+  pools:
+  - legacy
+- label: Revenue per Employee ($)
+  scale_type: continuous
+  role: dependent
+  concept_stem: revenue_per_employee
+  unit: $
+  concept_group: productivity_metric
+  domain_tags:
+  - business
+  - finance
+  - sales
+  pools:
+  - legacy
+- label: Revenue per User ($)
+  scale_type: continuous
+  role: dependent
+  concept_stem: revenue_per_user
+  unit: $
+  concept_group: productivity_metric
+  domain_tags:
+  - business
+  pools:
+  - legacy
+- label: SKU
+  scale_type: categorical
+  role: independent
+  concept_stem: sku
+  unit:
+  concept_group: sku_dimension
+  domain_tags:
+  - business
+  pools:
+  - legacy
+- label: Sales ($M)
+  scale_type: continuous
+  role: dependent
+  concept_stem: sales
+  unit: $M
+  concept_group: revenue_metric
+  domain_tags:
+  - business
+  pools:
+  - legacy
+- label: Salesperson
+  scale_type: categorical
+  role: independent
+  concept_stem: salesperson
+  unit:
+  concept_group: salesperson_dimension
+  domain_tags:
+  - business
+  pools:
+  - legacy
+- label: Season
+  scale_type: categorical
+  role: independent
+  concept_stem: season
+  unit:
+  concept_group: seasonal_dimension
+  domain_tags:
+  - business
+  pools:
+  - legacy
+- label: Segment
+  scale_type: categorical
+  role: independent
+  concept_stem: segment
+  unit:
+  concept_group: market_segment
+  domain_tags:
+  - business
+  pools:
+  - legacy
+- label: Session Duration (min)
+  scale_type: continuous
+  role: bidirectional
+  concept_stem: session_duration
+  unit: min
+  concept_group: business_duration
+  domain_tags:
+  - business
+  pools:
+  - legacy
+- label: Shipping Method
+  scale_type: categorical
+  role: independent
+  concept_stem: shipping_method
+  unit:
+  concept_group: shipping_dimension
+  domain_tags:
+  - business
+  pools:
+  - legacy
+- label: State
+  scale_type: categorical
+  role: independent
+  concept_stem: state
+  unit:
+  concept_group: geographic_location
+  domain_tags:
+  - business
+  pools:
+  - legacy
+- label: Stock Level (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: stock_level
+  unit: '%'
+  concept_group: inventory_metric
+  domain_tags:
+  - business
+  pools:
+  - legacy
+- label: Store
+  scale_type: categorical
+  role: independent
+  concept_stem: store
+  unit:
+  concept_group: store_dimension
+  domain_tags:
+  - business
+  pools:
+  - legacy
+- label: Territory
+  scale_type: categorical
+  role: independent
+  concept_stem: territory
+  unit:
+  concept_group: geographic_location
+  domain_tags:
+  - business
+  pools:
+  - legacy
+- label: Tier
+  scale_type: categorical
+  role: independent
+  concept_stem: tier
+  unit:
+  concept_group: pricing_tier
+  domain_tags:
+  - business
+  pools:
+  - legacy
+- label: Units Sold
+  scale_type: discrete_count
+  role: dependent
+  concept_stem: units_sold
+  unit:
+  concept_group: units_sold_metric
+  domain_tags:
+  - business
+  - finance
+  - sales
+  pools:
+  - legacy
+- label: Units Sold (k)
+  scale_type: discrete_count
+  role: dependent
+  concept_stem: units_sold
+  unit: k
+  concept_group: units_sold_metric
+  domain_tags:
+  - business
+  pools:
+  - legacy
+- label: Week
+  scale_type: temporal
+  role: bidirectional
+  concept_stem: week
+  unit:
+  concept_group: business_temporal
+  domain_tags:
+  - business
+  - biomedical
+  - engineering
+  pools:
+  - legacy
+- label: Year
+  scale_type: temporal
+  role: bidirectional
+  concept_stem: year
+  unit:
+  concept_group: business_temporal
+  domain_tags:
+  - business
+  - biomedical
+  - engineering
+  - demographic
+  pools:
+  - legacy
+- label: Monthly Recurring Revenue ($)
+  scale_type: continuous
+  role: dependent
+  concept_stem: mrr
+  unit: $
+  concept_group: revenue_recurring
+  domain_tags:
+  - business
+  - finance
+  - sales
+  pools: []
+- label: Annual Recurring Revenue ($)
+  scale_type: continuous
+  role: dependent
+  concept_stem: arr
+  unit: $
+  concept_group: revenue_recurring
+  domain_tags:
+  - business
+  - finance
+  - sales
+  pools: []
+- label: Average Revenue Per User ($)
+  scale_type: continuous
+  role: dependent
+  concept_stem: arpu
+  unit: $
+  concept_group: revenue_user
+  domain_tags:
+  - business
+  - finance
+  - sales
+  pools: []
+- label: Net Expansion Rate (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: net_expansion_rate
+  unit: '%'
+  concept_group: retention_metric
+  domain_tags:
+  - business
+  pools: []
+- label: Gross Retention Rate (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: gross_retention_rate
+  unit: '%'
+  concept_group: retention_metric
+  domain_tags:
+  - business
+  pools: []
+- label: Net Revenue Retention (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: net_revenue_retention
+  unit: '%'
+  concept_group: retention_metric
+  domain_tags:
+  - business
+  - customer
+  - marketing
+  pools: []
+- label: Customer Acquisition Cost ($)
+  scale_type: continuous
+  role: dependent
+  concept_stem: cac
+  unit: $
+  concept_group: acquisition_metric
+  domain_tags:
+  - business
+  - customer
+  - marketing
+  pools: []
+- label: Customer Lifetime Value ($)
+  scale_type: continuous
+  role: dependent
+  concept_stem: clv
+  unit: $
+  concept_group: lifetime_value
+  domain_tags:
+  - business
+  - customer
+  - marketing
+  pools: []
+- label: LTV to CAC Ratio
+  scale_type: continuous
+  role: dependent
+  concept_stem: ltv_cac_ratio
+  unit:
+  concept_group: unit_economics
+  domain_tags:
+  - business
+  - customer
+  - marketing
+  pools: []
+- label: CAC Payback Period (months)
+  scale_type: continuous
+  role: dependent
+  concept_stem: cac_payback_period
+  unit: months
+  concept_group: unit_economics
+  domain_tags:
+  - business
+  - customer
+  - marketing
+  pools: []
+- label: Magic Number
+  scale_type: continuous
+  role: dependent
+  concept_stem: magic_number
+  unit:
+  concept_group: sales_efficiency
+  domain_tags:
+  - business
+  pools: []
+- label: Rule of 40 (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: rule_of_40
+  unit: '%'
+  concept_group: saas_efficiency
+  domain_tags:
+  - business
+  pools: []
+- label: Burn Multiple
+  scale_type: continuous
+  role: dependent
+  concept_stem: burn_multiple
+  unit:
+  concept_group: capital_efficiency
+  domain_tags:
+  - business
+  pools: []
+- label: Quick Ratio
+  scale_type: continuous
+  role: dependent
+  concept_stem: quick_ratio
+  unit:
+  concept_group: liquidity_metric
+  domain_tags:
+  - accounting
+  - business
+  - finance
+  pools: []
+- label: Current Ratio
+  scale_type: continuous
+  role: dependent
+  concept_stem: current_ratio
+  unit:
+  concept_group: liquidity_metric
+  domain_tags:
+  - accounting
+  - business
+  - finance
+  pools: []
+- label: Debt-to-Equity Ratio
+  scale_type: continuous
+  role: dependent
+  concept_stem: debt_to_equity
+  unit:
+  concept_group: leverage_metric
+  domain_tags:
+  - accounting
+  - business
+  - finance
+  pools: []
+- label: Days Sales Outstanding (days)
+  scale_type: continuous
+  role: dependent
+  concept_stem: dso
+  unit: days
+  concept_group: working_capital
+  domain_tags:
+  - accounting
+  - business
+  - finance
+  pools: []
+- label: Days Inventory Outstanding (days)
+  scale_type: continuous
+  role: dependent
+  concept_stem: dio
+  unit: days
+  concept_group: working_capital
+  domain_tags:
+  - accounting
+  - business
+  - finance
+  pools: []
+- label: Days Payable Outstanding (days)
+  scale_type: continuous
+  role: dependent
+  concept_stem: dpo
+  unit: days
+  concept_group: working_capital
+  domain_tags:
+  - accounting
+  - business
+  - finance
+  pools: []
+- label: Cash Conversion Cycle (days)
+  scale_type: continuous
+  role: dependent
+  concept_stem: cash_conversion_cycle
+  unit: days
+  concept_group: working_capital
+  domain_tags:
+  - accounting
+  - business
+  - finance
+  pools: []
+- label: Lead Conversion Rate (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: lead_conversion_rate
+  unit: '%'
+  concept_group: conversion_funnel
+  domain_tags:
+  - business
+  pools: []
+- label: Opportunity Win Rate (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: opportunity_win_rate
+  unit: '%'
+  concept_group: sales_funnel
+  domain_tags:
+  - business
+  pools: []
+- label: Sales Velocity ($/day)
+  scale_type: continuous
+  role: dependent
+  concept_stem: sales_velocity
+  unit: $
+  concept_group: sales_efficiency
+  domain_tags:
+  - business
+  pools: []
+- label: Pipeline Coverage Ratio
+  scale_type: continuous
+  role: dependent
+  concept_stem: pipeline_coverage
+  unit:
+  concept_group: pipeline_metric
+  domain_tags:
+  - business
+  - finance
+  - sales
+  pools: []
+- label: Cart Abandonment Rate (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: cart_abandonment_rate
+  unit: '%'
+  concept_group: ecommerce_metric
+  domain_tags:
+  - business
+  - digital
+  - marketing
+  pools: []
+- label: Checkout Completion Rate (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: checkout_completion_rate
+  unit: '%'
+  concept_group: ecommerce_metric
+  domain_tags:
+  - business
+  - digital
+  - marketing
+  pools: []
+- label: Page Views Per Session
+  scale_type: continuous
+  role: dependent
+  concept_stem: pageviews_per_session
+  unit:
+  concept_group: engagement_metric
+  domain_tags:
+  - business
+  pools: []
+- label: DAU/MAU Ratio (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: stickiness_ratio
+  unit: '%'
+  concept_group: engagement_stickiness
+  domain_tags:
+  - business
+  - customer
+  - marketing
+  pools: []
+- label: Customer Satisfaction Score (CSAT, %)
+  scale_type: percentage
+  role: dependent
+  concept_stem: csat
+  unit: '%'
+  concept_group: satisfaction_metric
+  domain_tags:
+  - business
+  pools: []
+- label: Net Burn ($)
+  scale_type: continuous
+  role: dependent
+  concept_stem: net_burn
+  unit: $
+  concept_group: cash_burn
+  domain_tags:
+  - business
+  pools: []
+- label: Operating Margin (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: operating_margin
+  unit: '%'
+  concept_group: profitability_metric
+  domain_tags:
+  - accounting
+  - business
+  - finance
+  pools: []
+- label: EBITDA Margin (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: ebitda_margin
+  unit: '%'
+  concept_group: profitability_metric
+  domain_tags:
+  - accounting
+  - business
+  - finance
+  pools: []
+- label: Free Cash Flow ($)
+  scale_type: continuous
+  role: dependent
+  concept_stem: free_cash_flow
+  unit: $
+  concept_group: cash_flow
+  domain_tags:
+  - accounting
+  - business
+  - finance
+  pools: []
+- label: Payback Period (years)
+  scale_type: continuous
+  role: dependent
+  concept_stem: payback_period
+  unit: years
+  concept_group: investment_metric
+  domain_tags:
+  - business
+  - engineering
+  - finance
+  - investment
+  pools: []
+- label: Internal Rate of Return (IRR, %)
+  scale_type: percentage
+  role: dependent
+  concept_stem: irr
+  unit: '%'
+  concept_group: investment_metric
+  domain_tags:
+  - business
+  pools: []
+- label: Return on Invested Capital (ROIC, %)
+  scale_type: percentage
+  role: dependent
+  concept_stem: roic
+  unit: '%'
+  concept_group: efficiency_metric
+  domain_tags:
+  - business
+  pools: []
+- label: Working Capital ($)
+  scale_type: continuous
+  role: dependent
+  concept_stem: working_capital
+  unit: $
+  concept_group: liquidity_metric
+  domain_tags:
+  - accounting
+  - business
+  - finance
+  pools: []
+- label: Operating Cash Flow ($)
+  scale_type: continuous
+  role: dependent
+  concept_stem: operating_cash_flow
+  unit: $
+  concept_group: cash_flow
+  domain_tags:
+  - accounting
+  - business
+  - finance
+  pools: []
+- label: Total Revenue ($)
+  scale_type: continuous
+  role: dependent
+  concept_stem: total_revenue
+  domain_tags:
+  - business
+  - finance
+  - sales
+  pools: []
+  unit: $
+  concept_group: revenue_sales
+- label: Net Revenue ($)
+  scale_type: continuous
+  role: dependent
+  concept_stem: net_revenue
+  domain_tags:
+  - business
+  - finance
+  - sales
+  pools: []
+  unit: $
+  concept_group: revenue_sales
+- label: Gross Sales ($)
+  scale_type: continuous
+  role: dependent
+  concept_stem: gross_sales
+  domain_tags:
+  - business
+  - finance
+  - sales
+  pools: []
+  unit: $
+  concept_group: revenue_sales
+- label: Recurring Revenue ($)
+  scale_type: continuous
+  role: dependent
+  concept_stem: recurring_revenue
+  domain_tags:
+  - business
+  - finance
+  - sales
+  pools: []
+  unit: $
+  concept_group: revenue_sales
+- label: Net New ARR ($)
+  scale_type: continuous
+  role: dependent
+  concept_stem: net_new_arr
+  domain_tags:
+  - business
+  - finance
+  - sales
+  pools: []
+  unit: $
+  concept_group: revenue_sales
+- label: Expansion Revenue ($)
+  scale_type: continuous
+  role: dependent
+  concept_stem: expansion_revenue
+  domain_tags:
+  - business
+  - finance
+  - sales
+  pools: []
+  unit: $
+  concept_group: revenue_sales
+- label: Contraction Revenue ($)
+  scale_type: continuous
+  role: dependent
+  concept_stem: contraction_revenue
+  domain_tags:
+  - business
+  - finance
+  - sales
+  pools: []
+  unit: $
+  concept_group: revenue_sales
+- label: Revenue Growth Rate (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: revenue_growth_rate
+  domain_tags:
+  - business
+  - finance
+  - sales
+  pools: []
+  unit: '%'
+  concept_group: revenue_sales
+- label: Year-over-Year Growth (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: year_over_year_growth
+  domain_tags:
+  - business
+  - finance
+  - sales
+  pools: []
+  unit: '%'
+  concept_group: revenue_sales
+- label: Quarter-over-Quarter Growth (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: quarter_over_quarter_growth
+  domain_tags:
+  - business
+  - finance
+  - sales
+  pools: []
+  unit: '%'
+  concept_group: revenue_sales
+- label: Compound Annual Growth Rate (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: compound_annual_growth_rate
+  domain_tags:
+  - business
+  - finance
+  - sales
+  pools: []
+  unit: '%'
+  concept_group: revenue_sales
+- label: Revenue per Customer ($)
+  scale_type: continuous
+  role: dependent
+  concept_stem: revenue_per_customer
+  domain_tags:
+  - business
+  - finance
+  - sales
+  pools: []
+  unit: $
+  concept_group: revenue_sales
+- label: Average Deal Size ($)
+  scale_type: continuous
+  role: dependent
+  concept_stem: average_deal_size
+  domain_tags:
+  - business
+  - finance
+  - sales
+  pools: []
+  unit: $
+  concept_group: revenue_sales
+- label: Sales Volume (units/month)
+  scale_type: discrete_count
+  role: dependent
+  concept_stem: sales_volume
+  domain_tags:
+  - business
+  - finance
+  - sales
+  pools: []
+  unit: units/month
+  concept_group: revenue_sales
+- label: Sales Quota ($)
+  scale_type: continuous
+  role: independent
+  concept_stem: sales_quota
+  domain_tags:
+  - business
+  - finance
+  - sales
+  pools: []
+  unit: $
+  concept_group: revenue_sales
+- label: Quota Attainment (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: quota_attainment
+  domain_tags:
+  - business
+  - finance
+  - sales
+  pools: []
+  unit: '%'
+  concept_group: revenue_sales
+- label: Win Rate (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: win_rate
+  domain_tags:
+  - business
+  - finance
+  - sales
+  pools: []
+  unit: '%'
+  concept_group: revenue_sales
+- label: Lead-to-Opportunity Conversion Rate (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: lead_to_opportunity_conversion_rate
+  domain_tags:
+  - business
+  - finance
+  - sales
+  pools: []
+  unit: '%'
+  concept_group: revenue_sales
+- label: Opportunity-to-Close Rate (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: opportunity_to_close_rate
+  domain_tags:
+  - business
+  - finance
+  - sales
+  pools: []
+  unit: '%'
+  concept_group: revenue_sales
+- label: Sales Cycle Length (days)
+  scale_type: continuous
+  role: dependent
+  concept_stem: sales_cycle_length
+  domain_tags:
+  - business
+  - finance
+  - sales
+  pools: []
+  unit: days
+  concept_group: revenue_sales
+- label: Weighted Pipeline ($)
+  scale_type: continuous
+  role: dependent
+  concept_stem: weighted_pipeline
+  domain_tags:
+  - business
+  - finance
+  - sales
+  pools: []
+  unit: $
+  concept_group: revenue_sales
+- label: Number of Opportunities
+  scale_type: discrete_count
+  role: dependent
+  concept_stem: number_of_opportunities
+  domain_tags:
+  - business
+  - finance
+  - sales
+  pools: []
+  unit: count
+  concept_group: revenue_sales
+- label: Deals Closed Won
+  scale_type: discrete_count
+  role: dependent
+  concept_stem: deals_closed_won
+  domain_tags:
+  - business
+  - finance
+  - sales
+  pools: []
+  unit: count
+  concept_group: revenue_sales
+- label: Deals Closed Lost
+  scale_type: discrete_count
+  role: dependent
+  concept_stem: deals_closed_lost
+  domain_tags:
+  - business
+  - finance
+  - sales
+  pools: []
+  unit: count
+  concept_group: revenue_sales
+- label: Discount Rate (%)
+  scale_type: percentage
+  role: independent
+  concept_stem: discount_rate
+  domain_tags:
+  - business
+  - finance
+  - sales
+  pools: []
+  unit: '%'
+  concept_group: revenue_sales
+- label: Price per Unit ($)
+  scale_type: continuous
+  role: independent
+  concept_stem: price_per_unit
+  domain_tags:
+  - business
+  - finance
+  - sales
+  pools: []
+  unit: $
+  concept_group: revenue_sales
+- label: Price Elasticity of Demand
+  scale_type: continuous
+  role: dependent
+  concept_stem: price_elasticity_of_demand
+  domain_tags:
+  - business
+  - finance
+  - sales
+  pools: []
+  unit: ratio
+  concept_group: revenue_sales
+- label: Upsell Rate (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: upsell_rate
+  domain_tags:
+  - business
+  - finance
+  - sales
+  pools: []
+  unit: '%'
+  concept_group: revenue_sales
+- label: Cross-Sell Rate (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: cross_sell_rate
+  domain_tags:
+  - business
+  - finance
+  - sales
+  pools: []
+  unit: '%'
+  concept_group: revenue_sales
+- label: Attach Rate (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: attach_rate
+  domain_tags:
+  - business
+  - finance
+  - sales
+  pools: []
+  unit: '%'
+  concept_group: revenue_sales
+- label: Sales Rep Count
+  scale_type: discrete_count
+  role: independent
+  concept_stem: sales_rep_count
+  domain_tags:
+  - business
+  - finance
+  - sales
+  pools: []
+  unit: count
+  concept_group: revenue_sales
+- label: Sales Rep Ramp Time (days)
+  scale_type: continuous
+  role: dependent
+  concept_stem: sales_rep_ramp_time
+  domain_tags:
+  - business
+  - finance
+  - sales
+  pools: []
+  unit: days
+  concept_group: revenue_sales
+- label: Sales Call Volume (calls/rep/day)
+  scale_type: discrete_count
+  role: independent
+  concept_stem: sales_call_volume
+  domain_tags:
+  - business
+  - finance
+  - sales
+  pools: []
+  unit: calls/day
+  concept_group: revenue_sales
+- label: Meetings Booked (count)
+  scale_type: discrete_count
+  role: dependent
+  concept_stem: meetings_booked
+  domain_tags:
+  - business
+  - finance
+  - sales
+  pools: []
+  unit: count
+  concept_group: revenue_sales
+- label: Proposal Count
+  scale_type: discrete_count
+  role: dependent
+  concept_stem: proposal_count
+  domain_tags:
+  - business
+  - finance
+  - sales
+  pools: []
+  unit: count
+  concept_group: revenue_sales
+- label: Backlog ($)
+  scale_type: continuous
+  role: dependent
+  concept_stem: backlog
+  domain_tags:
+  - business
+  - finance
+  - sales
+  pools: []
+  unit: $
+  concept_group: revenue_sales
+- label: Bookings ($)
+  scale_type: continuous
+  role: dependent
+  concept_stem: bookings
+  domain_tags:
+  - business
+  - finance
+  - sales
+  pools: []
+  unit: $
+  concept_group: revenue_sales
+- label: Book-to-Bill Ratio
+  scale_type: continuous
+  role: dependent
+  concept_stem: book_to_bill_ratio
+  domain_tags:
+  - business
+  - finance
+  - sales
+  pools: []
+  unit: ratio
+  concept_group: revenue_sales
+- label: Sales Forecast Accuracy (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: sales_forecast_accuracy
+  domain_tags:
+  - business
+  - finance
+  - sales
+  pools: []
+  unit: '%'
+  concept_group: revenue_sales
+- label: Sales Region
+  scale_type: categorical
+  role: independent
+  concept_stem: sales_region
+  domain_tags:
+  - business
+  - finance
+  - sales
+  pools: []
+  concept_group: revenue_sales
+- label: Sales Channel
+  scale_type: categorical
+  role: independent
+  concept_stem: sales_channel
+  domain_tags:
+  - business
+  - finance
+  - sales
+  pools: []
+  concept_group: revenue_sales
+- label: Deal Stage
+  scale_type: categorical
+  role: dependent
+  concept_stem: deal_stage
+  domain_tags:
+  - business
+  - finance
+  - sales
+  pools: []
+  concept_group: revenue_sales
+- label: Product Line
+  scale_type: categorical
+  role: independent
+  concept_stem: product_line
+  domain_tags:
+  - business
+  - finance
+  - sales
+  pools: []
+  concept_group: revenue_sales
+- label: Same-Store Sales Growth (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: same_store_sales_growth
+  domain_tags:
+  - business
+  - finance
+  - sales
+  pools: []
+  unit: '%'
+  concept_group: revenue_sales
+- label: Sales per Square Foot ($)
+  scale_type: continuous
+  role: dependent
+  concept_stem: sales_per_square_foot
+  domain_tags:
+  - business
+  - finance
+  - sales
+  pools: []
+  unit: $/sq ft
+  concept_group: revenue_sales
+- label: Basket Size (items)
+  scale_type: discrete_count
+  role: dependent
+  concept_stem: basket_size
+  domain_tags:
+  - business
+  - finance
+  - sales
+  pools: []
+  unit: items
+  concept_group: revenue_sales
+- label: Transactions per Day
+  scale_type: discrete_count
+  role: dependent
+  concept_stem: transactions_per_day
+  domain_tags:
+  - business
+  - finance
+  - sales
+  pools: []
+  unit: count/day
+  concept_group: revenue_sales
+- label: Foot Traffic (visitors/day)
+  scale_type: discrete_count
+  role: independent
+  concept_stem: foot_traffic
+  domain_tags:
+  - business
+  - finance
+  - sales
+  pools: []
+  unit: visitors/day
+  concept_group: revenue_sales
+- label: Operating Income ($)
+  scale_type: continuous
+  role: dependent
+  concept_stem: operating_income
+  domain_tags:
+  - business
+  - finance
+  - accounting
+  pools: []
+  unit: $
+  concept_group: profitability
+- label: Net Profit Margin (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: net_profit_margin
+  domain_tags:
+  - business
+  - finance
+  - accounting
+  pools: []
+  unit: '%'
+  concept_group: profitability
+- label: EBIT ($)
+  scale_type: continuous
+  role: dependent
+  concept_stem: ebit
+  domain_tags:
+  - business
+  - finance
+  - accounting
+  pools: []
+  unit: $
+  concept_group: profitability
+- label: Contribution Margin (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: contribution_margin
+  domain_tags:
+  - business
+  - finance
+  - accounting
+  pools: []
+  unit: '%'
+  concept_group: profitability
+- label: Contribution Margin per Unit ($)
+  scale_type: continuous
+  role: dependent
+  concept_stem: contribution_margin_per_unit
+  domain_tags:
+  - business
+  - finance
+  - accounting
+  pools: []
+  unit: $
+  concept_group: profitability
+- label: Earnings per Share ($)
+  scale_type: continuous
+  role: dependent
+  concept_stem: earnings_per_share
+  domain_tags:
+  - business
+  - finance
+  - accounting
+  pools: []
+  unit: $
+  concept_group: profitability
+- label: Return on Assets (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: return_on_assets
+  domain_tags:
+  - business
+  - finance
+  - accounting
+  pools: []
+  unit: '%'
+  concept_group: profitability
+- label: Return on Equity (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: return_on_equity
+  domain_tags:
+  - business
+  - finance
+  - accounting
+  pools: []
+  unit: '%'
+  concept_group: profitability
+- label: Return on Invested Capital (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: return_on_invested_capital
+  domain_tags:
+  - business
+  - finance
+  - accounting
+  pools: []
+  unit: '%'
+  concept_group: profitability
+- label: Return on Capital Employed (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: return_on_capital_employed
+  domain_tags:
+  - business
+  - finance
+  - accounting
+  pools: []
+  unit: '%'
+  concept_group: profitability
+- label: Economic Value Added ($)
+  scale_type: continuous
+  role: dependent
+  concept_stem: economic_value_added
+  domain_tags:
+  - business
+  - finance
+  - accounting
+  pools: []
+  unit: $
+  concept_group: profitability
+- label: Cost of Goods Sold ($)
+  scale_type: continuous
+  role: dependent
+  concept_stem: cost_of_goods_sold
+  domain_tags:
+  - business
+  - finance
+  - accounting
+  pools: []
+  unit: $
+  concept_group: profitability
+- label: SG&A Expense ($)
+  scale_type: continuous
+  role: dependent
+  concept_stem: sg_a_expense
+  domain_tags:
+  - business
+  - finance
+  - accounting
+  pools: []
+  unit: $
+  concept_group: profitability
+- label: R&D Expense ($)
+  scale_type: continuous
+  role: dependent
+  concept_stem: r_d_expense
+  domain_tags:
+  - business
+  - finance
+  - accounting
+  pools: []
+  unit: $
+  concept_group: profitability
+- label: R&D Intensity (% of Revenue)
+  scale_type: percentage
+  role: dependent
+  concept_stem: r_d_intensity
+  domain_tags:
+  - business
+  - finance
+  - accounting
+  pools: []
+  unit: '%'
+  concept_group: profitability
+- label: Marketing Expense ($)
+  scale_type: continuous
+  role: dependent
+  concept_stem: marketing_expense
+  domain_tags:
+  - business
+  - finance
+  - accounting
+  pools: []
+  unit: $
+  concept_group: profitability
+- label: Depreciation and Amortization ($)
+  scale_type: continuous
+  role: dependent
+  concept_stem: depreciation_and_amortization
+  domain_tags:
+  - business
+  - finance
+  - accounting
+  pools: []
+  unit: $
+  concept_group: profitability
+- label: Interest Expense ($)
+  scale_type: continuous
+  role: dependent
+  concept_stem: interest_expense
+  domain_tags:
+  - business
+  - finance
+  - accounting
+  pools: []
+  unit: $
+  concept_group: profitability
+- label: Income Tax Expense ($)
+  scale_type: continuous
+  role: dependent
+  concept_stem: income_tax_expense
+  domain_tags:
+  - business
+  - finance
+  - accounting
+  pools: []
+  unit: $
+  concept_group: profitability
+- label: Effective Tax Rate (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: effective_tax_rate
+  domain_tags:
+  - business
+  - finance
+  - accounting
+  pools: []
+  unit: '%'
+  concept_group: profitability
+- label: Break-Even Point (units)
+  scale_type: discrete_count
+  role: dependent
+  concept_stem: break_even_point
+  domain_tags:
+  - business
+  - finance
+  - accounting
+  pools: []
+  unit: units
+  concept_group: profitability
+- label: Break-Even Revenue ($)
+  scale_type: continuous
+  role: dependent
+  concept_stem: break_even_revenue
+  domain_tags:
+  - business
+  - finance
+  - accounting
+  pools: []
+  unit: $
+  concept_group: profitability
+- label: Margin of Safety (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: margin_of_safety
+  domain_tags:
+  - business
+  - finance
+  - accounting
+  pools: []
+  unit: '%'
+  concept_group: profitability
+- label: Operating Leverage
+  scale_type: continuous
+  role: dependent
+  concept_stem: operating_leverage
+  domain_tags:
+  - business
+  - finance
+  - accounting
+  pools: []
+  unit: ratio
+  concept_group: profitability
+- label: Fixed Costs ($)
+  scale_type: continuous
+  role: independent
+  concept_stem: fixed_costs
+  domain_tags:
+  - business
+  - finance
+  - accounting
+  pools: []
+  unit: $
+  concept_group: profitability
+- label: Variable Cost per Unit ($)
+  scale_type: continuous
+  role: independent
+  concept_stem: variable_cost_per_unit
+  domain_tags:
+  - business
+  - finance
+  - accounting
+  pools: []
+  unit: $
+  concept_group: profitability
+- label: Cost-to-Income Ratio (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: cost_to_income_ratio
+  domain_tags:
+  - business
+  - finance
+  - accounting
+  pools: []
+  unit: '%'
+  concept_group: profitability
+- label: Expense Ratio (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: expense_ratio
+  domain_tags:
+  - business
+  - finance
+  - accounting
+  pools: []
+  unit: '%'
+  concept_group: profitability
+- label: Overhead Rate (%)
+  scale_type: percentage
+  role: independent
+  concept_stem: overhead_rate
+  domain_tags:
+  - business
+  - finance
+  - accounting
+  pools: []
+  unit: '%'
+  concept_group: profitability
+- label: Cost Savings ($)
+  scale_type: continuous
+  role: dependent
+  concept_stem: cost_savings
+  domain_tags:
+  - business
+  - finance
+  - accounting
+  pools: []
+  unit: $
+  concept_group: profitability
+- label: Dividend Payout Ratio (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: dividend_payout_ratio
+  domain_tags:
+  - business
+  - finance
+  - accounting
+  pools: []
+  unit: '%'
+  concept_group: profitability
+- label: Dividend Yield (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: dividend_yield
+  domain_tags:
+  - business
+  - finance
+  - accounting
+  pools: []
+  unit: '%'
+  concept_group: profitability
+- label: Retained Earnings ($)
+  scale_type: continuous
+  role: dependent
+  concept_stem: retained_earnings
+  domain_tags:
+  - business
+  - finance
+  - accounting
+  pools: []
+  unit: $
+  concept_group: profitability
+- label: Profit per Employee ($)
+  scale_type: continuous
+  role: dependent
+  concept_stem: profit_per_employee
+  domain_tags:
+  - business
+  - finance
+  - accounting
+  pools: []
+  unit: $
+  concept_group: profitability
+- label: Rule of 40 Score (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: rule_of_40_score
+  domain_tags:
+  - business
+  - finance
+  - accounting
+  pools: []
+  unit: '%'
+  concept_group: profitability
+- label: Cash Balance ($)
+  scale_type: continuous
+  role: bidirectional
+  concept_stem: cash_balance
+  domain_tags:
+  - business
+  - finance
+  - accounting
+  pools: []
+  unit: $
+  concept_group: liquidity_balance_sheet
+- label: Free Cash Flow Margin (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: free_cash_flow_margin
+  domain_tags:
+  - business
+  - finance
+  - accounting
+  pools: []
+  unit: '%'
+  concept_group: liquidity_balance_sheet
+- label: Investing Cash Flow ($)
+  scale_type: continuous
+  role: dependent
+  concept_stem: investing_cash_flow
+  domain_tags:
+  - business
+  - finance
+  - accounting
+  pools: []
+  unit: $
+  concept_group: liquidity_balance_sheet
+- label: Financing Cash Flow ($)
+  scale_type: continuous
+  role: dependent
+  concept_stem: financing_cash_flow
+  domain_tags:
+  - business
+  - finance
+  - accounting
+  pools: []
+  unit: $
+  concept_group: liquidity_balance_sheet
+- label: Net Burn Rate ($/month)
+  scale_type: continuous
+  role: dependent
+  concept_stem: net_burn_rate
+  domain_tags:
+  - business
+  - finance
+  - accounting
+  pools: []
+  unit: $/month
+  concept_group: liquidity_balance_sheet
+- label: Gross Burn Rate ($/month)
+  scale_type: continuous
+  role: dependent
+  concept_stem: gross_burn_rate
+  domain_tags:
+  - business
+  - finance
+  - accounting
+  pools: []
+  unit: $/month
+  concept_group: liquidity_balance_sheet
+- label: Cash Runway (months)
+  scale_type: continuous
+  role: dependent
+  concept_stem: cash_runway
+  domain_tags:
+  - business
+  - finance
+  - accounting
+  pools: []
+  unit: months
+  concept_group: liquidity_balance_sheet
+- label: Cash Ratio
+  scale_type: continuous
+  role: dependent
+  concept_stem: cash_ratio
+  domain_tags:
+  - business
+  - finance
+  - accounting
+  pools: []
+  unit: ratio
+  concept_group: liquidity_balance_sheet
+- label: Total Assets ($)
+  scale_type: continuous
+  role: dependent
+  concept_stem: total_assets
+  domain_tags:
+  - business
+  - finance
+  - accounting
+  pools: []
+  unit: $
+  concept_group: liquidity_balance_sheet
+- label: Total Liabilities ($)
+  scale_type: continuous
+  role: dependent
+  concept_stem: total_liabilities
+  domain_tags:
+  - business
+  - finance
+  - accounting
+  pools: []
+  unit: $
+  concept_group: liquidity_balance_sheet
+- label: Shareholders' Equity ($)
+  scale_type: continuous
+  role: dependent
+  concept_stem: shareholders_equity
+  domain_tags:
+  - business
+  - finance
+  - accounting
+  pools: []
+  unit: $
+  concept_group: liquidity_balance_sheet
+- label: Debt-to-Assets Ratio
+  scale_type: continuous
+  role: dependent
+  concept_stem: debt_to_assets_ratio
+  domain_tags:
+  - business
+  - finance
+  - accounting
+  pools: []
+  unit: ratio
+  concept_group: liquidity_balance_sheet
+- label: Net Debt ($)
+  scale_type: continuous
+  role: dependent
+  concept_stem: net_debt
+  domain_tags:
+  - business
+  - finance
+  - accounting
+  pools: []
+  unit: $
+  concept_group: liquidity_balance_sheet
+- label: Net Debt to EBITDA
+  scale_type: continuous
+  role: dependent
+  concept_stem: net_debt_to_ebitda
+  domain_tags:
+  - business
+  - finance
+  - accounting
+  pools: []
+  unit: ratio
+  concept_group: liquidity_balance_sheet
+- label: Interest Coverage Ratio
+  scale_type: continuous
+  role: dependent
+  concept_stem: interest_coverage_ratio
+  domain_tags:
+  - business
+  - finance
+  - accounting
+  pools: []
+  unit: ratio
+  concept_group: liquidity_balance_sheet
+- label: Debt Service Coverage Ratio
+  scale_type: continuous
+  role: dependent
+  concept_stem: debt_service_coverage_ratio
+  domain_tags:
+  - business
+  - finance
+  - accounting
+  pools: []
+  unit: ratio
+  concept_group: liquidity_balance_sheet
+- label: Equity Multiplier
+  scale_type: continuous
+  role: dependent
+  concept_stem: equity_multiplier
+  domain_tags:
+  - business
+  - finance
+  - accounting
+  pools: []
+  unit: ratio
+  concept_group: liquidity_balance_sheet
+- label: Asset Turnover
+  scale_type: continuous
+  role: dependent
+  concept_stem: asset_turnover
+  domain_tags:
+  - business
+  - finance
+  - accounting
+  pools: []
+  unit: ratio
+  concept_group: liquidity_balance_sheet
+- label: Accounts Receivable ($)
+  scale_type: continuous
+  role: dependent
+  concept_stem: accounts_receivable
+  domain_tags:
+  - business
+  - finance
+  - accounting
+  pools: []
+  unit: $
+  concept_group: liquidity_balance_sheet
+- label: Accounts Payable ($)
+  scale_type: continuous
+  role: dependent
+  concept_stem: accounts_payable
+  domain_tags:
+  - business
+  - finance
+  - accounting
+  pools: []
+  unit: $
+  concept_group: liquidity_balance_sheet
+- label: Bad Debt Rate (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: bad_debt_rate
+  domain_tags:
+  - business
+  - finance
+  - accounting
+  pools: []
+  unit: '%'
+  concept_group: liquidity_balance_sheet
+- label: Collection Effectiveness Index (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: collection_effectiveness_index
+  domain_tags:
+  - business
+  - finance
+  - accounting
+  pools: []
+  unit: '%'
+  concept_group: liquidity_balance_sheet
+- label: Invoice Cycle Time (days)
+  scale_type: continuous
+  role: dependent
+  concept_stem: invoice_cycle_time
+  domain_tags:
+  - business
+  - finance
+  - accounting
+  pools: []
+  unit: days
+  concept_group: liquidity_balance_sheet
+- label: Overdue Receivables (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: overdue_receivables
+  domain_tags:
+  - business
+  - finance
+  - accounting
+  pools: []
+  unit: '%'
+  concept_group: liquidity_balance_sheet
+- label: Capital Expenditure ($)
+  scale_type: continuous
+  role: independent
+  concept_stem: capital_expenditure
+  domain_tags:
+  - business
+  - finance
+  - accounting
+  pools: []
+  unit: $
+  concept_group: liquidity_balance_sheet
+- label: CapEx to Revenue (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: capex_to_revenue
+  domain_tags:
+  - business
+  - finance
+  - accounting
+  pools: []
+  unit: '%'
+  concept_group: liquidity_balance_sheet
+- label: Fixed Asset Turnover
+  scale_type: continuous
+  role: dependent
+  concept_stem: fixed_asset_turnover
+  domain_tags:
+  - business
+  - finance
+  - accounting
+  pools: []
+  unit: ratio
+  concept_group: liquidity_balance_sheet
+- label: Goodwill ($)
+  scale_type: continuous
+  role: dependent
+  concept_stem: goodwill
+  domain_tags:
+  - business
+  - finance
+  - accounting
+  pools: []
+  unit: $
+  concept_group: liquidity_balance_sheet
+- label: Book Value per Share ($)
+  scale_type: continuous
+  role: dependent
+  concept_stem: book_value_per_share
+  domain_tags:
+  - business
+  - finance
+  - accounting
+  pools: []
+  unit: $
+  concept_group: liquidity_balance_sheet
+- label: Interest Rate on Debt (%)
+  scale_type: percentage
+  role: independent
+  concept_stem: interest_rate_on_debt
+  domain_tags:
+  - business
+  - finance
+  - accounting
+  pools: []
+  unit: '%'
+  concept_group: liquidity_balance_sheet
+- label: Weighted Average Cost of Capital (%)
+  scale_type: percentage
+  role: independent
+  concept_stem: weighted_average_cost_of_capital
+  domain_tags:
+  - business
+  - finance
+  - accounting
+  pools: []
+  unit: '%'
+  concept_group: liquidity_balance_sheet
+- label: Credit Rating
+  scale_type: categorical
+  role: independent
+  concept_stem: credit_rating
+  domain_tags:
+  - business
+  - finance
+  - accounting
+  pools: []
+  concept_group: liquidity_balance_sheet
+- label: Liquidity Coverage Ratio (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: liquidity_coverage_ratio
+  domain_tags:
+  - business
+  - finance
+  - accounting
+  pools: []
+  unit: '%'
+  concept_group: liquidity_balance_sheet
+- label: Funding Raised ($)
+  scale_type: continuous
+  role: independent
+  concept_stem: funding_raised
+  domain_tags:
+  - business
+  - finance
+  - accounting
+  pools: []
+  unit: $
+  concept_group: liquidity_balance_sheet
+- label: Number of Funding Rounds
+  scale_type: discrete_count
+  role: independent
+  concept_stem: number_of_funding_rounds
+  domain_tags:
+  - business
+  - finance
+  - accounting
+  pools: []
+  unit: count
+  concept_group: liquidity_balance_sheet
+- label: Equity Dilution (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: equity_dilution
+  domain_tags:
+  - business
+  - finance
+  - accounting
+  pools: []
+  unit: '%'
+  concept_group: liquidity_balance_sheet
+- label: Market Capitalization ($)
+  scale_type: continuous
+  role: dependent
+  concept_stem: market_capitalization
+  domain_tags:
+  - business
+  - finance
+  - investment
+  pools: []
+  unit: $
+  concept_group: valuation_investment
+- label: Enterprise Value ($)
+  scale_type: continuous
+  role: dependent
+  concept_stem: enterprise_value
+  domain_tags:
+  - business
+  - finance
+  - investment
+  pools: []
+  unit: $
+  concept_group: valuation_investment
+- label: Share Price ($)
+  scale_type: continuous
+  role: dependent
+  concept_stem: share_price
+  domain_tags:
+  - business
+  - finance
+  - investment
+  pools: []
+  unit: $
+  concept_group: valuation_investment
+- label: Price-to-Earnings Ratio
+  scale_type: continuous
+  role: dependent
+  concept_stem: price_to_earnings_ratio
+  domain_tags:
+  - business
+  - finance
+  - investment
+  pools: []
+  unit: ratio
+  concept_group: valuation_investment
+- label: Price-to-Book Ratio
+  scale_type: continuous
+  role: dependent
+  concept_stem: price_to_book_ratio
+  domain_tags:
+  - business
+  - finance
+  - investment
+  pools: []
+  unit: ratio
+  concept_group: valuation_investment
+- label: Price-to-Sales Ratio
+  scale_type: continuous
+  role: dependent
+  concept_stem: price_to_sales_ratio
+  domain_tags:
+  - business
+  - finance
+  - investment
+  pools: []
+  unit: ratio
+  concept_group: valuation_investment
+- label: EV/EBITDA Multiple
+  scale_type: continuous
+  role: dependent
+  concept_stem: ev_ebitda_multiple
+  domain_tags:
+  - business
+  - finance
+  - investment
+  pools: []
+  unit: ratio
+  concept_group: valuation_investment
+- label: EV/Revenue Multiple
+  scale_type: continuous
+  role: dependent
+  concept_stem: ev_revenue_multiple
+  domain_tags:
+  - business
+  - finance
+  - investment
+  pools: []
+  unit: ratio
+  concept_group: valuation_investment
+- label: PEG Ratio
+  scale_type: continuous
+  role: dependent
+  concept_stem: peg_ratio
+  domain_tags:
+  - business
+  - finance
+  - investment
+  pools: []
+  unit: ratio
+  concept_group: valuation_investment
+- label: Trading Volume (shares)
+  scale_type: discrete_count
+  role: dependent
+  concept_stem: trading_volume
+  domain_tags:
+  - business
+  - finance
+  - investment
+  pools: []
+  unit: shares
+  concept_group: valuation_investment
+- label: Beta
+  scale_type: continuous
+  role: dependent
+  concept_stem: beta
+  domain_tags:
+  - business
+  - finance
+  - investment
+  pools: []
+  unit: ratio
+  concept_group: valuation_investment
+- label: Volatility (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: volatility
+  domain_tags:
+  - business
+  - finance
+  - investment
+  pools: []
+  unit: '%'
+  concept_group: valuation_investment
+- label: Sharpe Ratio
+  scale_type: continuous
+  role: dependent
+  concept_stem: sharpe_ratio
+  domain_tags:
+  - business
+  - finance
+  - investment
+  pools: []
+  unit: ratio
+  concept_group: valuation_investment
+- label: Sortino Ratio
+  scale_type: continuous
+  role: dependent
+  concept_stem: sortino_ratio
+  domain_tags:
+  - business
+  - finance
+  - investment
+  pools: []
+  unit: ratio
+  concept_group: valuation_investment
+- label: Alpha (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: alpha
+  domain_tags:
+  - business
+  - finance
+  - investment
+  pools: []
+  unit: '%'
+  concept_group: valuation_investment
+- label: Value at Risk 95% ($)
+  scale_type: continuous
+  role: dependent
+  concept_stem: value_at_risk_95
+  domain_tags:
+  - business
+  - finance
+  - investment
+  pools: []
+  unit: $
+  concept_group: valuation_investment
+- label: Maximum Drawdown (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: maximum_drawdown
+  domain_tags:
+  - business
+  - finance
+  - investment
+  pools: []
+  unit: '%'
+  concept_group: valuation_investment
+- label: Total Shareholder Return (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: total_shareholder_return
+  domain_tags:
+  - business
+  - finance
+  - investment
+  pools: []
+  unit: '%'
+  concept_group: valuation_investment
+- label: Internal Rate of Return (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: internal_rate_of_return
+  domain_tags:
+  - business
+  - finance
+  - investment
+  pools: []
+  unit: '%'
+  concept_group: valuation_investment
+- label: Terminal Growth Rate (%)
+  scale_type: percentage
+  role: independent
+  concept_stem: terminal_growth_rate
+  domain_tags:
+  - business
+  - finance
+  - investment
+  pools: []
+  unit: '%'
+  concept_group: valuation_investment
+- label: Multiple on Invested Capital
+  scale_type: continuous
+  role: dependent
+  concept_stem: multiple_on_invested_capital
+  domain_tags:
+  - business
+  - finance
+  - investment
+  pools: []
+  unit: ratio
+  concept_group: valuation_investment
+- label: Portfolio Weight (%)
+  scale_type: percentage
+  role: independent
+  concept_stem: portfolio_weight
+  domain_tags:
+  - business
+  - finance
+  - investment
+  pools: []
+  unit: '%'
+  concept_group: valuation_investment
+- label: Assets Under Management ($)
+  scale_type: continuous
+  role: dependent
+  concept_stem: assets_under_management
+  domain_tags:
+  - business
+  - finance
+  - investment
+  pools: []
+  unit: $
+  concept_group: valuation_investment
+- label: Management Fee (%)
+  scale_type: percentage
+  role: independent
+  concept_stem: management_fee
+  domain_tags:
+  - business
+  - finance
+  - investment
+  pools: []
+  unit: '%'
+  concept_group: valuation_investment
+- label: Investment Horizon (years)
+  scale_type: continuous
+  role: independent
+  concept_stem: investment_horizon
+  domain_tags:
+  - business
+  - finance
+  - investment
+  pools: []
+  unit: years
+  concept_group: valuation_investment
+- label: Asset Class
+  scale_type: categorical
+  role: independent
+  concept_stem: asset_class
+  domain_tags:
+  - business
+  - finance
+  - investment
+  pools: []
+  concept_group: valuation_investment
+- label: Exchange Rate (units per $)
+  scale_type: continuous
+  role: independent
+  concept_stem: exchange_rate
+  domain_tags:
+  - business
+  - finance
+  - investment
+  pools: []
+  unit: rate
+  concept_group: valuation_investment
+- label: Inflation Rate (%)
+  scale_type: percentage
+  role: independent
+  concept_stem: inflation_rate
+  domain_tags:
+  - business
+  - finance
+  - investment
+  pools: []
+  unit: '%'
+  concept_group: valuation_investment
+- label: Interest Rate Benchmark (%)
+  scale_type: percentage
+  role: independent
+  concept_stem: interest_rate_benchmark
+  domain_tags:
+  - business
+  - finance
+  - investment
+  pools: []
+  unit: '%'
+  concept_group: valuation_investment
+- label: GDP Growth Rate (%)
+  scale_type: percentage
+  role: independent
+  concept_stem: gdp_growth_rate
+  domain_tags:
+  - business
+  - finance
+  - investment
+  pools: []
+  unit: '%'
+  concept_group: valuation_investment
+- label: Consumer Confidence Index
+  scale_type: continuous
+  role: independent
+  concept_stem: consumer_confidence_index
+  domain_tags:
+  - business
+  - finance
+  - investment
+  pools: []
+  unit: index
+  concept_group: valuation_investment
+- label: Purchasing Managers Index
+  scale_type: continuous
+  role: independent
+  concept_stem: purchasing_managers_index
+  domain_tags:
+  - business
+  - finance
+  - investment
+  pools: []
+  unit: index
+  concept_group: valuation_investment
+- label: Commodity Price ($/unit)
+  scale_type: continuous
+  role: independent
+  concept_stem: commodity_price
+  domain_tags:
+  - business
+  - finance
+  - investment
+  pools: []
+  unit: $/unit
+  concept_group: valuation_investment
+- label: Bid-Ask Spread (bps)
+  scale_type: continuous
+  role: dependent
+  concept_stem: bid_ask_spread
+  domain_tags:
+  - business
+  - finance
+  - investment
+  pools: []
+  unit: bps
+  concept_group: valuation_investment
+- label: Dividend per Share ($)
+  scale_type: continuous
+  role: dependent
+  concept_stem: dividend_per_share
+  domain_tags:
+  - business
+  - finance
+  - investment
+  pools: []
+  unit: $
+  concept_group: valuation_investment
+- label: Short Interest (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: short_interest
+  domain_tags:
+  - business
+  - finance
+  - investment
+  pools: []
+  unit: '%'
+  concept_group: valuation_investment
+- label: Blended CAC ($)
+  scale_type: continuous
+  role: dependent
+  concept_stem: blended_cac
+  domain_tags:
+  - business
+  - marketing
+  - customer
+  pools: []
+  unit: $
+  concept_group: customer_acquisition_retention
+- label: Paid CAC ($)
+  scale_type: continuous
+  role: dependent
+  concept_stem: paid_cac
+  domain_tags:
+  - business
+  - marketing
+  - customer
+  pools: []
+  unit: $
+  concept_group: customer_acquisition_retention
+- label: New Customers (count)
+  scale_type: discrete_count
+  role: dependent
+  concept_stem: new_customers
+  domain_tags:
+  - business
+  - marketing
+  - customer
+  pools: []
+  unit: count
+  concept_group: customer_acquisition_retention
+- label: Churned Customers (count)
+  scale_type: discrete_count
+  role: dependent
+  concept_stem: churned_customers
+  domain_tags:
+  - business
+  - marketing
+  - customer
+  pools: []
+  unit: count
+  concept_group: customer_acquisition_retention
+- label: Customer Churn Rate (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: customer_churn_rate
+  domain_tags:
+  - business
+  - marketing
+  - customer
+  pools: []
+  unit: '%'
+  concept_group: customer_acquisition_retention
+- label: Revenue Churn Rate (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: revenue_churn_rate
+  domain_tags:
+  - business
+  - marketing
+  - customer
+  pools: []
+  unit: '%'
+  concept_group: customer_acquisition_retention
+- label: Logo Retention Rate (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: logo_retention_rate
+  domain_tags:
+  - business
+  - marketing
+  - customer
+  pools: []
+  unit: '%'
+  concept_group: customer_acquisition_retention
+- label: Customer Retention Rate (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: customer_retention_rate
+  domain_tags:
+  - business
+  - marketing
+  - customer
+  pools: []
+  unit: '%'
+  concept_group: customer_acquisition_retention
+- label: Gross Revenue Retention (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: gross_revenue_retention
+  domain_tags:
+  - business
+  - marketing
+  - customer
+  pools: []
+  unit: '%'
+  concept_group: customer_acquisition_retention
+- label: Repeat Purchase Rate (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: repeat_purchase_rate
+  domain_tags:
+  - business
+  - marketing
+  - customer
+  pools: []
+  unit: '%'
+  concept_group: customer_acquisition_retention
+- label: Purchase Frequency (orders/year)
+  scale_type: continuous
+  role: dependent
+  concept_stem: purchase_frequency
+  domain_tags:
+  - business
+  - marketing
+  - customer
+  pools: []
+  unit: orders/year
+  concept_group: customer_acquisition_retention
+- label: Customer Tenure (months)
+  scale_type: continuous
+  role: dependent
+  concept_stem: customer_tenure
+  domain_tags:
+  - business
+  - marketing
+  - customer
+  pools: []
+  unit: months
+  concept_group: customer_acquisition_retention
+- label: Time Between Purchases (days)
+  scale_type: continuous
+  role: dependent
+  concept_stem: time_between_purchases
+  domain_tags:
+  - business
+  - marketing
+  - customer
+  pools: []
+  unit: days
+  concept_group: customer_acquisition_retention
+- label: Reactivation Rate (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: reactivation_rate
+  domain_tags:
+  - business
+  - marketing
+  - customer
+  pools: []
+  unit: '%'
+  concept_group: customer_acquisition_retention
+- label: Win-Back Rate (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: win_back_rate
+  domain_tags:
+  - business
+  - marketing
+  - customer
+  pools: []
+  unit: '%'
+  concept_group: customer_acquisition_retention
+- label: Active Users (count)
+  scale_type: discrete_count
+  role: dependent
+  concept_stem: active_users
+  domain_tags:
+  - business
+  - marketing
+  - customer
+  pools: []
+  unit: count
+  concept_group: customer_acquisition_retention
+- label: Daily Active Users
+  scale_type: discrete_count
+  role: dependent
+  concept_stem: daily_active_users
+  domain_tags:
+  - business
+  - marketing
+  - customer
+  pools: []
+  unit: users
+  concept_group: customer_acquisition_retention
+- label: Monthly Active Users
+  scale_type: discrete_count
+  role: dependent
+  concept_stem: monthly_active_users
+  domain_tags:
+  - business
+  - marketing
+  - customer
+  pools: []
+  unit: users
+  concept_group: customer_acquisition_retention
+- label: Weekly Active Users
+  scale_type: discrete_count
+  role: dependent
+  concept_stem: weekly_active_users
+  domain_tags:
+  - business
+  - marketing
+  - customer
+  pools: []
+  unit: users
+  concept_group: customer_acquisition_retention
+- label: Session Length (min)
+  scale_type: continuous
+  role: dependent
+  concept_stem: session_length
+  domain_tags:
+  - business
+  - marketing
+  - customer
+  pools: []
+  unit: min
+  concept_group: customer_acquisition_retention
+- label: Sessions per User
+  scale_type: continuous
+  role: dependent
+  concept_stem: sessions_per_user
+  domain_tags:
+  - business
+  - marketing
+  - customer
+  pools: []
+  unit: sessions
+  concept_group: customer_acquisition_retention
+- label: Feature Adoption Rate (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: feature_adoption_rate
+  domain_tags:
+  - business
+  - marketing
+  - customer
+  pools: []
+  unit: '%'
+  concept_group: customer_acquisition_retention
+- label: Activation Rate (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: activation_rate
+  domain_tags:
+  - business
+  - marketing
+  - customer
+  pools: []
+  unit: '%'
+  concept_group: customer_acquisition_retention
+- label: Time to Value (days)
+  scale_type: continuous
+  role: dependent
+  concept_stem: time_to_value
+  domain_tags:
+  - business
+  - marketing
+  - customer
+  pools: []
+  unit: days
+  concept_group: customer_acquisition_retention
+- label: Onboarding Completion Rate (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: onboarding_completion_rate
+  domain_tags:
+  - business
+  - marketing
+  - customer
+  pools: []
+  unit: '%'
+  concept_group: customer_acquisition_retention
+- label: Free-to-Paid Conversion Rate (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: free_to_paid_conversion_rate
+  domain_tags:
+  - business
+  - marketing
+  - customer
+  pools: []
+  unit: '%'
+  concept_group: customer_acquisition_retention
+- label: Trial Conversion Rate (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: trial_conversion_rate
+  domain_tags:
+  - business
+  - marketing
+  - customer
+  pools: []
+  unit: '%'
+  concept_group: customer_acquisition_retention
+- label: Referral Rate (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: referral_rate
+  domain_tags:
+  - business
+  - marketing
+  - customer
+  pools: []
+  unit: '%'
+  concept_group: customer_acquisition_retention
+- label: Viral Coefficient
+  scale_type: continuous
+  role: dependent
+  concept_stem: viral_coefficient
+  domain_tags:
+  - business
+  - marketing
+  - customer
+  pools: []
+  unit: ratio
+  concept_group: customer_acquisition_retention
+- label: Customer Segment
+  scale_type: categorical
+  role: independent
+  concept_stem: customer_segment
+  domain_tags:
+  - business
+  - marketing
+  - customer
+  pools: []
+  concept_group: customer_acquisition_retention
+- label: Customer Tier
+  scale_type: categorical
+  role: independent
+  concept_stem: customer_tier
+  domain_tags:
+  - business
+  - marketing
+  - customer
+  pools: []
+  concept_group: customer_acquisition_retention
+- label: Subscription Plan
+  scale_type: categorical
+  role: independent
+  concept_stem: subscription_plan
+  domain_tags:
+  - business
+  - marketing
+  - customer
+  pools: []
+  concept_group: customer_acquisition_retention
+- label: Cohort Month
+  scale_type: temporal
+  role: independent
+  concept_stem: cohort_month
+  domain_tags:
+  - business
+  - marketing
+  - customer
+  pools: []
+  unit: month
+  concept_group: customer_acquisition_retention
+- label: Customer Health Score
+  scale_type: continuous
+  role: dependent
+  concept_stem: customer_health_score
+  domain_tags:
+  - business
+  - marketing
+  - customer
+  pools: []
+  unit: score
+  concept_group: customer_acquisition_retention
+- label: Customer Concentration (% of Revenue)
+  scale_type: percentage
+  role: dependent
+  concept_stem: customer_concentration
+  domain_tags:
+  - business
+  - marketing
+  - customer
+  pools: []
+  unit: '%'
+  concept_group: customer_acquisition_retention
+- label: Share of Wallet (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: share_of_wallet
+  domain_tags:
+  - business
+  - marketing
+  - customer
+  pools: []
+  unit: '%'
+  concept_group: customer_acquisition_retention
+- label: Customer Age (years)
+  scale_type: continuous
+  role: independent
+  concept_stem: customer_age
+  domain_tags:
+  - business
+  - marketing
+  - customer
+  pools: []
+  unit: years
+  concept_group: customer_acquisition_retention
+- label: Customer Region
+  scale_type: categorical
+  role: independent
+  concept_stem: customer_region
+  domain_tags:
+  - business
+  - marketing
+  - customer
+  pools: []
+  concept_group: customer_acquisition_retention
+- label: Customer Industry
+  scale_type: categorical
+  role: independent
+  concept_stem: customer_industry
+  domain_tags:
+  - business
+  - marketing
+  - customer
+  pools: []
+  concept_group: customer_acquisition_retention
+- label: Net Promoter Score
+  scale_type: continuous
+  role: dependent
+  concept_stem: net_promoter_score
+  domain_tags:
+  - business
+  - customer
+  - service
+  pools: []
+  unit: NPS
+  concept_group: customer_experience
+- label: Customer Satisfaction Score (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: customer_satisfaction_score
+  domain_tags:
+  - business
+  - customer
+  - service
+  pools: []
+  unit: '%'
+  concept_group: customer_experience
+- label: Customer Effort Score
+  scale_type: continuous
+  role: dependent
+  concept_stem: customer_effort_score
+  domain_tags:
+  - business
+  - customer
+  - service
+  pools: []
+  unit: score
+  concept_group: customer_experience
+- label: Survey Response Rate (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: survey_response_rate
+  domain_tags:
+  - business
+  - customer
+  - service
+  - demographic
+  pools: []
+  unit: '%'
+  concept_group: customer_experience
+- label: Average Rating (stars)
+  scale_type: continuous
+  role: dependent
+  concept_stem: average_rating
+  domain_tags:
+  - business
+  - customer
+  - service
+  pools: []
+  unit: stars
+  concept_group: customer_experience
+- label: Review Count
+  scale_type: discrete_count
+  role: dependent
+  concept_stem: review_count
+  domain_tags:
+  - business
+  - customer
+  - service
+  pools: []
+  unit: count
+  concept_group: customer_experience
+- label: First Response Time (min)
+  scale_type: continuous
+  role: dependent
+  concept_stem: first_response_time
+  domain_tags:
+  - business
+  - customer
+  - service
+  pools: []
+  unit: min
+  concept_group: customer_experience
+- label: Average Resolution Time (h)
+  scale_type: continuous
+  role: dependent
+  concept_stem: average_resolution_time
+  domain_tags:
+  - business
+  - customer
+  - service
+  pools: []
+  unit: h
+  concept_group: customer_experience
+- label: First Contact Resolution Rate (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: first_contact_resolution_rate
+  domain_tags:
+  - business
+  - customer
+  - service
+  pools: []
+  unit: '%'
+  concept_group: customer_experience
+- label: Ticket Volume (tickets/day)
+  scale_type: discrete_count
+  role: dependent
+  concept_stem: ticket_volume
+  domain_tags:
+  - business
+  - customer
+  - service
+  pools: []
+  unit: tickets/day
+  concept_group: customer_experience
+- label: Ticket Backlog (count)
+  scale_type: discrete_count
+  role: dependent
+  concept_stem: ticket_backlog
+  domain_tags:
+  - business
+  - customer
+  - service
+  pools: []
+  unit: count
+  concept_group: customer_experience
+- label: Ticket Reopen Rate (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: ticket_reopen_rate
+  domain_tags:
+  - business
+  - customer
+  - service
+  pools: []
+  unit: '%'
+  concept_group: customer_experience
+- label: Escalation Rate (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: escalation_rate
+  domain_tags:
+  - business
+  - customer
+  - service
+  pools: []
+  unit: '%'
+  concept_group: customer_experience
+- label: SLA Compliance (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: sla_compliance
+  domain_tags:
+  - business
+  - customer
+  - service
+  pools: []
+  unit: '%'
+  concept_group: customer_experience
+- label: Average Handle Time (min)
+  scale_type: continuous
+  role: dependent
+  concept_stem: average_handle_time
+  domain_tags:
+  - business
+  - customer
+  - service
+  pools: []
+  unit: min
+  concept_group: customer_experience
+- label: Call Abandonment Rate (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: call_abandonment_rate
+  domain_tags:
+  - business
+  - customer
+  - service
+  pools: []
+  unit: '%'
+  concept_group: customer_experience
+- label: Average Speed of Answer (s)
+  scale_type: continuous
+  role: dependent
+  concept_stem: average_speed_of_answer
+  domain_tags:
+  - business
+  - customer
+  - service
+  pools: []
+  unit: s
+  concept_group: customer_experience
+- label: Service Level (% answered in 20s)
+  scale_type: percentage
+  role: dependent
+  concept_stem: service_level
+  domain_tags:
+  - business
+  - customer
+  - service
+  pools: []
+  unit: '%'
+  concept_group: customer_experience
+- label: Agent Occupancy (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: agent_occupancy
+  domain_tags:
+  - business
+  - customer
+  - service
+  pools: []
+  unit: '%'
+  concept_group: customer_experience
+- label: Agent Utilization (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: agent_utilization
+  domain_tags:
+  - business
+  - customer
+  - service
+  pools: []
+  unit: '%'
+  concept_group: customer_experience
+- label: Chat Concurrency
+  scale_type: continuous
+  role: dependent
+  concept_stem: chat_concurrency
+  domain_tags:
+  - business
+  - customer
+  - service
+  pools: []
+  unit: chats
+  concept_group: customer_experience
+- label: Self-Service Resolution Rate (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: self_service_resolution_rate
+  domain_tags:
+  - business
+  - customer
+  - service
+  pools: []
+  unit: '%'
+  concept_group: customer_experience
+- label: Support Cost per Ticket ($)
+  scale_type: continuous
+  role: dependent
+  concept_stem: support_cost_per_ticket
+  domain_tags:
+  - business
+  - customer
+  - service
+  pools: []
+  unit: $
+  concept_group: customer_experience
+- label: Complaint Rate (per 1,000 customers)
+  scale_type: continuous
+  role: dependent
+  concept_stem: complaint_rate
+  domain_tags:
+  - business
+  - customer
+  - service
+  pools: []
+  unit: per 1,000
+  concept_group: customer_experience
+- label: Customer Support Channel
+  scale_type: categorical
+  role: independent
+  concept_stem: customer_support_channel
+  domain_tags:
+  - business
+  - customer
+  - service
+  pools: []
+  concept_group: customer_experience
+- label: Ticket Priority
+  scale_type: categorical
+  role: independent
+  concept_stem: ticket_priority
+  domain_tags:
+  - business
+  - customer
+  - service
+  pools: []
+  concept_group: customer_experience
+- label: Support Agent Count
+  scale_type: discrete_count
+  role: independent
+  concept_stem: support_agent_count
+  domain_tags:
+  - business
+  - customer
+  - service
+  pools: []
+  unit: count
+  concept_group: customer_experience
+- label: Quality Assurance Score (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: quality_assurance_score
+  domain_tags:
+  - business
+  - customer
+  - service
+  pools: []
+  unit: '%'
+  concept_group: customer_experience
+- label: Refund Rate (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: refund_rate
+  domain_tags:
+  - business
+  - customer
+  - service
+  pools: []
+  unit: '%'
+  concept_group: customer_experience
+- label: Return Rate (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: return_rate
+  domain_tags:
+  - business
+  - customer
+  - service
+  pools: []
+  unit: '%'
+  concept_group: customer_experience
+- label: Warranty Claim Rate (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: warranty_claim_rate
+  domain_tags:
+  - business
+  - customer
+  - service
+  pools: []
+  unit: '%'
+  concept_group: customer_experience
+- label: Knowledge Base Article Views
+  scale_type: discrete_count
+  role: dependent
+  concept_stem: knowledge_base_article_views
+  domain_tags:
+  - business
+  - customer
+  - service
+  pools: []
+  unit: count
+  concept_group: customer_experience
+- label: Brand Sentiment Score
+  scale_type: continuous
+  role: dependent
+  concept_stem: brand_sentiment_score
+  domain_tags:
+  - business
+  - customer
+  - service
+  pools: []
+  unit: score
+  concept_group: customer_experience
+- label: Customer Complaints Resolved (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: customer_complaints_resolved
+  domain_tags:
+  - business
+  - customer
+  - service
+  pools: []
+  unit: '%'
+  concept_group: customer_experience
+- label: Marketing Spend ($)
+  scale_type: continuous
+  role: independent
+  concept_stem: marketing_spend
+  domain_tags:
+  - business
+  - marketing
+  - digital
+  pools: []
+  unit: $
+  concept_group: marketing_digital
+- label: Advertising Spend ($)
+  scale_type: continuous
+  role: independent
+  concept_stem: advertising_spend
+  domain_tags:
+  - business
+  - marketing
+  - digital
+  pools: []
+  unit: $
+  concept_group: marketing_digital
+- label: Reach
+  scale_type: discrete_count
+  role: dependent
+  concept_stem: reach
+  domain_tags:
+  - business
+  - marketing
+  - digital
+  pools: []
+  unit: count
+  concept_group: marketing_digital
+- label: Frequency (impressions/user)
+  scale_type: continuous
+  role: independent
+  concept_stem: frequency
+  domain_tags:
+  - business
+  - marketing
+  - digital
+  pools: []
+  unit: ratio
+  concept_group: marketing_digital
+- label: Cost per Click ($)
+  scale_type: continuous
+  role: dependent
+  concept_stem: cost_per_click
+  domain_tags:
+  - business
+  - marketing
+  - digital
+  pools: []
+  unit: $
+  concept_group: marketing_digital
+- label: Cost per Mille CPM ($)
+  scale_type: continuous
+  role: dependent
+  concept_stem: cost_per_mille_cpm
+  domain_tags:
+  - business
+  - marketing
+  - digital
+  pools: []
+  unit: $
+  concept_group: marketing_digital
+- label: Cost per Lead ($)
+  scale_type: continuous
+  role: dependent
+  concept_stem: cost_per_lead
+  domain_tags:
+  - business
+  - marketing
+  - digital
+  pools: []
+  unit: $
+  concept_group: marketing_digital
+- label: Return on Ad Spend
+  scale_type: continuous
+  role: dependent
+  concept_stem: return_on_ad_spend
+  domain_tags:
+  - business
+  - marketing
+  - digital
+  pools: []
+  unit: ratio
+  concept_group: marketing_digital
+- label: Marketing ROI (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: marketing_roi
+  domain_tags:
+  - business
+  - marketing
+  - digital
+  pools: []
+  unit: '%'
+  concept_group: marketing_digital
+- label: Marketing Qualified Leads
+  scale_type: discrete_count
+  role: dependent
+  concept_stem: marketing_qualified_leads
+  domain_tags:
+  - business
+  - marketing
+  - digital
+  pools: []
+  unit: count
+  concept_group: marketing_digital
+- label: Sales Qualified Leads
+  scale_type: discrete_count
+  role: dependent
+  concept_stem: sales_qualified_leads
+  domain_tags:
+  - business
+  - marketing
+  - digital
+  pools: []
+  unit: count
+  concept_group: marketing_digital
+- label: MQL to SQL Rate (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: mql_to_sql_rate
+  domain_tags:
+  - business
+  - marketing
+  - digital
+  pools: []
+  unit: '%'
+  concept_group: marketing_digital
+- label: Website Sessions
+  scale_type: discrete_count
+  role: dependent
+  concept_stem: website_sessions
+  domain_tags:
+  - business
+  - marketing
+  - digital
+  pools: []
+  unit: count
+  concept_group: marketing_digital
+- label: Unique Visitors
+  scale_type: discrete_count
+  role: dependent
+  concept_stem: unique_visitors
+  domain_tags:
+  - business
+  - marketing
+  - digital
+  pools: []
+  unit: count
+  concept_group: marketing_digital
+- label: Pages per Session
+  scale_type: continuous
+  role: dependent
+  concept_stem: pages_per_session
+  domain_tags:
+  - business
+  - marketing
+  - digital
+  pools: []
+  unit: pages
+  concept_group: marketing_digital
+- label: Average Session Duration (s)
+  scale_type: continuous
+  role: dependent
+  concept_stem: average_session_duration
+  domain_tags:
+  - business
+  - marketing
+  - digital
+  pools: []
+  unit: s
+  concept_group: marketing_digital
+- label: Organic Traffic Share (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: organic_traffic_share
+  domain_tags:
+  - business
+  - marketing
+  - digital
+  pools: []
+  unit: '%'
+  concept_group: marketing_digital
+- label: Search Engine Ranking Position
+  scale_type: discrete_count
+  role: dependent
+  concept_stem: search_engine_ranking_position
+  domain_tags:
+  - business
+  - marketing
+  - digital
+  pools: []
+  unit: rank
+  concept_group: marketing_digital
+- label: Keyword Count in Top 10
+  scale_type: discrete_count
+  role: dependent
+  concept_stem: keyword_count_in_top_10
+  domain_tags:
+  - business
+  - marketing
+  - digital
+  pools: []
+  unit: count
+  concept_group: marketing_digital
+- label: Backlink Count
+  scale_type: discrete_count
+  role: dependent
+  concept_stem: backlink_count
+  domain_tags:
+  - business
+  - marketing
+  - digital
+  pools: []
+  unit: count
+  concept_group: marketing_digital
+- label: Domain Authority
+  scale_type: discrete_count
+  role: dependent
+  concept_stem: domain_authority
+  domain_tags:
+  - business
+  - marketing
+  - digital
+  pools: []
+  unit: score
+  concept_group: marketing_digital
+- label: Email Open Rate (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: email_open_rate
+  domain_tags:
+  - business
+  - marketing
+  - digital
+  pools: []
+  unit: '%'
+  concept_group: marketing_digital
+- label: Email Click Rate (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: email_click_rate
+  domain_tags:
+  - business
+  - marketing
+  - digital
+  pools: []
+  unit: '%'
+  concept_group: marketing_digital
+- label: Email Unsubscribe Rate (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: email_unsubscribe_rate
+  domain_tags:
+  - business
+  - marketing
+  - digital
+  pools: []
+  unit: '%'
+  concept_group: marketing_digital
+- label: Email List Size
+  scale_type: discrete_count
+  role: dependent
+  concept_stem: email_list_size
+  domain_tags:
+  - business
+  - marketing
+  - digital
+  pools: []
+  unit: count
+  concept_group: marketing_digital
+- label: Social Followers
+  scale_type: discrete_count
+  role: dependent
+  concept_stem: social_followers
+  domain_tags:
+  - business
+  - marketing
+  - digital
+  pools: []
+  unit: count
+  concept_group: marketing_digital
+- label: Social Engagement Rate (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: social_engagement_rate
+  domain_tags:
+  - business
+  - marketing
+  - digital
+  pools: []
+  unit: '%'
+  concept_group: marketing_digital
+- label: Social Shares
+  scale_type: discrete_count
+  role: dependent
+  concept_stem: social_shares
+  domain_tags:
+  - business
+  - marketing
+  - digital
+  pools: []
+  unit: count
+  concept_group: marketing_digital
+- label: Video Views
+  scale_type: discrete_count
+  role: dependent
+  concept_stem: video_views
+  domain_tags:
+  - business
+  - marketing
+  - digital
+  pools: []
+  unit: count
+  concept_group: marketing_digital
+- label: Video Completion Rate (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: video_completion_rate
+  domain_tags:
+  - business
+  - marketing
+  - digital
+  pools: []
+  unit: '%'
+  concept_group: marketing_digital
+- label: Influencer Reach
+  scale_type: discrete_count
+  role: dependent
+  concept_stem: influencer_reach
+  domain_tags:
+  - business
+  - marketing
+  - digital
+  pools: []
+  unit: count
+  concept_group: marketing_digital
+- label: Share of Voice (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: share_of_voice
+  domain_tags:
+  - business
+  - marketing
+  - digital
+  pools: []
+  unit: '%'
+  concept_group: marketing_digital
+- label: Brand Awareness (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: brand_awareness
+  domain_tags:
+  - business
+  - marketing
+  - digital
+  pools: []
+  unit: '%'
+  concept_group: marketing_digital
+- label: Brand Recall (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: brand_recall
+  domain_tags:
+  - business
+  - marketing
+  - digital
+  pools: []
+  unit: '%'
+  concept_group: marketing_digital
+- label: Brand Equity Index
+  scale_type: continuous
+  role: dependent
+  concept_stem: brand_equity_index
+  domain_tags:
+  - business
+  - marketing
+  - digital
+  pools: []
+  unit: index
+  concept_group: marketing_digital
+- label: Campaign Duration (days)
+  scale_type: discrete_count
+  role: independent
+  concept_stem: campaign_duration
+  domain_tags:
+  - business
+  - marketing
+  - digital
+  pools: []
+  unit: days
+  concept_group: marketing_digital
+- label: Campaign Type
+  scale_type: categorical
+  role: independent
+  concept_stem: campaign_type
+  domain_tags:
+  - business
+  - marketing
+  - digital
+  pools: []
+  concept_group: marketing_digital
+- label: Ad Platform
+  scale_type: categorical
+  role: independent
+  concept_stem: ad_platform
+  domain_tags:
+  - business
+  - marketing
+  - digital
+  pools: []
+  concept_group: marketing_digital
+- label: Ad Creative Variant
+  scale_type: categorical
+  role: independent
+  concept_stem: ad_creative_variant
+  domain_tags:
+  - business
+  - marketing
+  - digital
+  pools: []
+  concept_group: marketing_digital
+- label: A/B Test Lift (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: a_b_test_lift
+  domain_tags:
+  - business
+  - marketing
+  - digital
+  pools: []
+  unit: '%'
+  concept_group: marketing_digital
+- label: Statistical Significance (p-value)
+  scale_type: continuous
+  role: dependent
+  concept_stem: statistical_significance
+  domain_tags:
+  - business
+  - marketing
+  - digital
+  pools: []
+  unit: p-value
+  concept_group: marketing_digital
+- label: Landing Page Conversion Rate (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: landing_page_conversion_rate
+  domain_tags:
+  - business
+  - marketing
+  - digital
+  pools: []
+  unit: '%'
+  concept_group: marketing_digital
+- label: Attribution Weight (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: attribution_weight
+  domain_tags:
+  - business
+  - marketing
+  - digital
+  pools: []
+  unit: '%'
+  concept_group: marketing_digital
+- label: Marketing-Sourced Revenue (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: marketing_sourced_revenue
+  domain_tags:
+  - business
+  - marketing
+  - digital
+  pools: []
+  unit: '%'
+  concept_group: marketing_digital
+- label: Content Pieces Published
+  scale_type: discrete_count
+  role: independent
+  concept_stem: content_pieces_published
+  domain_tags:
+  - business
+  - marketing
+  - digital
+  pools: []
+  unit: count
+  concept_group: marketing_digital
+- label: Event Attendees
+  scale_type: discrete_count
+  role: dependent
+  concept_stem: event_attendees
+  domain_tags:
+  - business
+  - marketing
+  - digital
+  pools: []
+  unit: count
+  concept_group: marketing_digital
+- label: Webinar Registration Rate (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: webinar_registration_rate
+  domain_tags:
+  - business
+  - marketing
+  - digital
+  pools: []
+  unit: '%'
+  concept_group: marketing_digital
+- label: Promo Redemption Rate (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: promo_redemption_rate
+  domain_tags:
+  - business
+  - marketing
+  - digital
+  pools: []
+  unit: '%'
+  concept_group: marketing_digital
+- label: Coupon Discount Depth (%)
+  scale_type: percentage
+  role: independent
+  concept_stem: coupon_discount_depth
+  domain_tags:
+  - business
+  - marketing
+  - digital
+  pools: []
+  unit: '%'
+  concept_group: marketing_digital
+- label: Order Fulfillment Cycle Time (days)
+  scale_type: continuous
+  role: dependent
+  concept_stem: order_fulfillment_cycle_time
+  domain_tags:
+  - business
+  - operations
+  - logistics
+  pools: []
+  unit: days
+  concept_group: operations_supply_chain
+- label: Perfect Order Rate (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: perfect_order_rate
+  domain_tags:
+  - business
+  - operations
+  - logistics
+  pools: []
+  unit: '%'
+  concept_group: operations_supply_chain
+- label: On-Time Delivery Rate (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: on_time_delivery_rate
+  domain_tags:
+  - business
+  - operations
+  - logistics
+  pools: []
+  unit: '%'
+  concept_group: operations_supply_chain
+- label: On-Time In-Full Rate (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: on_time_in_full_rate
+  domain_tags:
+  - business
+  - operations
+  - logistics
+  pools: []
+  unit: '%'
+  concept_group: operations_supply_chain
+- label: Fill Rate (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: fill_rate
+  domain_tags:
+  - business
+  - operations
+  - logistics
+  pools: []
+  unit: '%'
+  concept_group: operations_supply_chain
+- label: Stockout Rate (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: stockout_rate
+  domain_tags:
+  - business
+  - operations
+  - logistics
+  pools: []
+  unit: '%'
+  concept_group: operations_supply_chain
+- label: Backorder Count
+  scale_type: discrete_count
+  role: dependent
+  concept_stem: backorder_count
+  domain_tags:
+  - business
+  - operations
+  - logistics
+  pools: []
+  unit: count
+  concept_group: operations_supply_chain
+- label: Inventory Level (units)
+  scale_type: discrete_count
+  role: bidirectional
+  concept_stem: inventory_level
+  domain_tags:
+  - business
+  - operations
+  - logistics
+  pools: []
+  unit: units
+  concept_group: operations_supply_chain
+- label: Inventory Value ($)
+  scale_type: continuous
+  role: dependent
+  concept_stem: inventory_value
+  domain_tags:
+  - business
+  - operations
+  - logistics
+  pools: []
+  unit: $
+  concept_group: operations_supply_chain
+- label: Inventory Holding Cost ($)
+  scale_type: continuous
+  role: dependent
+  concept_stem: inventory_holding_cost
+  domain_tags:
+  - business
+  - operations
+  - logistics
+  pools: []
+  unit: $
+  concept_group: operations_supply_chain
+- label: Inventory Carrying Cost (%)
+  scale_type: percentage
+  role: independent
+  concept_stem: inventory_carrying_cost
+  domain_tags:
+  - business
+  - operations
+  - logistics
+  pools: []
+  unit: '%'
+  concept_group: operations_supply_chain
+- label: Safety Stock (units)
+  scale_type: discrete_count
+  role: independent
+  concept_stem: safety_stock
+  domain_tags:
+  - business
+  - operations
+  - logistics
+  pools: []
+  unit: units
+  concept_group: operations_supply_chain
+- label: Reorder Point (units)
+  scale_type: discrete_count
+  role: independent
+  concept_stem: reorder_point
+  domain_tags:
+  - business
+  - operations
+  - logistics
+  pools: []
+  unit: units
+  concept_group: operations_supply_chain
+- label: Economic Order Quantity (units)
+  scale_type: discrete_count
+  role: independent
+  concept_stem: economic_order_quantity
+  domain_tags:
+  - business
+  - operations
+  - logistics
+  pools: []
+  unit: units
+  concept_group: operations_supply_chain
+- label: Days of Supply
+  scale_type: continuous
+  role: dependent
+  concept_stem: days_of_supply
+  domain_tags:
+  - business
+  - operations
+  - logistics
+  pools: []
+  unit: days
+  concept_group: operations_supply_chain
+- label: Inventory Accuracy (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: inventory_accuracy
+  domain_tags:
+  - business
+  - operations
+  - logistics
+  pools: []
+  unit: '%'
+  concept_group: operations_supply_chain
+- label: Shrinkage Rate (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: shrinkage_rate
+  domain_tags:
+  - business
+  - operations
+  - logistics
+  pools: []
+  unit: '%'
+  concept_group: operations_supply_chain
+- label: Obsolete Inventory (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: obsolete_inventory
+  domain_tags:
+  - business
+  - operations
+  - logistics
+  pools: []
+  unit: '%'
+  concept_group: operations_supply_chain
+- label: Supplier Lead Time (days)
+  scale_type: continuous
+  role: dependent
+  concept_stem: supplier_lead_time
+  domain_tags:
+  - business
+  - operations
+  - logistics
+  pools: []
+  unit: days
+  concept_group: operations_supply_chain
+- label: Supplier Defect Rate (ppm)
+  scale_type: continuous
+  role: dependent
+  concept_stem: supplier_defect_rate
+  domain_tags:
+  - business
+  - operations
+  - logistics
+  pools: []
+  unit: ppm
+  concept_group: operations_supply_chain
+- label: Supplier Count
+  scale_type: discrete_count
+  role: independent
+  concept_stem: supplier_count
+  domain_tags:
+  - business
+  - operations
+  - logistics
+  pools: []
+  unit: count
+  concept_group: operations_supply_chain
+- label: Supplier Concentration (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: supplier_concentration
+  domain_tags:
+  - business
+  - operations
+  - logistics
+  pools: []
+  unit: '%'
+  concept_group: operations_supply_chain
+- label: Purchase Order Cycle Time (days)
+  scale_type: continuous
+  role: dependent
+  concept_stem: purchase_order_cycle_time
+  domain_tags:
+  - business
+  - operations
+  - logistics
+  pools: []
+  unit: days
+  concept_group: operations_supply_chain
+- label: Procurement Savings (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: procurement_savings
+  domain_tags:
+  - business
+  - operations
+  - logistics
+  pools: []
+  unit: '%'
+  concept_group: operations_supply_chain
+- label: Spend Under Management (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: spend_under_management
+  domain_tags:
+  - business
+  - operations
+  - logistics
+  pools: []
+  unit: '%'
+  concept_group: operations_supply_chain
+- label: Purchase Price Variance (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: purchase_price_variance
+  domain_tags:
+  - business
+  - operations
+  - logistics
+  pools: []
+  unit: '%'
+  concept_group: operations_supply_chain
+- label: Freight Cost per Unit ($)
+  scale_type: continuous
+  role: dependent
+  concept_stem: freight_cost_per_unit
+  domain_tags:
+  - business
+  - operations
+  - logistics
+  pools: []
+  unit: $
+  concept_group: operations_supply_chain
+- label: Transportation Cost ($)
+  scale_type: continuous
+  role: dependent
+  concept_stem: transportation_cost
+  domain_tags:
+  - business
+  - operations
+  - logistics
+  pools: []
+  unit: $
+  concept_group: operations_supply_chain
+- label: Shipments per Day
+  scale_type: discrete_count
+  role: dependent
+  concept_stem: shipments_per_day
+  domain_tags:
+  - business
+  - operations
+  - logistics
+  pools: []
+  unit: count/day
+  concept_group: operations_supply_chain
+- label: Delivery Lead Time (days)
+  scale_type: continuous
+  role: dependent
+  concept_stem: delivery_lead_time
+  domain_tags:
+  - business
+  - operations
+  - logistics
+  pools: []
+  unit: days
+  concept_group: operations_supply_chain
+- label: Last-Mile Delivery Cost ($)
+  scale_type: continuous
+  role: dependent
+  concept_stem: last_mile_delivery_cost
+  domain_tags:
+  - business
+  - operations
+  - logistics
+  pools: []
+  unit: $
+  concept_group: operations_supply_chain
+- label: Truck Load Utilization (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: truck_load_utilization
+  domain_tags:
+  - business
+  - operations
+  - logistics
+  pools: []
+  unit: '%'
+  concept_group: operations_supply_chain
+- label: Warehouse Capacity Utilization (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: warehouse_capacity_utilization
+  domain_tags:
+  - business
+  - operations
+  - logistics
+  pools: []
+  unit: '%'
+  concept_group: operations_supply_chain
+- label: Pick Accuracy (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: pick_accuracy
+  domain_tags:
+  - business
+  - operations
+  - logistics
+  pools: []
+  unit: '%'
+  concept_group: operations_supply_chain
+- label: Picks per Hour
+  scale_type: continuous
+  role: dependent
+  concept_stem: picks_per_hour
+  domain_tags:
+  - business
+  - operations
+  - logistics
+  pools: []
+  unit: picks/h
+  concept_group: operations_supply_chain
+- label: Dock-to-Stock Time (h)
+  scale_type: continuous
+  role: dependent
+  concept_stem: dock_to_stock_time
+  domain_tags:
+  - business
+  - operations
+  - logistics
+  pools: []
+  unit: h
+  concept_group: operations_supply_chain
+- label: Order Defect Rate (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: order_defect_rate
+  domain_tags:
+  - business
+  - operations
+  - logistics
+  pools: []
+  unit: '%'
+  concept_group: operations_supply_chain
+- label: Damaged Goods Rate (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: damaged_goods_rate
+  domain_tags:
+  - business
+  - operations
+  - logistics
+  pools: []
+  unit: '%'
+  concept_group: operations_supply_chain
+- label: Cost per Order ($)
+  scale_type: continuous
+  role: dependent
+  concept_stem: cost_per_order
+  domain_tags:
+  - business
+  - operations
+  - logistics
+  pools: []
+  unit: $
+  concept_group: operations_supply_chain
+- label: Production Output (units)
+  scale_type: discrete_count
+  role: dependent
+  concept_stem: production_output
+  domain_tags:
+  - business
+  - operations
+  - logistics
+  pools: []
+  unit: units
+  concept_group: operations_supply_chain
+- label: Capacity Utilization (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: capacity_utilization
+  domain_tags:
+  - business
+  - operations
+  - logistics
+  pools: []
+  unit: '%'
+  concept_group: operations_supply_chain
+- label: Plant Downtime (h)
+  scale_type: continuous
+  role: dependent
+  concept_stem: plant_downtime
+  domain_tags:
+  - business
+  - operations
+  - logistics
+  pools: []
+  unit: h
+  concept_group: operations_supply_chain
+- label: Process Cycle Efficiency (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: process_cycle_efficiency
+  domain_tags:
+  - business
+  - operations
+  - logistics
+  pools: []
+  unit: '%'
+  concept_group: operations_supply_chain
+- label: Work-in-Progress (units)
+  scale_type: discrete_count
+  role: dependent
+  concept_stem: work_in_progress
+  domain_tags:
+  - business
+  - operations
+  - logistics
+  pools: []
+  unit: units
+  concept_group: operations_supply_chain
+- label: Throughput Time (days)
+  scale_type: continuous
+  role: dependent
+  concept_stem: throughput_time
+  domain_tags:
+  - business
+  - operations
+  - logistics
+  pools: []
+  unit: days
+  concept_group: operations_supply_chain
+- label: Bullwhip Effect Ratio
+  scale_type: continuous
+  role: dependent
+  concept_stem: bullwhip_effect_ratio
+  domain_tags:
+  - business
+  - operations
+  - logistics
+  pools: []
+  unit: ratio
+  concept_group: operations_supply_chain
+- label: Demand Forecast Error MAPE (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: demand_forecast_error_mape
+  domain_tags:
+  - business
+  - operations
+  - logistics
+  pools: []
+  unit: '%'
+  concept_group: operations_supply_chain
+- label: Forecast Bias (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: forecast_bias
+  domain_tags:
+  - business
+  - operations
+  - logistics
+  pools: []
+  unit: '%'
+  concept_group: operations_supply_chain
+- label: Demand Volume (units)
+  scale_type: discrete_count
+  role: independent
+  concept_stem: demand_volume
+  domain_tags:
+  - business
+  - operations
+  - logistics
+  pools: []
+  unit: units
+  concept_group: operations_supply_chain
+- label: Service Level (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: service_level_operations_supply_chain
+  domain_tags:
+  - business
+  - operations
+  - logistics
+  pools: []
+  unit: '%'
+  concept_group: operations_supply_chain
+- label: Shipping Mode
+  scale_type: categorical
+  role: independent
+  concept_stem: shipping_mode
+  domain_tags:
+  - business
+  - operations
+  - logistics
+  pools: []
+  concept_group: operations_supply_chain
+- label: Carrier
+  scale_type: categorical
+  role: independent
+  concept_stem: carrier
+  domain_tags:
+  - business
+  - operations
+  - logistics
+  pools: []
+  concept_group: operations_supply_chain
+- label: Warehouse Location
+  scale_type: categorical
+  role: independent
+  concept_stem: warehouse_location
+  domain_tags:
+  - business
+  - operations
+  - logistics
+  pools: []
+  concept_group: operations_supply_chain
+- label: Order Channel
+  scale_type: categorical
+  role: independent
+  concept_stem: order_channel
+  domain_tags:
+  - business
+  - operations
+  - logistics
+  pools: []
+  concept_group: operations_supply_chain
+- label: Carbon Footprint per Shipment (kgCO2e)
+  scale_type: continuous
+  role: dependent
+  concept_stem: carbon_footprint_per_shipment
+  domain_tags:
+  - business
+  - operations
+  - logistics
+  pools: []
+  unit: kgCO2e
+  concept_group: operations_supply_chain
+- label: Tariff Rate (%)
+  scale_type: percentage
+  role: independent
+  concept_stem: tariff_rate
+  domain_tags:
+  - business
+  - operations
+  - logistics
+  pools: []
+  unit: '%'
+  concept_group: operations_supply_chain
+- label: Customs Clearance Time (days)
+  scale_type: continuous
+  role: dependent
+  concept_stem: customs_clearance_time
+  domain_tags:
+  - business
+  - operations
+  - logistics
+  pools: []
+  unit: days
+  concept_group: operations_supply_chain
+- label: Headcount
+  scale_type: discrete_count
+  role: dependent
+  concept_stem: headcount
+  domain_tags:
+  - business
+  - hr
+  - people
+  pools: []
+  unit: count
+  concept_group: human_resources
+- label: Full-Time Equivalents
+  scale_type: continuous
+  role: dependent
+  concept_stem: full_time_equivalents
+  domain_tags:
+  - business
+  - hr
+  - people
+  pools: []
+  unit: FTE
+  concept_group: human_resources
+- label: New Hires (count)
+  scale_type: discrete_count
+  role: dependent
+  concept_stem: new_hires
+  domain_tags:
+  - business
+  - hr
+  - people
+  pools: []
+  unit: count
+  concept_group: human_resources
+- label: Employee Turnover Rate (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: employee_turnover_rate
+  domain_tags:
+  - business
+  - hr
+  - people
+  pools: []
+  unit: '%'
+  concept_group: human_resources
+- label: Voluntary Turnover Rate (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: voluntary_turnover_rate
+  domain_tags:
+  - business
+  - hr
+  - people
+  pools: []
+  unit: '%'
+  concept_group: human_resources
+- label: Involuntary Turnover Rate (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: involuntary_turnover_rate
+  domain_tags:
+  - business
+  - hr
+  - people
+  pools: []
+  unit: '%'
+  concept_group: human_resources
+- label: Regretted Attrition Rate (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: regretted_attrition_rate
+  domain_tags:
+  - business
+  - hr
+  - people
+  pools: []
+  unit: '%'
+  concept_group: human_resources
+- label: First-Year Attrition (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: first_year_attrition
+  domain_tags:
+  - business
+  - hr
+  - people
+  pools: []
+  unit: '%'
+  concept_group: human_resources
+- label: Employee Retention Rate (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: employee_retention_rate
+  domain_tags:
+  - business
+  - hr
+  - people
+  pools: []
+  unit: '%'
+  concept_group: human_resources
+- label: Average Tenure (years)
+  scale_type: continuous
+  role: dependent
+  concept_stem: average_tenure
+  domain_tags:
+  - business
+  - hr
+  - people
+  pools: []
+  unit: years
+  concept_group: human_resources
+- label: Time to Hire (days)
+  scale_type: continuous
+  role: dependent
+  concept_stem: time_to_hire
+  domain_tags:
+  - business
+  - hr
+  - people
+  pools: []
+  unit: days
+  concept_group: human_resources
+- label: Time to Fill (days)
+  scale_type: continuous
+  role: dependent
+  concept_stem: time_to_fill
+  domain_tags:
+  - business
+  - hr
+  - people
+  pools: []
+  unit: days
+  concept_group: human_resources
+- label: Cost per Hire ($)
+  scale_type: continuous
+  role: dependent
+  concept_stem: cost_per_hire
+  domain_tags:
+  - business
+  - hr
+  - people
+  pools: []
+  unit: $
+  concept_group: human_resources
+- label: Offer Acceptance Rate (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: offer_acceptance_rate
+  domain_tags:
+  - business
+  - hr
+  - people
+  pools: []
+  unit: '%'
+  concept_group: human_resources
+- label: Applicants per Opening
+  scale_type: continuous
+  role: dependent
+  concept_stem: applicants_per_opening
+  domain_tags:
+  - business
+  - hr
+  - people
+  pools: []
+  unit: count
+  concept_group: human_resources
+- label: Quality of Hire Score
+  scale_type: continuous
+  role: dependent
+  concept_stem: quality_of_hire_score
+  domain_tags:
+  - business
+  - hr
+  - people
+  pools: []
+  unit: score
+  concept_group: human_resources
+- label: Recruiter Productivity (hires/recruiter)
+  scale_type: continuous
+  role: dependent
+  concept_stem: recruiter_productivity
+  domain_tags:
+  - business
+  - hr
+  - people
+  pools: []
+  unit: hires
+  concept_group: human_resources
+- label: Employee Engagement Score
+  scale_type: continuous
+  role: dependent
+  concept_stem: employee_engagement_score
+  domain_tags:
+  - business
+  - hr
+  - people
+  pools: []
+  unit: score
+  concept_group: human_resources
+- label: Employee Net Promoter Score
+  scale_type: continuous
+  role: dependent
+  concept_stem: employee_net_promoter_score
+  domain_tags:
+  - business
+  - hr
+  - people
+  pools: []
+  unit: eNPS
+  concept_group: human_resources
+- label: Employee Satisfaction (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: employee_satisfaction
+  domain_tags:
+  - business
+  - hr
+  - people
+  pools: []
+  unit: '%'
+  concept_group: human_resources
+- label: Absenteeism Rate (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: absenteeism_rate
+  domain_tags:
+  - business
+  - hr
+  - people
+  pools: []
+  unit: '%'
+  concept_group: human_resources
+- label: Sick Days per Employee
+  scale_type: continuous
+  role: dependent
+  concept_stem: sick_days_per_employee
+  domain_tags:
+  - business
+  - hr
+  - people
+  pools: []
+  unit: days
+  concept_group: human_resources
+- label: Overtime Hours
+  scale_type: continuous
+  role: dependent
+  concept_stem: overtime_hours
+  domain_tags:
+  - business
+  - hr
+  - people
+  pools: []
+  unit: h
+  concept_group: human_resources
+- label: Average Salary ($)
+  scale_type: continuous
+  role: independent
+  concept_stem: average_salary
+  domain_tags:
+  - business
+  - hr
+  - people
+  pools: []
+  unit: $
+  concept_group: human_resources
+- label: Compensation Ratio (compa-ratio)
+  scale_type: continuous
+  role: independent
+  concept_stem: compensation_ratio
+  domain_tags:
+  - business
+  - hr
+  - people
+  pools: []
+  unit: ratio
+  concept_group: human_resources
+- label: Gender Pay Gap (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: gender_pay_gap
+  domain_tags:
+  - business
+  - hr
+  - people
+  pools: []
+  unit: '%'
+  concept_group: human_resources
+- label: Pay Equity Ratio
+  scale_type: continuous
+  role: dependent
+  concept_stem: pay_equity_ratio
+  domain_tags:
+  - business
+  - hr
+  - people
+  pools: []
+  unit: ratio
+  concept_group: human_resources
+- label: Total Compensation Cost ($)
+  scale_type: continuous
+  role: dependent
+  concept_stem: total_compensation_cost
+  domain_tags:
+  - business
+  - hr
+  - people
+  pools: []
+  unit: $
+  concept_group: human_resources
+- label: Benefits Cost per Employee ($)
+  scale_type: continuous
+  role: dependent
+  concept_stem: benefits_cost_per_employee
+  domain_tags:
+  - business
+  - hr
+  - people
+  pools: []
+  unit: $
+  concept_group: human_resources
+- label: Labor Cost Ratio (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: labor_cost_ratio
+  domain_tags:
+  - business
+  - hr
+  - people
+  pools: []
+  unit: '%'
+  concept_group: human_resources
+- label: Training Hours per Employee
+  scale_type: continuous
+  role: independent
+  concept_stem: training_hours_per_employee
+  domain_tags:
+  - business
+  - hr
+  - people
+  pools: []
+  unit: h
+  concept_group: human_resources
+- label: Training Spend per Employee ($)
+  scale_type: continuous
+  role: independent
+  concept_stem: training_spend_per_employee
+  domain_tags:
+  - business
+  - hr
+  - people
+  pools: []
+  unit: $
+  concept_group: human_resources
+- label: Training Completion Rate (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: training_completion_rate
+  domain_tags:
+  - business
+  - hr
+  - people
+  pools: []
+  unit: '%'
+  concept_group: human_resources
+- label: Internal Promotion Rate (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: internal_promotion_rate
+  domain_tags:
+  - business
+  - hr
+  - people
+  pools: []
+  unit: '%'
+  concept_group: human_resources
+- label: Internal Mobility Rate (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: internal_mobility_rate
+  domain_tags:
+  - business
+  - hr
+  - people
+  pools: []
+  unit: '%'
+  concept_group: human_resources
+- label: Span of Control
+  scale_type: discrete_count
+  role: independent
+  concept_stem: span_of_control
+  domain_tags:
+  - business
+  - hr
+  - people
+  pools: []
+  unit: reports
+  concept_group: human_resources
+- label: Manager Effectiveness Score
+  scale_type: continuous
+  role: dependent
+  concept_stem: manager_effectiveness_score
+  domain_tags:
+  - business
+  - hr
+  - people
+  pools: []
+  unit: score
+  concept_group: human_resources
+- label: Performance Rating
+  scale_type: categorical
+  role: dependent
+  concept_stem: performance_rating
+  domain_tags:
+  - business
+  - hr
+  - people
+  pools: []
+  concept_group: human_resources
+- label: High Performer Share (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: high_performer_share
+  domain_tags:
+  - business
+  - hr
+  - people
+  pools: []
+  unit: '%'
+  concept_group: human_resources
+- label: Diversity Representation (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: diversity_representation
+  domain_tags:
+  - business
+  - hr
+  - people
+  pools: []
+  unit: '%'
+  concept_group: human_resources
+- label: Women in Leadership (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: women_in_leadership
+  domain_tags:
+  - business
+  - hr
+  - people
+  pools: []
+  unit: '%'
+  concept_group: human_resources
+- label: Inclusion Index
+  scale_type: continuous
+  role: dependent
+  concept_stem: inclusion_index
+  domain_tags:
+  - business
+  - hr
+  - people
+  pools: []
+  unit: index
+  concept_group: human_resources
+- label: Workplace Injury Rate (per 100 FTE)
+  scale_type: continuous
+  role: dependent
+  concept_stem: workplace_injury_rate
+  domain_tags:
+  - business
+  - hr
+  - people
+  pools: []
+  unit: per 100 FTE
+  concept_group: human_resources
+- label: Lost Time Injury Frequency Rate
+  scale_type: continuous
+  role: dependent
+  concept_stem: lost_time_injury_frequency_rate
+  domain_tags:
+  - business
+  - hr
+  - people
+  pools: []
+  unit: rate
+  concept_group: human_resources
+- label: Remote Work Share (%)
+  scale_type: percentage
+  role: independent
+  concept_stem: remote_work_share
+  domain_tags:
+  - business
+  - hr
+  - people
+  - demographic
+  pools: []
+  unit: '%'
+  concept_group: human_resources
+- label: Employee Age (years)
+  scale_type: continuous
+  role: independent
+  concept_stem: employee_age
+  domain_tags:
+  - business
+  - hr
+  - people
+  pools: []
+  unit: years
+  concept_group: human_resources
+- label: Job Level
+  scale_type: categorical
+  role: independent
+  concept_stem: job_level
+  domain_tags:
+  - business
+  - hr
+  - people
+  pools: []
+  concept_group: human_resources
+- label: Employment Type
+  scale_type: categorical
+  role: independent
+  concept_stem: employment_type
+  domain_tags:
+  - business
+  - hr
+  - people
+  pools: []
+  concept_group: human_resources
+- label: Succession Coverage (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: succession_coverage
+  domain_tags:
+  - business
+  - hr
+  - people
+  pools: []
+  unit: '%'
+  concept_group: human_resources
+- label: Open Positions
+  scale_type: discrete_count
+  role: dependent
+  concept_stem: open_positions
+  domain_tags:
+  - business
+  - hr
+  - people
+  pools: []
+  unit: count
+  concept_group: human_resources
+- label: Offboarding Time (days)
+  scale_type: continuous
+  role: dependent
+  concept_stem: offboarding_time
+  domain_tags:
+  - business
+  - hr
+  - people
+  pools: []
+  unit: days
+  concept_group: human_resources
+- label: Productivity per Hour ($)
+  scale_type: continuous
+  role: dependent
+  concept_stem: productivity_per_hour
+  domain_tags:
+  - business
+  - hr
+  - people
+  pools: []
+  unit: $/h
+  concept_group: human_resources
+- label: Revenue per FTE ($)
+  scale_type: continuous
+  role: dependent
+  concept_stem: revenue_per_fte
+  domain_tags:
+  - business
+  - hr
+  - people
+  pools: []
+  unit: $
+  concept_group: human_resources
+- label: Actual Cost ($)
+  scale_type: continuous
+  role: dependent
+  concept_stem: actual_cost
+  domain_tags:
+  - business
+  - operations
+  - project_management
+  pools: []
+  unit: $
+  concept_group: productivity_projects
+- label: Budget Variance (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: budget_variance
+  domain_tags:
+  - business
+  - operations
+  - project_management
+  pools: []
+  unit: '%'
+  concept_group: productivity_projects
+- label: Planned Value ($)
+  scale_type: continuous
+  role: independent
+  concept_stem: planned_value
+  domain_tags:
+  - business
+  - operations
+  - project_management
+  pools: []
+  unit: $
+  concept_group: productivity_projects
+- label: Earned Value ($)
+  scale_type: continuous
+  role: dependent
+  concept_stem: earned_value
+  domain_tags:
+  - business
+  - operations
+  - project_management
+  pools: []
+  unit: $
+  concept_group: productivity_projects
+- label: Project Duration (weeks)
+  scale_type: continuous
+  role: dependent
+  concept_stem: project_duration
+  domain_tags:
+  - business
+  - operations
+  - project_management
+  pools: []
+  unit: weeks
+  concept_group: productivity_projects
+- label: Milestones Completed (count)
+  scale_type: discrete_count
+  role: dependent
+  concept_stem: milestones_completed
+  domain_tags:
+  - business
+  - operations
+  - project_management
+  pools: []
+  unit: count
+  concept_group: productivity_projects
+- label: Tasks Completed
+  scale_type: discrete_count
+  role: dependent
+  concept_stem: tasks_completed
+  domain_tags:
+  - business
+  - operations
+  - project_management
+  pools: []
+  unit: count
+  concept_group: productivity_projects
+- label: Task Completion Rate (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: task_completion_rate
+  domain_tags:
+  - business
+  - operations
+  - project_management
+  pools: []
+  unit: '%'
+  concept_group: productivity_projects
+- label: On-Time Project Delivery (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: on_time_project_delivery
+  domain_tags:
+  - business
+  - operations
+  - project_management
+  pools: []
+  unit: '%'
+  concept_group: productivity_projects
+- label: Scope Creep (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: scope_creep
+  domain_tags:
+  - business
+  - operations
+  - project_management
+  pools: []
+  unit: '%'
+  concept_group: productivity_projects
+- label: Resource Utilization (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: resource_utilization
+  domain_tags:
+  - business
+  - operations
+  - project_management
+  pools: []
+  unit: '%'
+  concept_group: productivity_projects
+- label: Team Velocity (points/sprint)
+  scale_type: discrete_count
+  role: dependent
+  concept_stem: team_velocity
+  domain_tags:
+  - business
+  - operations
+  - project_management
+  pools: []
+  unit: points
+  concept_group: productivity_projects
+- label: Sprint Burndown Remaining (points)
+  scale_type: discrete_count
+  role: dependent
+  concept_stem: sprint_burndown_remaining
+  domain_tags:
+  - business
+  - operations
+  - project_management
+  pools: []
+  unit: points
+  concept_group: productivity_projects
+- label: Cycle Time (days)
+  scale_type: continuous
+  role: dependent
+  concept_stem: cycle_time
+  domain_tags:
+  - business
+  - operations
+  - project_management
+  pools: []
+  unit: days
+  concept_group: productivity_projects
+- label: Work in Progress Limit
+  scale_type: discrete_count
+  role: independent
+  concept_stem: work_in_progress_limit
+  domain_tags:
+  - business
+  - operations
+  - project_management
+  pools: []
+  unit: count
+  concept_group: productivity_projects
+- label: Risk Exposure ($)
+  scale_type: continuous
+  role: dependent
+  concept_stem: risk_exposure
+  domain_tags:
+  - business
+  - operations
+  - project_management
+  pools: []
+  unit: $
+  concept_group: productivity_projects
+- label: Open Risks (count)
+  scale_type: discrete_count
+  role: dependent
+  concept_stem: open_risks
+  domain_tags:
+  - business
+  - operations
+  - project_management
+  pools: []
+  unit: count
+  concept_group: productivity_projects
+- label: Issue Resolution Time (days)
+  scale_type: continuous
+  role: dependent
+  concept_stem: issue_resolution_time
+  domain_tags:
+  - business
+  - operations
+  - project_management
+  pools: []
+  unit: days
+  concept_group: productivity_projects
+- label: Change Request Count
+  scale_type: discrete_count
+  role: dependent
+  concept_stem: change_request_count
+  domain_tags:
+  - business
+  - operations
+  - project_management
+  pools: []
+  unit: count
+  concept_group: productivity_projects
+- label: Stakeholder Satisfaction (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: stakeholder_satisfaction
+  domain_tags:
+  - business
+  - operations
+  - project_management
+  pools: []
+  unit: '%'
+  concept_group: productivity_projects
+- label: Benefits Realization (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: benefits_realization
+  domain_tags:
+  - business
+  - operations
+  - project_management
+  pools: []
+  unit: '%'
+  concept_group: productivity_projects
+- label: Project Portfolio Value ($)
+  scale_type: continuous
+  role: dependent
+  concept_stem: project_portfolio_value
+  domain_tags:
+  - business
+  - operations
+  - project_management
+  pools: []
+  unit: $
+  concept_group: productivity_projects
+- label: Project Success Rate (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: project_success_rate
+  domain_tags:
+  - business
+  - operations
+  - project_management
+  pools: []
+  unit: '%'
+  concept_group: productivity_projects
+- label: Meeting Hours per Week
+  scale_type: continuous
+  role: independent
+  concept_stem: meeting_hours_per_week
+  domain_tags:
+  - business
+  - operations
+  - project_management
+  pools: []
+  unit: h
+  concept_group: productivity_projects
+- label: Utilization Rate (billable %)
+  scale_type: percentage
+  role: dependent
+  concept_stem: utilization_rate
+  domain_tags:
+  - business
+  - operations
+  - project_management
+  pools: []
+  unit: '%'
+  concept_group: productivity_projects
+- label: Billable Hours
+  scale_type: continuous
+  role: dependent
+  concept_stem: billable_hours
+  domain_tags:
+  - business
+  - operations
+  - project_management
+  pools: []
+  unit: h
+  concept_group: productivity_projects
+- label: Realization Rate (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: realization_rate
+  domain_tags:
+  - business
+  - operations
+  - project_management
+  pools: []
+  unit: '%'
+  concept_group: productivity_projects
+- label: Hourly Billing Rate ($)
+  scale_type: continuous
+  role: independent
+  concept_stem: hourly_billing_rate
+  domain_tags:
+  - business
+  - operations
+  - project_management
+  pools: []
+  unit: $/h
+  concept_group: productivity_projects
+- label: Project Type
+  scale_type: categorical
+  role: independent
+  concept_stem: project_type
+  domain_tags:
+  - business
+  - operations
+  - project_management
+  pools: []
+  concept_group: productivity_projects
+- label: Priority Level
+  scale_type: categorical
+  role: independent
+  concept_stem: priority_level
+  domain_tags:
+  - business
+  - operations
+  - project_management
+  pools: []
+  concept_group: productivity_projects
+- label: New Product Revenue Share (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: new_product_revenue_share
+  domain_tags:
+  - business
+  - product
+  - strategy
+  pools: []
+  unit: '%'
+  concept_group: product_innovation
+- label: Time to Market (months)
+  scale_type: continuous
+  role: dependent
+  concept_stem: time_to_market
+  domain_tags:
+  - business
+  - product
+  - strategy
+  pools: []
+  unit: months
+  concept_group: product_innovation
+- label: Product Launch Success Rate (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: product_launch_success_rate
+  domain_tags:
+  - business
+  - product
+  - strategy
+  pools: []
+  unit: '%'
+  concept_group: product_innovation
+- label: Features Shipped (count)
+  scale_type: discrete_count
+  role: dependent
+  concept_stem: features_shipped
+  domain_tags:
+  - business
+  - product
+  - strategy
+  pools: []
+  unit: count
+  concept_group: product_innovation
+- label: Roadmap Completion (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: roadmap_completion
+  domain_tags:
+  - business
+  - product
+  - strategy
+  pools: []
+  unit: '%'
+  concept_group: product_innovation
+- label: Product-Market Fit Score (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: product_market_fit_score
+  domain_tags:
+  - business
+  - product
+  - strategy
+  pools: []
+  unit: '%'
+  concept_group: product_innovation
+- label: Feature Usage Rate (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: feature_usage_rate
+  domain_tags:
+  - business
+  - product
+  - strategy
+  pools: []
+  unit: '%'
+  concept_group: product_innovation
+- label: Product Defect Rate (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: product_defect_rate
+  domain_tags:
+  - business
+  - product
+  - strategy
+  pools: []
+  unit: '%'
+  concept_group: product_innovation
+- label: Patents Filed
+  scale_type: discrete_count
+  role: dependent
+  concept_stem: patents_filed
+  domain_tags:
+  - business
+  - product
+  - strategy
+  pools: []
+  unit: count
+  concept_group: product_innovation
+- label: Patents Granted
+  scale_type: discrete_count
+  role: dependent
+  concept_stem: patents_granted
+  domain_tags:
+  - business
+  - product
+  - strategy
+  pools: []
+  unit: count
+  concept_group: product_innovation
+- label: Idea Pipeline (count)
+  scale_type: discrete_count
+  role: dependent
+  concept_stem: idea_pipeline
+  domain_tags:
+  - business
+  - product
+  - strategy
+  pools: []
+  unit: count
+  concept_group: product_innovation
+- label: Prototype Iterations
+  scale_type: discrete_count
+  role: independent
+  concept_stem: prototype_iterations
+  domain_tags:
+  - business
+  - product
+  - strategy
+  pools: []
+  unit: count
+  concept_group: product_innovation
+- label: Pricing Tier Count
+  scale_type: discrete_count
+  role: independent
+  concept_stem: pricing_tier_count
+  domain_tags:
+  - business
+  - product
+  - strategy
+  pools: []
+  unit: count
+  concept_group: product_innovation
+- label: Product Margin by SKU (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: product_margin_by_sku
+  domain_tags:
+  - business
+  - product
+  - strategy
+  pools: []
+  unit: '%'
+  concept_group: product_innovation
+- label: SKU Count
+  scale_type: discrete_count
+  role: independent
+  concept_stem: sku_count
+  domain_tags:
+  - business
+  - product
+  - strategy
+  pools: []
+  unit: count
+  concept_group: product_innovation
+- label: SKU Rationalization Rate (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: sku_rationalization_rate
+  domain_tags:
+  - business
+  - product
+  - strategy
+  pools: []
+  unit: '%'
+  concept_group: product_innovation
+- label: Product Lifecycle Stage
+  scale_type: categorical
+  role: independent
+  concept_stem: product_lifecycle_stage
+  domain_tags:
+  - business
+  - product
+  - strategy
+  pools: []
+  concept_group: product_innovation
+- label: Innovation Investment (% of Revenue)
+  scale_type: percentage
+  role: independent
+  concept_stem: innovation_investment
+  domain_tags:
+  - business
+  - product
+  - strategy
+  pools: []
+  unit: '%'
+  concept_group: product_innovation
+- label: Open Source Contributions
+  scale_type: discrete_count
+  role: dependent
+  concept_stem: open_source_contributions
+  domain_tags:
+  - business
+  - product
+  - strategy
+  pools: []
+  unit: count
+  concept_group: product_innovation
+- label: API Calls per Day
+  scale_type: discrete_count
+  role: dependent
+  concept_stem: api_calls_per_day
+  domain_tags:
+  - business
+  - product
+  - strategy
+  pools: []
+  unit: count/day
+  concept_group: product_innovation
+- label: Platform Uptime (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: platform_uptime
+  domain_tags:
+  - business
+  - product
+  - strategy
+  pools: []
+  unit: '%'
+  concept_group: product_innovation
+- label: App Store Rating
+  scale_type: continuous
+  role: dependent
+  concept_stem: app_store_rating
+  domain_tags:
+  - business
+  - product
+  - strategy
+  pools: []
+  unit: stars
+  concept_group: product_innovation
+- label: App Downloads
+  scale_type: discrete_count
+  role: dependent
+  concept_stem: app_downloads
+  domain_tags:
+  - business
+  - product
+  - strategy
+  pools: []
+  unit: count
+  concept_group: product_innovation
+- label: Uninstall Rate (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: uninstall_rate
+  domain_tags:
+  - business
+  - product
+  - strategy
+  pools: []
+  unit: '%'
+  concept_group: product_innovation
+- label: Stickiness Ratio (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: stickiness_ratio
+  domain_tags:
+  - business
+  - product
+  - strategy
+  pools: []
+  unit: '%'
+  concept_group: product_innovation
+- label: Competitive Win Rate (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: competitive_win_rate
+  domain_tags:
+  - business
+  - product
+  - strategy
+  pools: []
+  unit: '%'
+  concept_group: product_innovation
+- label: Feature Parity Score (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: feature_parity_score
+  domain_tags:
+  - business
+  - product
+  - strategy
+  pools: []
+  unit: '%'
+  concept_group: product_innovation
+- label: Customer Feature Requests (count)
+  scale_type: discrete_count
+  role: dependent
+  concept_stem: customer_feature_requests
+  domain_tags:
+  - business
+  - product
+  - strategy
+  pools: []
+  unit: count
+  concept_group: product_innovation
+- label: Beta Tester Count
+  scale_type: discrete_count
+  role: independent
+  concept_stem: beta_tester_count
+  domain_tags:
+  - business
+  - product
+  - strategy
+  pools: []
+  unit: count
+  concept_group: product_innovation
+- label: Release Frequency (per month)
+  scale_type: discrete_count
+  role: dependent
+  concept_stem: release_frequency
+  domain_tags:
+  - business
+  - product
+  - strategy
+  pools: []
+  unit: count/month
+  concept_group: product_innovation
+- label: Total Addressable Market ($)
+  scale_type: continuous
+  role: independent
+  concept_stem: total_addressable_market
+  domain_tags:
+  - business
+  - strategy
+  - market
+  pools: []
+  unit: $
+  concept_group: strategy_market
+- label: Serviceable Addressable Market ($)
+  scale_type: continuous
+  role: independent
+  concept_stem: serviceable_addressable_market
+  domain_tags:
+  - business
+  - strategy
+  - market
+  pools: []
+  unit: $
+  concept_group: strategy_market
+- label: Serviceable Obtainable Market ($)
+  scale_type: continuous
+  role: independent
+  concept_stem: serviceable_obtainable_market
+  domain_tags:
+  - business
+  - strategy
+  - market
+  pools: []
+  unit: $
+  concept_group: strategy_market
+- label: Market Growth Rate (%)
+  scale_type: percentage
+  role: independent
+  concept_stem: market_growth_rate
+  domain_tags:
+  - business
+  - strategy
+  - market
+  pools: []
+  unit: '%'
+  concept_group: strategy_market
+- label: Relative Market Share
+  scale_type: continuous
+  role: dependent
+  concept_stem: relative_market_share
+  domain_tags:
+  - business
+  - strategy
+  - market
+  pools: []
+  unit: ratio
+  concept_group: strategy_market
+- label: Market Penetration (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: market_penetration
+  domain_tags:
+  - business
+  - strategy
+  - market
+  pools: []
+  unit: '%'
+  concept_group: strategy_market
+- label: Competitor Count
+  scale_type: discrete_count
+  role: independent
+  concept_stem: competitor_count
+  domain_tags:
+  - business
+  - strategy
+  - market
+  pools: []
+  unit: count
+  concept_group: strategy_market
+- label: Herfindahl-Hirschman Index
+  scale_type: continuous
+  role: independent
+  concept_stem: herfindahl_hirschman_index
+  domain_tags:
+  - business
+  - strategy
+  - market
+  pools: []
+  unit: index
+  concept_group: strategy_market
+- label: Concentration Ratio CR4 (%)
+  scale_type: percentage
+  role: independent
+  concept_stem: concentration_ratio_cr4
+  domain_tags:
+  - business
+  - strategy
+  - market
+  pools: []
+  unit: '%'
+  concept_group: strategy_market
+- label: Entry Barrier Score
+  scale_type: continuous
+  role: independent
+  concept_stem: entry_barrier_score
+  domain_tags:
+  - business
+  - strategy
+  - market
+  pools: []
+  unit: score
+  concept_group: strategy_market
+- label: Pricing Position Index
+  scale_type: continuous
+  role: independent
+  concept_stem: pricing_position_index
+  domain_tags:
+  - business
+  - strategy
+  - market
+  pools: []
+  unit: index
+  concept_group: strategy_market
+- label: Brand Value ($)
+  scale_type: continuous
+  role: dependent
+  concept_stem: brand_value
+  domain_tags:
+  - business
+  - strategy
+  - market
+  pools: []
+  unit: $
+  concept_group: strategy_market
+- label: Customer Preference Share (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: customer_preference_share
+  domain_tags:
+  - business
+  - strategy
+  - market
+  pools: []
+  unit: '%'
+  concept_group: strategy_market
+- label: Geographic Expansion (new markets)
+  scale_type: discrete_count
+  role: dependent
+  concept_stem: geographic_expansion
+  domain_tags:
+  - business
+  - strategy
+  - market
+  pools: []
+  unit: count
+  concept_group: strategy_market
+- label: Merger and Acquisition Deal Value ($)
+  scale_type: continuous
+  role: independent
+  concept_stem: merger_and_acquisition_deal_value
+  domain_tags:
+  - business
+  - strategy
+  - market
+  pools: []
+  unit: $
+  concept_group: strategy_market
+- label: Synergy Realization (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: synergy_realization
+  domain_tags:
+  - business
+  - strategy
+  - market
+  pools: []
+  unit: '%'
+  concept_group: strategy_market
+- label: Integration Cost ($)
+  scale_type: continuous
+  role: dependent
+  concept_stem: integration_cost
+  domain_tags:
+  - business
+  - strategy
+  - market
+  pools: []
+  unit: $
+  concept_group: strategy_market
+- label: Strategic Initiative Completion (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: strategic_initiative_completion
+  domain_tags:
+  - business
+  - strategy
+  - market
+  pools: []
+  unit: '%'
+  concept_group: strategy_market
+- label: OKR Attainment (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: okr_attainment
+  domain_tags:
+  - business
+  - strategy
+  - market
+  pools: []
+  unit: '%'
+  concept_group: strategy_market
+- label: Balanced Scorecard Index
+  scale_type: continuous
+  role: dependent
+  concept_stem: balanced_scorecard_index
+  domain_tags:
+  - business
+  - strategy
+  - market
+  pools: []
+  unit: index
+  concept_group: strategy_market
+- label: Competitive Intensity Index
+  scale_type: continuous
+  role: independent
+  concept_stem: competitive_intensity_index
+  domain_tags:
+  - business
+  - strategy
+  - market
+  pools: []
+  unit: index
+  concept_group: strategy_market
+- label: Industry
+  scale_type: categorical
+  role: independent
+  concept_stem: industry
+  domain_tags:
+  - business
+  - strategy
+  - market
+  pools: []
+  concept_group: strategy_market
+- label: Company Size
+  scale_type: categorical
+  role: independent
+  concept_stem: company_size
+  domain_tags:
+  - business
+  - strategy
+  - market
+  pools: []
+  concept_group: strategy_market
+- label: Business Model
+  scale_type: categorical
+  role: independent
+  concept_stem: business_model
+  domain_tags:
+  - business
+  - strategy
+  - market
+  pools: []
+  concept_group: strategy_market
+- label: Market Segment
+  scale_type: categorical
+  role: independent
+  concept_stem: market_segment
+  domain_tags:
+  - business
+  - strategy
+  - market
+  pools: []
+  concept_group: strategy_market
+- label: Franchise Count
+  scale_type: discrete_count
+  role: independent
+  concept_stem: franchise_count
+  domain_tags:
+  - business
+  - strategy
+  - market
+  pools: []
+  unit: count
+  concept_group: strategy_market
+- label: Store Count
+  scale_type: discrete_count
+  role: independent
+  concept_stem: store_count
+  domain_tags:
+  - business
+  - strategy
+  - market
+  pools: []
+  unit: count
+  concept_group: strategy_market
+- label: New Store Openings
+  scale_type: discrete_count
+  role: dependent
+  concept_stem: new_store_openings
+  domain_tags:
+  - business
+  - strategy
+  - market
+  pools: []
+  unit: count
+  concept_group: strategy_market
+- label: Store Closure Rate (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: store_closure_rate
+  domain_tags:
+  - business
+  - strategy
+  - market
+  pools: []
+  unit: '%'
+  concept_group: strategy_market
+- label: Operational Loss Events (count)
+  scale_type: discrete_count
+  role: dependent
+  concept_stem: operational_loss_events
+  domain_tags:
+  - business
+  - risk
+  - compliance
+  pools: []
+  unit: count
+  concept_group: risk_compliance_governance
+- label: Operational Loss ($)
+  scale_type: continuous
+  role: dependent
+  concept_stem: operational_loss
+  domain_tags:
+  - business
+  - risk
+  - compliance
+  pools: []
+  unit: $
+  concept_group: risk_compliance_governance
+- label: Fraud Loss ($)
+  scale_type: continuous
+  role: dependent
+  concept_stem: fraud_loss
+  domain_tags:
+  - business
+  - risk
+  - compliance
+  pools: []
+  unit: $
+  concept_group: risk_compliance_governance
+- label: Fraud Rate (basis points)
+  scale_type: continuous
+  role: dependent
+  concept_stem: fraud_rate
+  domain_tags:
+  - business
+  - risk
+  - compliance
+  pools: []
+  unit: bps
+  concept_group: risk_compliance_governance
+- label: Compliance Audit Findings (count)
+  scale_type: discrete_count
+  role: dependent
+  concept_stem: compliance_audit_findings
+  domain_tags:
+  - business
+  - risk
+  - compliance
+  pools: []
+  unit: count
+  concept_group: risk_compliance_governance
+- label: Audit Finding Closure Rate (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: audit_finding_closure_rate
+  domain_tags:
+  - business
+  - risk
+  - compliance
+  pools: []
+  unit: '%'
+  concept_group: risk_compliance_governance
+- label: Policy Violation Count
+  scale_type: discrete_count
+  role: dependent
+  concept_stem: policy_violation_count
+  domain_tags:
+  - business
+  - risk
+  - compliance
+  pools: []
+  unit: count
+  concept_group: risk_compliance_governance
+- label: Regulatory Fines ($)
+  scale_type: continuous
+  role: dependent
+  concept_stem: regulatory_fines
+  domain_tags:
+  - business
+  - risk
+  - compliance
+  pools: []
+  unit: $
+  concept_group: risk_compliance_governance
+- label: Training Compliance Rate (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: training_compliance_rate
+  domain_tags:
+  - business
+  - risk
+  - compliance
+  pools: []
+  unit: '%'
+  concept_group: risk_compliance_governance
+- label: Data Breach Incidents (count)
+  scale_type: discrete_count
+  role: dependent
+  concept_stem: data_breach_incidents
+  domain_tags:
+  - business
+  - risk
+  - compliance
+  pools: []
+  unit: count
+  concept_group: risk_compliance_governance
+- label: Records Exposed (count)
+  scale_type: discrete_count
+  role: dependent
+  concept_stem: records_exposed
+  domain_tags:
+  - business
+  - risk
+  - compliance
+  pools: []
+  unit: count
+  concept_group: risk_compliance_governance
+- label: Security Incident Response Time (h)
+  scale_type: continuous
+  role: dependent
+  concept_stem: security_incident_response_time
+  domain_tags:
+  - business
+  - risk
+  - compliance
+  pools: []
+  unit: h
+  concept_group: risk_compliance_governance
+- label: Phishing Click Rate (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: phishing_click_rate
+  domain_tags:
+  - business
+  - risk
+  - compliance
+  pools: []
+  unit: '%'
+  concept_group: risk_compliance_governance
+- label: Vendor Risk Score
+  scale_type: continuous
+  role: dependent
+  concept_stem: vendor_risk_score
+  domain_tags:
+  - business
+  - risk
+  - compliance
+  pools: []
+  unit: score
+  concept_group: risk_compliance_governance
+- label: Insurance Premium ($)
+  scale_type: continuous
+  role: independent
+  concept_stem: insurance_premium
+  domain_tags:
+  - business
+  - risk
+  - compliance
+  pools: []
+  unit: $
+  concept_group: risk_compliance_governance
+- label: Insurance Claims Count
+  scale_type: discrete_count
+  role: dependent
+  concept_stem: insurance_claims_count
+  domain_tags:
+  - business
+  - risk
+  - compliance
+  pools: []
+  unit: count
+  concept_group: risk_compliance_governance
+- label: Loss Ratio (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: loss_ratio
+  domain_tags:
+  - business
+  - risk
+  - compliance
+  pools: []
+  unit: '%'
+  concept_group: risk_compliance_governance
+- label: Combined Ratio (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: combined_ratio
+  domain_tags:
+  - business
+  - risk
+  - compliance
+  pools: []
+  unit: '%'
+  concept_group: risk_compliance_governance
+- label: Credit Default Rate (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: credit_default_rate
+  domain_tags:
+  - business
+  - risk
+  - compliance
+  pools: []
+  unit: '%'
+  concept_group: risk_compliance_governance
+- label: Probability of Default (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: probability_of_default
+  domain_tags:
+  - business
+  - risk
+  - compliance
+  pools: []
+  unit: '%'
+  concept_group: risk_compliance_governance
+- label: Loss Given Default (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: loss_given_default
+  domain_tags:
+  - business
+  - risk
+  - compliance
+  pools: []
+  unit: '%'
+  concept_group: risk_compliance_governance
+- label: Exposure at Default ($)
+  scale_type: continuous
+  role: dependent
+  concept_stem: exposure_at_default
+  domain_tags:
+  - business
+  - risk
+  - compliance
+  pools: []
+  unit: $
+  concept_group: risk_compliance_governance
+- label: Non-Performing Loan Ratio (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: non_performing_loan_ratio
+  domain_tags:
+  - business
+  - risk
+  - compliance
+  pools: []
+  unit: '%'
+  concept_group: risk_compliance_governance
+- label: Capital Adequacy Ratio (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: capital_adequacy_ratio
+  domain_tags:
+  - business
+  - risk
+  - compliance
+  pools: []
+  unit: '%'
+  concept_group: risk_compliance_governance
+- label: Tier 1 Capital Ratio (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: tier_1_capital_ratio
+  domain_tags:
+  - business
+  - risk
+  - compliance
+  pools: []
+  unit: '%'
+  concept_group: risk_compliance_governance
+- label: Net Interest Margin (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: net_interest_margin
+  domain_tags:
+  - business
+  - risk
+  - compliance
+  pools: []
+  unit: '%'
+  concept_group: risk_compliance_governance
+- label: Loan-to-Deposit Ratio (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: loan_to_deposit_ratio
+  domain_tags:
+  - business
+  - risk
+  - compliance
+  pools: []
+  unit: '%'
+  concept_group: risk_compliance_governance
+- label: Loan-to-Value Ratio (%)
+  scale_type: percentage
+  role: independent
+  concept_stem: loan_to_value_ratio
+  domain_tags:
+  - business
+  - risk
+  - compliance
+  pools: []
+  unit: '%'
+  concept_group: risk_compliance_governance
+- label: Credit Score
+  scale_type: discrete_count
+  role: independent
+  concept_stem: credit_score
+  domain_tags:
+  - business
+  - risk
+  - compliance
+  pools: []
+  unit: score
+  concept_group: risk_compliance_governance
+- label: Debt-to-Income Ratio (%)
+  scale_type: percentage
+  role: independent
+  concept_stem: debt_to_income_ratio
+  domain_tags:
+  - business
+  - risk
+  - compliance
+  pools: []
+  unit: '%'
+  concept_group: risk_compliance_governance
+- label: Board Independence (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: board_independence
+  domain_tags:
+  - business
+  - risk
+  - compliance
+  pools: []
+  unit: '%'
+  concept_group: risk_compliance_governance
+- label: Board Size
+  scale_type: discrete_count
+  role: independent
+  concept_stem: board_size
+  domain_tags:
+  - business
+  - risk
+  - compliance
+  pools: []
+  unit: count
+  concept_group: risk_compliance_governance
+- label: ESG Score
+  scale_type: continuous
+  role: dependent
+  concept_stem: esg_score
+  domain_tags:
+  - business
+  - risk
+  - compliance
+  pools: []
+  unit: score
+  concept_group: risk_compliance_governance
+- label: Carbon Emissions (tCO2e)
+  scale_type: continuous
+  role: dependent
+  concept_stem: carbon_emissions
+  domain_tags:
+  - business
+  - risk
+  - compliance
+  pools: []
+  unit: tCO2e
+  concept_group: risk_compliance_governance
+- label: Energy Cost ($)
+  scale_type: continuous
+  role: dependent
+  concept_stem: energy_cost
+  domain_tags:
+  - business
+  - risk
+  - compliance
+  pools: []
+  unit: $
+  concept_group: risk_compliance_governance
+- label: Sustainability Spend ($)
+  scale_type: continuous
+  role: independent
+  concept_stem: sustainability_spend
+  domain_tags:
+  - business
+  - risk
+  - compliance
+  pools: []
+  unit: $
+  concept_group: risk_compliance_governance
+- label: Charitable Giving ($)
+  scale_type: continuous
+  role: independent
+  concept_stem: charitable_giving
+  domain_tags:
+  - business
+  - risk
+  - compliance
+  pools: []
+  unit: $
+  concept_group: risk_compliance_governance
+- label: Whistleblower Reports (count)
+  scale_type: discrete_count
+  role: dependent
+  concept_stem: whistleblower_reports
+  domain_tags:
+  - business
+  - risk
+  - compliance
+  pools: []
+  unit: count
+  concept_group: risk_compliance_governance
+- label: Contract Cycle Time (days)
+  scale_type: continuous
+  role: dependent
+  concept_stem: contract_cycle_time
+  domain_tags:
+  - business
+  - risk
+  - compliance
+  pools: []
+  unit: days
+  concept_group: risk_compliance_governance
+- label: Contract Renewal Rate (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: contract_renewal_rate
+  domain_tags:
+  - business
+  - risk
+  - compliance
+  pools: []
+  unit: '%'
+  concept_group: risk_compliance_governance
+- label: Legal Spend ($)
+  scale_type: continuous
+  role: dependent
+  concept_stem: legal_spend
+  domain_tags:
+  - business
+  - risk
+  - compliance
+  pools: []
+  unit: $
+  concept_group: risk_compliance_governance
+- label: Risk Appetite Level
+  scale_type: categorical
+  role: independent
+  concept_stem: risk_appetite_level
+  domain_tags:
+  - business
+  - risk
+  - compliance
+  pools: []
+  concept_group: risk_compliance_governance
+- label: Control Effectiveness Rating
+  scale_type: categorical
+  role: dependent
+  concept_stem: control_effectiveness_rating
+  domain_tags:
+  - business
+  - risk
+  - compliance
+  pools: []
+  concept_group: risk_compliance_governance
+- label: Business Continuity Test Pass Rate (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: business_continuity_test_pass_rate
+  domain_tags:
+  - business
+  - risk
+  - compliance
+  pools: []
+  unit: '%'
+  concept_group: risk_compliance_governance
+- label: IT Spend (% of Revenue)
+  scale_type: percentage
+  role: independent
+  concept_stem: it_spend
+  domain_tags:
+  - business
+  - it
+  - digital
+  pools: []
+  unit: '%'
+  concept_group: it_digital_business
+- label: IT Cost per Employee ($)
+  scale_type: continuous
+  role: dependent
+  concept_stem: it_cost_per_employee
+  domain_tags:
+  - business
+  - it
+  - digital
+  pools: []
+  unit: $
+  concept_group: it_digital_business
+- label: Incident Count
+  scale_type: discrete_count
+  role: dependent
+  concept_stem: incident_count
+  domain_tags:
+  - business
+  - it
+  - digital
+  pools: []
+  unit: count
+  concept_group: it_digital_business
+- label: Mean Time to Resolve (h)
+  scale_type: continuous
+  role: dependent
+  concept_stem: mean_time_to_resolve
+  domain_tags:
+  - business
+  - it
+  - digital
+  pools: []
+  unit: h
+  concept_group: it_digital_business
+- label: Change Success Rate (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: change_success_rate
+  domain_tags:
+  - business
+  - it
+  - digital
+  pools: []
+  unit: '%'
+  concept_group: it_digital_business
+- label: Automation Rate (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: automation_rate
+  domain_tags:
+  - business
+  - it
+  - digital
+  pools: []
+  unit: '%'
+  concept_group: it_digital_business
+- label: Digital Adoption Rate (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: digital_adoption_rate
+  domain_tags:
+  - business
+  - it
+  - digital
+  pools: []
+  unit: '%'
+  concept_group: it_digital_business
+- label: Cloud Spend ($)
+  scale_type: continuous
+  role: dependent
+  concept_stem: cloud_spend
+  domain_tags:
+  - business
+  - it
+  - digital
+  pools: []
+  unit: $
+  concept_group: it_digital_business
+- label: Software Licenses Utilization (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: software_licenses_utilization
+  domain_tags:
+  - business
+  - it
+  - digital
+  pools: []
+  unit: '%'
+  concept_group: it_digital_business
+- label: Shadow IT Applications (count)
+  scale_type: discrete_count
+  role: dependent
+  concept_stem: shadow_it_applications
+  domain_tags:
+  - business
+  - it
+  - digital
+  pools: []
+  unit: count
+  concept_group: it_digital_business
+- label: Data Quality Score (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: data_quality_score
+  domain_tags:
+  - business
+  - it
+  - digital
+  pools: []
+  unit: '%'
+  concept_group: it_digital_business
+- label: Data Completeness (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: data_completeness
+  domain_tags:
+  - business
+  - it
+  - digital
+  pools: []
+  unit: '%'
+  concept_group: it_digital_business
+- label: Report Generation Time (min)
+  scale_type: continuous
+  role: dependent
+  concept_stem: report_generation_time
+  domain_tags:
+  - business
+  - it
+  - digital
+  pools: []
+  unit: min
+  concept_group: it_digital_business
+- label: Dashboard Usage (views/week)
+  scale_type: discrete_count
+  role: dependent
+  concept_stem: dashboard_usage
+  domain_tags:
+  - business
+  - it
+  - digital
+  pools: []
+  unit: count/week
+  concept_group: it_digital_business
+- label: Process Automation Hours Saved
+  scale_type: continuous
+  role: dependent
+  concept_stem: process_automation_hours_saved
+  domain_tags:
+  - business
+  - it
+  - digital
+  pools: []
+  unit: h
+  concept_group: it_digital_business
+- label: Robotic Process Automation Bots (count)
+  scale_type: discrete_count
+  role: independent
+  concept_stem: robotic_process_automation_bots
+  domain_tags:
+  - business
+  - it
+  - digital
+  pools: []
+  unit: count
+  concept_group: it_digital_business
+- label: Straight-Through Processing Rate (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: straight_through_processing_rate
+  domain_tags:
+  - business
+  - it
+  - digital
+  pools: []
+  unit: '%'
+  concept_group: it_digital_business
+- label: Digital Revenue Share (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: digital_revenue_share
+  domain_tags:
+  - business
+  - it
+  - digital
+  pools: []
+  unit: '%'
+  concept_group: it_digital_business
+- label: Mobile Revenue Share (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: mobile_revenue_share
+  domain_tags:
+  - business
+  - it
+  - digital
+  pools: []
+  unit: '%'
+  concept_group: it_digital_business
+- label: E-commerce Conversion Rate (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: e_commerce_conversion_rate
+  domain_tags:
+  - business
+  - it
+  - digital
+  pools: []
+  unit: '%'
+  concept_group: it_digital_business
+- label: Page Load Time (s)
+  scale_type: continuous
+  role: dependent
+  concept_stem: page_load_time
+  domain_tags:
+  - business
+  - it
+  - digital
+  pools: []
+  unit: s
+  concept_group: it_digital_business
+- label: Payment Success Rate (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: payment_success_rate
+  domain_tags:
+  - business
+  - it
+  - digital
+  pools: []
+  unit: '%'
+  concept_group: it_digital_business
+- label: Payment Processing Fee (%)
+  scale_type: percentage
+  role: independent
+  concept_stem: payment_processing_fee
+  domain_tags:
+  - business
+  - it
+  - digital
+  pools: []
+  unit: '%'
+  concept_group: it_digital_business
+- label: Chargeback Rate (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: chargeback_rate
+  domain_tags:
+  - business
+  - it
+  - digital
+  pools: []
+  unit: '%'
+  concept_group: it_digital_business
+- label: Transaction Volume ($)
+  scale_type: continuous
+  role: dependent
+  concept_stem: transaction_volume
+  domain_tags:
+  - business
+  - it
+  - digital
+  pools: []
+  unit: $
+  concept_group: it_digital_business
+- label: Transaction Count
+  scale_type: discrete_count
+  role: dependent
+  concept_stem: transaction_count
+  domain_tags:
+  - business
+  - it
+  - digital
+  pools: []
+  unit: count
+  concept_group: it_digital_business
+- label: Average Transaction Value ($)
+  scale_type: continuous
+  role: dependent
+  concept_stem: average_transaction_value
+  domain_tags:
+  - business
+  - it
+  - digital
+  pools: []
+  unit: $
+  concept_group: it_digital_business
+- label: Take Rate (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: take_rate
+  domain_tags:
+  - business
+  - it
+  - digital
+  pools: []
+  unit: '%'
+  concept_group: it_digital_business
+- label: Gross Merchandise Value ($)
+  scale_type: continuous
+  role: dependent
+  concept_stem: gross_merchandise_value
+  domain_tags:
+  - business
+  - it
+  - digital
+  pools: []
+  unit: $
+  concept_group: it_digital_business
+- label: Marketplace Seller Count
+  scale_type: discrete_count
+  role: dependent
+  concept_stem: marketplace_seller_count
+  domain_tags:
+  - business
+  - it
+  - digital
+  pools: []
+  unit: count
+  concept_group: it_digital_business
+- label: Marketplace Liquidity (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: marketplace_liquidity
+  domain_tags:
+  - business
+  - it
+  - digital
+  pools: []
+  unit: '%'
+  concept_group: it_digital_business
+- label: Platform Commission ($)
+  scale_type: continuous
+  role: dependent
+  concept_stem: platform_commission
+  domain_tags:
+  - business
+  - it
+  - digital
+  pools: []
+  unit: $
+  concept_group: it_digital_business
+- label: Subscriber Count
+  scale_type: discrete_count
+  role: dependent
+  concept_stem: subscriber_count
+  domain_tags:
+  - business
+  - it
+  - digital
+  pools: []
+  unit: count
+  concept_group: it_digital_business
+- label: Subscription Pause Rate (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: subscription_pause_rate
+  domain_tags:
+  - business
+  - it
+  - digital
+  pools: []
+  unit: '%'
+  concept_group: it_digital_business
+- label: Billing Failure Rate (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: billing_failure_rate
+  domain_tags:
+  - business
+  - it
+  - digital
+  pools: []
+  unit: '%'
+  concept_group: it_digital_business
+- label: Involuntary Churn Rate (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: involuntary_churn_rate
+  domain_tags:
+  - business
+  - it
+  - digital
+  pools: []
+  unit: '%'
+  concept_group: it_digital_business
+- label: Payment Method
+  scale_type: categorical
+  role: independent
+  concept_stem: payment_method
+  domain_tags:
+  - business
+  - it
+  - digital
+  pools: []
+  concept_group: it_digital_business
+- label: Currency
+  scale_type: categorical
+  role: independent
+  concept_stem: currency
+  domain_tags:
+  - business
+  - it
+  - digital
+  pools: []
+  concept_group: it_digital_business
+- label: Reporting Date
+  scale_type: temporal
+  role: independent
+  concept_stem: reporting_date
+  domain_tags:
+  - business
+  - general
+  pools: []
+  unit: date
+  concept_group: time_and_context
+- label: Reporting Period (months)
+  scale_type: temporal
+  role: independent
+  concept_stem: reporting_period
+  domain_tags:
+  - business
+  - general
+  pools: []
+  unit: months
+  concept_group: time_and_context
+- label: Week Number
+  scale_type: discrete_count
+  role: independent
+  concept_stem: week_number
+  domain_tags:
+  - business
+  - general
+  pools: []
+  unit: week
+  concept_group: time_and_context
+- label: Holiday Indicator
+  scale_type: categorical
+  role: independent
+  concept_stem: holiday_indicator
+  domain_tags:
+  - business
+  - general
+  pools: []
+  concept_group: time_and_context
+- label: Seasonality Index
+  scale_type: continuous
+  role: independent
+  concept_stem: seasonality_index
+  domain_tags:
+  - business
+  - general
+  pools: []
+  unit: index
+  concept_group: time_and_context
+- label: Fiscal Period
+  scale_type: temporal
+  role: independent
+  concept_stem: fiscal_period
+  domain_tags:
+  - business
+  - general
+  pools: []
+  unit: period
+  concept_group: time_and_context
+- label: Years in Business
+  scale_type: continuous
+  role: independent
+  concept_stem: years_in_business
+  domain_tags:
+  - business
+  - general
+  pools: []
+  unit: years
+  concept_group: time_and_context
+- label: Company Age (years)
+  scale_type: continuous
+  role: independent
+  concept_stem: company_age
+  domain_tags:
+  - business
+  - general
+  pools: []
+  unit: years
+  concept_group: time_and_context
+- label: Employee Count Band
+  scale_type: categorical
+  role: independent
+  concept_stem: employee_count_band
+  domain_tags:
+  - business
+  - general
+  pools: []
+  concept_group: time_and_context
+- label: Revenue Band
+  scale_type: categorical
+  role: independent
+  concept_stem: revenue_band
+  domain_tags:
+  - business
+  - general
+  pools: []
+  concept_group: time_and_context
+- label: Ownership Type
+  scale_type: categorical
+  role: independent
+  concept_stem: ownership_type
+  domain_tags:
+  - business
+  - general
+  pools: []
+  concept_group: time_and_context
+- label: Currency Exchange Impact (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: currency_exchange_impact
+  domain_tags:
+  - business
+  - general
+  pools: []
+  unit: '%'
+  concept_group: time_and_context
+- label: Time Zone
+  scale_type: categorical
+  role: independent
+  concept_stem: time_zone
+  domain_tags:
+  - business
+  - general
+  - demographic
+  pools: []
+  concept_group: time_and_context
+- label: Cost Center
+  scale_type: categorical
+  role: independent
+  concept_stem: cost_center
+  domain_tags:
+  - business
+  - general
+  pools: []
+  concept_group: time_and_context
+- label: Scenario (Base/Upside/Downside)
+  scale_type: categorical
+  role: independent
+  concept_stem: scenario
+  domain_tags:
+  - business
+  - general
+  pools: []
+  concept_group: time_and_context
+- label: Budget Version
+  scale_type: categorical
+  role: independent
+  concept_stem: budget_version
+  domain_tags:
+  - business
+  - general
+  pools: []
+  concept_group: time_and_context
+- label: Actual vs Budget Variance (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: actual_vs_budget_variance
+  domain_tags:
+  - business
+  - general
+  pools: []
+  unit: '%'
+  concept_group: time_and_context
+- label: Forecast vs Actual Variance (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: forecast_vs_actual_variance
+  domain_tags:
+  - business
+  - general
+  pools: []
+  unit: '%'
+  concept_group: time_and_context
+- label: Index vs Prior Period (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: index_vs_prior_period
+  domain_tags:
+  - business
+  - general
+  pools: []
+  unit: '%'
+  concept_group: time_and_context
+- label: Moving Average 12M ($)
+  scale_type: continuous
+  role: dependent
+  concept_stem: moving_average_12m
+  domain_tags:
+  - business
+  - general
+  pools: []
+  unit: $
+  concept_group: time_and_context
+- label: Trend Slope (%/period)
+  scale_type: continuous
+  role: dependent
+  concept_stem: trend_slope
+  domain_tags:
+  - business
+  - general
+  pools: []
+  unit: '%/period'
+  concept_group: time_and_context
+- label: Volatility of Revenue (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: volatility_of_revenue
+  domain_tags:
+  - business
+  - general
+  pools: []
+  unit: '%'
+  concept_group: time_and_context
+titles:
+- title: Quarterly Performance
+  allowed_chart_types:
+  - bar
+  - line
+  - area
+  - pie
+  domain_tags:
+  - business
+- title: Monthly Revenue vs Target
+  allowed_chart_types:
+  - bar
+  - line
+  - area
+  domain_tags:
+  - business
+- title: A/B Test Results
+  allowed_chart_types:
+  - bar
+  - box
+  - histogram
+  domain_tags:
+  - business
+- title: Conversion Funnel
+  allowed_chart_types:
+  - bar
+  - area
+  domain_tags:
+  - business
+- title: Cohort Retention
+  allowed_chart_types:
+  - heatmap
+  domain_tags:
+  - business
+- title: Customer Acquisition Funnel
+  allowed_chart_types:
+  - bar
+  - area
+  domain_tags:
+  - business
+- title: Campaign Performance
+  allowed_chart_types:
+  - bar
+  - line
+  - pie
+  domain_tags:
+  - business
+- title: Sales by Region
+  allowed_chart_types:
+  - bar
+  - pie
+  - box
+  domain_tags:
+  - business
+- title: Product Mix
+  allowed_chart_types:
+  - pie
+  - bar
+  - area
+  domain_tags:
+  - business
+- title: Inventory Levels
+  allowed_chart_types:
+  - bar
+  - line
+  - area
+  - histogram
+  - box
+  domain_tags:
+  - business
+- title: Forecast vs Actual
+  allowed_chart_types:
+  - line
+  - bar
+  - scatter
+  domain_tags:
+  - business
+- title: Variance Analysis
+  allowed_chart_types:
+  - bar
+  - box
+  - histogram
+  domain_tags:
+  - business
+- title: KPI Dashboard
+  allowed_chart_types:
+  - bar
+  - line
+  - pie
+  domain_tags:
+  - business
+- title: Engagement Over Time
+  allowed_chart_types:
+  - line
+  - area
+  - bar
+  domain_tags:
+  - business
+- title: User Activity Heatmap
+  allowed_chart_types:
+  - heatmap
+  domain_tags:
+  - business
+- title: Top Customers
+  allowed_chart_types:
+  - bar
+  - pie
+  domain_tags:
+  - business
+- title: Revenue Breakdown
+  allowed_chart_types:
+  - pie
+  - bar
+  - area
+  domain_tags:
+  - business
+- title: Churn Analysis
+  allowed_chart_types:
+  - line
+  - bar
+  - histogram
+  - pie
+  domain_tags:
+  - business
+- title: Segmentation Overview
+  allowed_chart_types:
+  - pie
+  - bar
+  - scatter
+  domain_tags:
+  - business
+- title: Operational Metrics
+  allowed_chart_types:
+  - bar
+  - line
+  - box
+  - pie
+  domain_tags:
+  - business
+- title: Benchmarking Report
+  allowed_chart_types:
+  - bar
+  - scatter
+  - box
+  domain_tags:
+  - business
+- title: Executive Summary Dashboard
+  allowed_chart_types:
+  - bar
+  - line
+  - pie
+  domain_tags:
+  - business
+- title: Waterfall Chart
+  allowed_chart_types:
+  - bar
+  domain_tags:
+  - business
+- title: Pareto Analysis
+  allowed_chart_types:
+  - bar
+  - line
+  domain_tags:
+  - business
+- title: Financial Performance Summary
+  allowed_chart_types:
+  - bar
+  - line
+  - pie
+  domain_tags:
+  - business
+- title: Budget vs Actual
+  allowed_chart_types:
+  - bar
+  - line
+  - pie
+  domain_tags:
+  - business
+- title: Cash Flow Analysis
+  allowed_chart_types:
+  - line
+  - bar
+  - area
+  domain_tags:
+  - business
+- title: Profitability Analysis
+  allowed_chart_types:
+  - bar
+  - line
+  - pie
+  domain_tags:
+  - business
+- title: Market Share Trends
+  allowed_chart_types:
+  - line
+  - pie
+  - area
+  - bar
+  domain_tags:
+  - business
+- title: Competitive Landscape
+  allowed_chart_types:
+  - bar
+  - scatter
+  domain_tags:
+  - business
+- title: Investment Portfolio Performance
+  allowed_chart_types:
+  - line
+  - area
+  - bar
+  - pie
+  domain_tags:
+  - business
+- title: Risk-Return Analysis
+  allowed_chart_types:
+  - scatter
+  domain_tags:
+  - business
+- title: Credit Risk Assessment
+  allowed_chart_types:
+  - bar
+  - histogram
+  - box
+  domain_tags:
+  - business
+- title: Liquidity Ratios
+  allowed_chart_types:
+  - bar
+  - line
+  domain_tags:
+  - business
+- title: Debt-to-Equity Analysis
+  allowed_chart_types:
+  - bar
+  - line
+  domain_tags:
+  - business
+- title: ROI Comparison
+  allowed_chart_types:
+  - bar
+  - box
+  - scatter
+  domain_tags:
+  - business
+- title: Customer Lifetime Value
+  allowed_chart_types:
+  - bar
+  - histogram
+  - box
+  - scatter
+  domain_tags:
+  - business
+- title: Marketing Attribution
+  allowed_chart_types:
+  - pie
+  - bar
+  - area
+  domain_tags:
+  - business
+- title: Lead Generation Metrics
+  allowed_chart_types:
+  - bar
+  - line
+  domain_tags:
+  - business
+- title: Social Media Analytics
+  allowed_chart_types:
+  - bar
+  - line
+  - pie
+  domain_tags:
+  - business
+- title: Email Campaign Performance
+  allowed_chart_types:
+  - bar
+  - line
+  - pie
+  domain_tags:
+  - business
+- title: Website Traffic Analysis
+  allowed_chart_types:
+  - line
+  - area
+  - bar
+  domain_tags:
+  - business
+- title: Search Engine Performance
+  allowed_chart_types:
+  - bar
+  - line
+  domain_tags:
+  - business
+- title: Brand Awareness Study
+  allowed_chart_types:
+  - bar
+  - line
+  - pie
+  domain_tags:
+  - business
+- title: Market Research Findings
+  allowed_chart_types:
+  - bar
+  - pie
+  - box
+  domain_tags:
+  - business
+- title: Net Promoter Score
+  allowed_chart_types:
+  - bar
+  - line
+  - histogram
+  domain_tags:
+  - business
+- title: Customer Satisfaction Trends
+  allowed_chart_types:
+  - line
+  - bar
+  - box
+  domain_tags:
+  - business
+- title: Supply Chain Analytics
+  allowed_chart_types:
+  - bar
+  - line
+  - area
+  domain_tags:
+  - business
+- title: Manufacturing Efficiency
+  allowed_chart_types:
+  - bar
+  - line
+  - histogram
+  domain_tags:
+  - business
+- title: Quality Assurance Metrics
+  allowed_chart_types:
+  - bar
+  - line
+  - box
+  domain_tags:
+  - business
+- title: Price Performance Comparison
+  allowed_chart_types:
+  - line
+  - bar
+  domain_tags:
+  - business
+- title: Innovation Pipeline
+  allowed_chart_types:
+  - bar
+  - line
+  - pie
+  domain_tags:
+  - business
+- title: Product Development Timeline
+  allowed_chart_types:
+  - line
+  - bar
+  domain_tags:
+  - business
+- title: Performance Scorecard
+  allowed_chart_types:
+  - heatmap
+  - bar
+  domain_tags:
+  - business
+- title: Regional Sales Performance
+  allowed_chart_types:
+  - heatmap
+  - bar
+  domain_tags:
+  - business
+- title: Customer Behavior Matrix
+  allowed_chart_types:
+  - heatmap
+  domain_tags:
+  - business
+- title: Product Performance Comparison
+  allowed_chart_types:
+  - heatmap
+  - bar
+  domain_tags:
+  - business
+- title: Cohort Analysis Dashboard
+  allowed_chart_types:
+  - heatmap
+  domain_tags:
+  - business
+- title: Cohort Retention Matrix
+  allowed_chart_types:
+  - heatmap
+  domain_tags:
+  - business
+- title: Retention Cohort Heatmap
+  allowed_chart_types:
+  - heatmap
+  domain_tags:
+  - business
+- title: A/B Test Results Matrix
+  allowed_chart_types:
+  - heatmap
+  domain_tags:
+  - business
+- title: Channel Attribution Heatmap
+  allowed_chart_types:
+  - heatmap
+  domain_tags:
+  - business
+- title: Seasonal Trend Analysis
+  allowed_chart_types:
+  - heatmap
+  - line
+  domain_tags:
+  - business
+- title: Risk Assessment Matrix
+  allowed_chart_types:
+  - heatmap
+  domain_tags:
+  - business
+- title: Supply Chain Heatmap
+  allowed_chart_types:
+  - heatmap
+  domain_tags:
+  - business
+- title: Inventory Level Over Time
+  allowed_chart_types:
+  - heatmap
+  - line
+  domain_tags:
+  - business
+- title: Sales Funnel Conversion Matrix
+  allowed_chart_types:
+  - heatmap
+  domain_tags:
+  - business
+- title: Customer Lifetime Value Map
+  allowed_chart_types:
+  - heatmap
+  domain_tags:
+  - business
+- title: Employee Performance Matrix
+  allowed_chart_types:
+  - heatmap
+  domain_tags:
+  - business
+- title: Operational Risk Heatmap
+  allowed_chart_types:
+  - heatmap
+  domain_tags:
+  - business
+- title: Fraud Detection Score Matrix
+  allowed_chart_types:
+  - heatmap
+  domain_tags:
+  - business
+- title: Market Penetration Map
+  allowed_chart_types:
+  - heatmap
+  domain_tags:
+  - business
+- title: Channel vs Product Performance
+  allowed_chart_types:
+  - heatmap
+  domain_tags:
+  - business
+comparative_pairs:
+- control: Control Group (A)
+  treatment: Variant Group (B)
+  domain_category: business
+  context_tags:
+  - business
+- control: Organic Traffic
+  treatment: Paid Acquisition
+  domain_category: business
+  context_tags:
+  - business
+- control: Free Tier Users
+  treatment: Premium Subscribers
+  domain_category: business
+  context_tags:
+  - business
+- control: First-Time Buyers
+  treatment: Repeat Customers
+  domain_category: business
+  context_tags:
+  - business
+- control: B2C Segment
+  treatment: B2B Enterprise
+  domain_category: business
+  context_tags:
+  - business
+- control: Domestic Market
+  treatment: International Expansion
+  domain_category: business
+  context_tags:
+  - business
+- control: Inbound Marketing
+  treatment: Outbound Campaign
+  domain_category: business
+  context_tags:
+  - business
+- control: Direct Sales
+  treatment: Channel Partners
+  domain_category: business
+  context_tags:
+  - business
+- control: Fixed-Rate Model
+  treatment: Usage-Based Pricing
+  domain_category: business
+  context_tags:
+  - business
+- control: Standard Delivery
+  treatment: Express Fulfillment
+  domain_category: business
+  context_tags:
+  - business
+- control: Historical Average
+  treatment: Current Fiscal Year
+  domain_category: business
+  context_tags:
+  - business
+- control: Optimistic Scenario
+  treatment: Pessimistic Forecast
+  domain_category: business
+  context_tags:
+  - business
+- control: On-Premise Infrastructure
+  treatment: SaaS Implementation
+  domain_category: business
+  context_tags:
+  - business
+- control: Pre-Merger Performance
+  treatment: Post-Merger Synergy
+  domain_category: business
+  context_tags:
+  - business
+- control: Manual Assembly
+  treatment: Automated Robotics
+  domain_category: business
+  context_tags:
+  - business
+- control: Bootstrapped Runway
+  treatment: Venture-Backed Capital
+  domain_category: business
+  context_tags:
+  - business
+- control: Monthly Recurring Revenue (MRR)
+  treatment: Annual Run Rate (ARR)
+  domain_category: business
+  context_tags:
+  - business
+- control: Gross Customer Churn
+  treatment: Net Revenue Churn
+  domain_category: business
+  context_tags:
+  - business
+- control: In-App Purchases
+  treatment: Subscription Revenue
+  domain_category: business
+  context_tags:
+  - business
+- control: Customer Acquisition Cost (CAC)
+  treatment: Customer Lifetime Value (LTV)
+  domain_category: business
+  context_tags:
+  - business
+- control: Expansion Revenue
+  treatment: Contraction Risk
+  domain_category: business
+  context_tags:
+  - business
+- control: Self-Serve Signup
+  treatment: Sales-Led Enterprise Close
+  domain_category: business
+  context_tags:
+  - business
+- control: Annual Contract
+  treatment: Monthly Subscription
+  domain_category: business
+  context_tags:
+  - business
+- control: In-House Development
+  treatment: Outsourced Vendor
+  domain_category: business
+  context_tags:
+  - business
+manifest_version: 2
+default_fallbacks:
+- Quarter
+- Revenue ($M)
+capabilities:
+  tabular_preset: true
+  heatmap_pools: true
+order: 3

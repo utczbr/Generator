@@ -1,0 +1,13 @@
+label,scale_type,role,unit,concept_stem,concept_group,domain_tags,pools
+Solar Irradiance (W/m²),continuous,dependent,W/m²,solar_irradiance,solar_telemetry,"energy, engineering",
+Grid Efficiency (%),percentage,dependent,%,grid_efficiency,grid_analytics,energy,
+Active Inverters (count),discrete_count,dependent,count,active_inverters,hardware_status,energy,
+Ambient Temperature (°C),continuous,independent,°C,ambient_temperature,environmental_factors,energy,
+Turbine Rotation Speed (rpm),continuous,dependent,rpm,turbine_speed,wind_telemetry,energy,
+Battery State of Charge (%),percentage,bidirectional,%,battery_charge,storage_analytics,energy,
+Wind Speed (m/s),continuous,independent,m/s,wind_speed,meteorological,energy,
+Power Output (MW),continuous,dependent,MW,power_output,generation,energy,
+Operating Phase,categorical,independent,,operating_phase,system_state,energy,
+Timestamp (h),temporal,independent,h,timestamp_hour,temporal_index,energy,
+Maintenance Fault Count,discrete_count,dependent,count,fault_count,reliability,energy,
+Storage Capacity (MWh),continuous,dependent,MWh,storage_capacity,storage_analytics,energy,

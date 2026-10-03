@@ -1,0 +1,47 @@
+# Python & Virtual Environments
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+.env
+
+# Testing & Caches
+.pytest_cache/
+.cache.json
+**/.backups/
+
+# Logs & Databases
+*.log
+*.db
+
+# Runtime Datasets & Benchmark Outputs
+dataset_export/
+dataset_verification_run/
+benchmark_results.json
+run_manifest.json
+import_plan.json
+
+# Staging Template Ingestion (keep if local-only)
+templates/metrics/
+templates/pairs/
+
+# Generated Images (ignore loose PNGs, but preserve documentation figures)
+*.png
+!docs/figures/*.png
+
+# LaTeX Build Artifacts (track paper.tex, ignore compilation byproducts)
+*.aux
+*.out
+*.synctex.gz
+*.fls
+*.fdb_latexmk
+*.bbl
+*.blg
+docs/paper_backeup.tex
+docs/paper_latex.zip
+
+# System & IDE
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

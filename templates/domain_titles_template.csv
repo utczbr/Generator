@@ -1,0 +1,8 @@
+title,allowed_chart_types,domain_tags
+Solar Panel Efficiency Curve,"line, scatter",energy
+Wind Farm Power Generation,"bar, area, line",energy
+Grid Frequency Distribution,histogram,energy
+Substation Load Comparison,"bar, box",energy
+Energy Storage Utilization,"bar, line, area",energy
+Renewable Generation Trends,"line, area, bar",energy
+Inverter Reliability Summary,"bar, box, histogram",energy

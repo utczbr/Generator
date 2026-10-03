@@ -2,6 +2,7 @@
 import numpy as np
 import random
 import io
+from typing import Optional, Tuple
 from PIL import Image, ImageFilter, ImageOps, ImageEnhance, ImageDraw, ImageFont, ImageChops
 
 try:
@@ -15,12 +16,6 @@ except ImportError:
 # ===================================================================================
 def apply_jpeg_compression_effect(pil_img, quality_range=(60, 92), **kwargs):
     quality = random.randint(*quality_range)
-    if _HAS_CV2:
-        try:
-            arr_bgr = cv2.cvtColor(np.array(pil_img), cv2.COLOR_RGB2BGR)
-            ok, enc = cv2.imencode('.jpg', arr_bgr, [int(cv2.IMWRITE_JPEG_QUALITY), quality])
-            if ok: return Image.open(io.BytesIO(enc.tobytes())).convert('RGB')
-        except Exception: pass
     buf = io.BytesIO()
     pil_img.save(buf, format='JPEG', quality=quality)
     buf.seek(0)
@@ -57,9 +52,9 @@ def apply_blur_effect(pil_img, radius_range=(0.5, 1.8), **kwargs):
     return pil_img.filter(ImageFilter.GaussianBlur(radius=radius))
 
 def _manual_motion_blur(image, radius, angle):
-    # Manual implementation of a motion blur, used as a fallback for older Pillow versions
-    from PIL import ImageFilter
-    import numpy as np
+    # Pillow has no built-in motion blur (ImageFilter.MotionBlur does not exist in any release).
+    # NOTE: ImageFilter.Kernel only accepts 3x3 or 5x5 kernels, so any radius >= 2.5 (size >= 7)
+    # raises ValueError here; apply_realism_effects logs that as a warning and skips the effect.
 
     # Ensure kernel size is an odd integer for ImageFilter.Kernel
     size = int(radius * 2) + 1
@@ -91,12 +86,7 @@ def _manual_motion_blur(image, radius, angle):
 def apply_motion_blur_effect(pil_img, radius_range=(2, 5), angle_range=(0, 360), **kwargs):
     radius = random.uniform(*radius_range)
     angle = random.uniform(*angle_range)
-    try:
-        # Try the modern, built-in filter first (available in Pillow >= 9.0)
-        return pil_img.filter(ImageFilter.MotionBlur(radius=radius, angle=angle))
-    except AttributeError:
-        # Fallback to manual implementation if MotionBlur is not available
-        return _manual_motion_blur(pil_img, radius, angle)
+    return _manual_motion_blur(pil_img, radius, angle)
 
 def apply_low_res_effect(pil_img, scale_range=(0.25, 0.6), **kwargs):
     scale = random.uniform(*scale_range)
@@ -266,62 +256,9 @@ def apply_scan_rotation_effect(pil_img, angle_range=(-1, 1), **kwargs):
 def apply_grayscale_effect(pil_img, **kwargs):
     return pil_img.convert('L').convert('RGB')
 
-def apply_perspective_effect(pil_img, magnitude=0.15, **kwargs):
-    w, h = pil_img.size
-    mag_w, mag_h = w * magnitude, h * magnitude
-    src_corners = np.float32([[0, 0], [w, 0], [w, h], [0, h]])
-    dst_corners = np.float32([
-        [random.uniform(0, mag_w), random.uniform(0, mag_h)],
-        [w - random.uniform(0, mag_w), random.uniform(0, mag_h)],
-        [w - random.uniform(0, mag_w), h - random.uniform(0, mag_h)],
-        [random.uniform(0, mag_w), h - random.uniform(0, mag_h)]
-    ])
-    
-    def compute_perspective_transform(src, dst):
-        A = []
-        for s, d in zip(src, dst):
-            sx, sy = s
-            dx, dy = d
-            A.append([sx, sy, 1, 0, 0, 0, -dx * sx, -dx * sy])
-            A.append([0, 0, 0, sx, sy, 1, -dy * sx, -dy * sy])
-        A = np.array(A, dtype=np.float32)
-        
-        U, S, Vt = np.linalg.svd(A)
-        H = Vt[-1].reshape(3, 3)
-        H /= H[2, 2]
-        return H[:2].flatten()
-    
-    try:
-        coeffs = compute_perspective_transform(src_corners, dst_corners)
-        return pil_img.transform((w, h), Image.AFFINE, coeffs, Image.BICUBIC)
-    except:
-        return pil_img
-
-
-def _compute_homography(src_pts, dst_pts):
-    A = []
-    b = []
-    for (x, y), (u, v) in zip(src_pts, dst_pts):
-        A.append([x, y, 1.0, 0.0, 0.0, 0.0, -u * x, -u * y])
-        A.append([0.0, 0.0, 0.0, x, y, 1.0, -v * x, -v * y])
-        b.extend([u, v])
-    A = np.array(A, dtype=np.float64)
-    b = np.array(b, dtype=np.float64)
-    h, _, _, _ = np.linalg.lstsq(A, b, rcond=None)
-    H = np.append(h, 1.0).reshape(3, 3)
-    return H
-
-
-def _pil_coeffs_from_homography(H):
-    H_inv = np.linalg.inv(H)
-    return (
-        H_inv[0, 0], H_inv[0, 1], H_inv[0, 2],
-        H_inv[1, 0], H_inv[1, 1], H_inv[1, 2],
-        H_inv[2, 0], H_inv[2, 1]
-    )
-
-
 def apply_perspective_warp_effect(pil_img, distortion_factor=0.08, border_value=(255, 255, 255), return_homography=False, **kwargs):
+    if not _HAS_CV2:
+        raise RuntimeError("perspective warp requires opencv (see requirements.txt)")
     w, h = pil_img.size
     dx = w * distortion_factor
     dy = h * distortion_factor
@@ -334,30 +271,11 @@ def apply_perspective_warp_effect(pil_img, distortion_factor=0.08, border_value=
         [random.uniform(0, dx), random.uniform(h - 1 - dy, h - 1)]
     ])
 
-    H = None
-    if _HAS_CV2:
-        try:
-            H = cv2.getPerspectiveTransform(src_pts, dst_pts)
-            arr = np.array(pil_img)
-            warped = cv2.warpPerspective(arr, H, (w, h), borderValue=border_value)
-            out_img = Image.fromarray(warped)
-        except Exception:
-            H = None
-            out_img = pil_img
-    else:
-        try:
-            H = _compute_homography(src_pts, dst_pts)
-            coeffs = _pil_coeffs_from_homography(H)
-            out_img = pil_img.transform(
-                (w, h),
-                Image.PERSPECTIVE,
-                coeffs,
-                resample=Image.BICUBIC,
-                fillcolor=border_value
-            )
-        except Exception:
-            H = None
-            out_img = pil_img
+    try:
+        H = cv2.getPerspectiveTransform(src_pts, dst_pts)
+        out_img = Image.fromarray(cv2.warpPerspective(np.array(pil_img), H, (w, h), borderValue=border_value))
+    except Exception:
+        H, out_img = None, pil_img
 
     if return_homography:
         return out_img, H
@@ -488,4 +406,126 @@ def apply_pdf_document_context_effect(pil_img, margin_px_range=(20, 50), caption
     dy = total_bottom_padding
 
     return new_img, dx, dy
+
+
+def apply_page_curl(
+    pil_img: Image.Image,
+    curl_axis: str = "y",
+    amplitude: Optional[float] = None,
+    wavelength: Optional[float] = None,
+    phase: float = 0.0,
+    border_value: Optional[Tuple[int, int, int]] = None,
+    return_forward_map: bool = True,
+    **kwargs
+):
+    """
+    Apply a cylindrical page-curl / sine-mesh non-rigid displacement field.
+    Returns:
+      (warped_img, forward_map) if return_forward_map is True
+      warped_img if return_forward_map is False
+    """
+    w, h = pil_img.size
+
+    # Compute amplitude and wavelength defaults if not provided
+    if amplitude is None:
+        amp_ratio = float(kwargs.get("amplitude_ratio", random.uniform(0.02, 0.05)))
+        amplitude = amp_ratio * (h if curl_axis == "y" else w)
+    else:
+        amplitude = float(amplitude)
+
+    if wavelength is None:
+        wave_ratio = float(kwargs.get("wavelength_ratio", random.uniform(0.8, 1.5)))
+        wavelength = wave_ratio * (w if curl_axis == "y" else h)
+    else:
+        wavelength = float(wavelength)
+
+    phase = float(phase)
+
+    # Ensure wavelength is not zero
+    if wavelength == 0:
+        wavelength = float(w if curl_axis == "y" else h)
+
+    if border_value is None:
+        try:
+            border_value = pil_img.getpixel((0, 0))
+            if not isinstance(border_value, tuple):
+                border_value = (border_value, border_value, border_value)
+            elif len(border_value) > 3:
+                border_value = border_value[:3]
+        except Exception:
+            border_value = (255, 255, 255)
+
+    # 1. Forward coordinate mapping function: (x_src, y_src) -> (x_dst, y_dst)
+    # in image coordinates (origin top-left)
+    def forward_map(points_array):
+        pts = np.asarray(points_array, dtype=np.float64)
+        is_1d = (pts.ndim == 1)
+        pts_2d = np.atleast_2d(pts)
+
+        xs = pts_2d[:, 0]
+        ys = pts_2d[:, 1]
+
+        if curl_axis == "y":
+            # Cylinder / spine along Y: curvature across X displaces Y
+            dy = amplitude * np.sin(2.0 * np.pi * xs / wavelength + phase)
+            warped_xs = xs
+            warped_ys = ys + dy
+        else:
+            # Cylinder / spine along X: curvature across Y displaces X
+            dx = amplitude * np.sin(2.0 * np.pi * ys / wavelength + phase)
+            warped_xs = xs + dx
+            warped_ys = ys
+
+        warped = np.column_stack([warped_xs, warped_ys])
+        return warped[0] if is_1d else warped
+
+    # 2. Image remap using inverse coordinate mapping: (x_dst, y_dst) -> (x_src, y_src)
+    grid_x, grid_y = np.meshgrid(
+        np.arange(w, dtype=np.float32),
+        np.arange(h, dtype=np.float32)
+    )
+
+    if curl_axis == "y":
+        map_x = grid_x
+        map_y = grid_y - np.float32(amplitude * np.sin(2.0 * np.pi * grid_x / wavelength + phase))
+    else:
+        map_x = grid_x - np.float32(amplitude * np.sin(2.0 * np.pi * grid_y / wavelength + phase))
+        map_y = grid_y
+
+    img_arr = np.array(pil_img)
+    bv = border_value if isinstance(border_value, tuple) else (255, 255, 255)
+
+    if _HAS_CV2:
+        try:
+            warped_arr = cv2.remap(
+                img_arr,
+                map_x,
+                map_y,
+                interpolation=cv2.INTER_CUBIC,
+                borderMode=cv2.BORDER_CONSTANT,
+                borderValue=bv
+            )
+            out_img = Image.fromarray(warped_arr)
+        except Exception:
+            out_img = pil_img
+    else:
+        try:
+            from scipy.ndimage import map_coordinates
+            coords = np.array([map_y, map_x])
+            warped_arr = np.empty_like(img_arr)
+            for c in range(min(3, img_arr.shape[2] if img_arr.ndim > 2 else 1)):
+                fill_c = bv[c] if isinstance(bv, (tuple, list)) and c < len(bv) else 255
+                if img_arr.ndim > 2:
+                    warped_arr[:, :, c] = map_coordinates(
+                        img_arr[:, :, c], coords, order=1, mode="constant", cval=fill_c
+                    )
+                else:
+                    warped_arr = map_coordinates(img_arr, coords, order=1, mode="constant", cval=fill_c)
+            out_img = Image.fromarray(warped_arr)
+        except Exception:
+            out_img = pil_img
+
+    if return_forward_map:
+        return out_img, forward_map
+    return out_img
 

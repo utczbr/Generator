@@ -1,0 +1,5917 @@
+domain_id: demographic
+display_name: Demographics, Population & Social Sciences
+is_scientific: false
+default_weight: 0.2
+metrics:
+- label: Age Cohort
+  scale_type: categorical
+  role: independent
+  concept_stem: age_cohort
+  concept_group: demographic_age
+  domain_tags:
+  - demographic
+  pools: []
+- label: Education Level
+  scale_type: categorical
+  role: independent
+  concept_stem: education_level
+  concept_group: demographic_education
+  domain_tags:
+  - demographic
+  - biomedical
+  pools: []
+- label: Metropolitan Area
+  scale_type: categorical
+  role: independent
+  concept_stem: metropolitan_area
+  concept_group: demographic_geography
+  domain_tags:
+  - demographic
+  pools: []
+- label: Income Bracket
+  scale_type: categorical
+  role: independent
+  concept_stem: income_bracket
+  concept_group: demographic_income
+  domain_tags:
+  - demographic
+  pools: []
+- label: Survey Wave
+  scale_type: discrete_count
+  role: independent
+  concept_stem: survey_wave
+  concept_group: survey_metadata
+  domain_tags:
+  - demographic
+  - demography
+  - time
+  pools: []
+- label: Median Household Income ($k)
+  scale_type: continuous
+  role: dependent
+  concept_stem: median_household_income
+  unit: $k
+  concept_group: demographic_income
+  domain_tags:
+  - demographic
+  - business
+  pools: []
+- label: Employment Rate (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: employment_rate
+  unit: '%'
+  concept_group: labor_metric
+  domain_tags:
+  - business
+  - demographic
+  - demography
+  - labor
+  pools: []
+- label: Homeownership Rate (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: homeownership_rate
+  unit: '%'
+  concept_group: housing_metric
+  domain_tags:
+  - demographic
+  - demography
+  - household
+  pools: []
+- label: Higher Education Attainment (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: higher_education_attainment
+  unit: '%'
+  concept_group: demographic_education
+  domain_tags:
+  - demographic
+  pools: []
+- label: Population Density (people/km²)
+  scale_type: continuous
+  role: dependent
+  concept_stem: population_density
+  unit: people/km²
+  concept_group: population_metric
+  domain_tags:
+  - demographic
+  pools: []
+- label: Net Migration Rate (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: net_migration_rate
+  unit: '%'
+  concept_group: migration_metric
+  domain_tags:
+  - demographic
+  pools: []
+- label: Fertility Rate
+  scale_type: continuous
+  role: dependent
+  concept_stem: fertility_rate
+  concept_group: fertility_metric
+  domain_tags:
+  - demographic
+  pools: []
+- label: Life Expectancy (years)
+  scale_type: continuous
+  role: dependent
+  concept_stem: life_expectancy
+  unit: years
+  concept_group: mortality_metric
+  domain_tags:
+  - demographic
+  - biomedical
+  pools: []
+- label: Literacy Rate (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: literacy_rate
+  unit: '%'
+  concept_group: demographic_education
+  domain_tags:
+  - demographic
+  pools: []
+- label: Urban Population Share (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: urban_population_share
+  unit: '%'
+  concept_group: urbanization_metric
+  domain_tags:
+  - demographic
+  pools: []
+- label: Household Size (persons)
+  scale_type: discrete_count
+  role: bidirectional
+  concept_stem: household_size
+  unit: persons
+  concept_group: household_metric
+  domain_tags:
+  - demographic
+  - demography
+  - household
+  pools: []
+- label: Dependency Ratio (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: dependency_ratio
+  unit: '%'
+  concept_group: population_metric
+  domain_tags:
+  - demographic
+  pools: []
+- label: Poverty Rate (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: poverty_rate
+  unit: '%'
+  concept_group: socioeconomic_metric
+  domain_tags:
+  - demographic
+  pools: []
+- label: Gini Index
+  scale_type: continuous
+  role: dependent
+  concept_stem: gini_index
+  concept_group: inequality_metric
+  domain_tags:
+  - demographic
+  - business
+  pools: []
+- label: Labor Force Participation (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: labor_force_participation
+  unit: '%'
+  concept_group: labor_metric
+  domain_tags:
+  - demographic
+  - business
+  pools: []
+- label: Unemployment Rate (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: unemployment_rate
+  unit: '%'
+  concept_group: labor_metric
+  domain_tags:
+  - business
+  - demographic
+  - demography
+  - labor
+  pools: []
+- label: Median Age (years)
+  scale_type: continuous
+  role: bidirectional
+  concept_stem: median_age
+  unit: years
+  concept_group: demographic_age
+  domain_tags:
+  - demographic
+  - demography
+  - population
+  pools: []
+- label: Total Population
+  scale_type: discrete_count
+  role: dependent
+  concept_stem: total_population
+  domain_tags:
+  - demographic
+  - demography
+  - population
+  pools: []
+  unit: persons
+  concept_group: population_size_structure
+- label: Population Density (persons/km²)
+  scale_type: continuous
+  role: dependent
+  concept_stem: population_density
+  domain_tags:
+  - demographic
+  - demography
+  - population
+  pools: []
+  unit: persons/km²
+  concept_group: population_size_structure
+- label: Population Growth Rate (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: population_growth_rate
+  domain_tags:
+  - demographic
+  - demography
+  - population
+  pools: []
+  unit: '%'
+  concept_group: population_size_structure
+- label: Population Change (persons)
+  scale_type: discrete_count
+  role: dependent
+  concept_stem: population_change
+  domain_tags:
+  - demographic
+  - demography
+  - population
+  pools: []
+  unit: persons
+  concept_group: population_size_structure
+- label: Mean Age (years)
+  scale_type: continuous
+  role: dependent
+  concept_stem: mean_age
+  domain_tags:
+  - demographic
+  - demography
+  - population
+  pools: []
+  unit: years
+  concept_group: population_size_structure
+- label: Age Group
+  scale_type: categorical
+  role: independent
+  concept_stem: age_group
+  domain_tags:
+  - demographic
+  - demography
+  - population
+  pools: []
+  concept_group: population_size_structure
+- label: Age at Last Birthday (years)
+  scale_type: discrete_count
+  role: independent
+  concept_stem: age_at_last_birthday
+  domain_tags:
+  - demographic
+  - demography
+  - population
+  pools: []
+  unit: years
+  concept_group: population_size_structure
+- label: Birth Cohort Year
+  scale_type: temporal
+  role: independent
+  concept_stem: birth_cohort_year
+  domain_tags:
+  - demographic
+  - demography
+  - population
+  pools: []
+  unit: year
+  concept_group: population_size_structure
+- label: Generation
+  scale_type: categorical
+  role: independent
+  concept_stem: generation
+  domain_tags:
+  - demographic
+  - demography
+  - population
+  pools: []
+  concept_group: population_size_structure
+- label: Gender Identity
+  scale_type: categorical
+  role: independent
+  concept_stem: gender_identity
+  domain_tags:
+  - demographic
+  - demography
+  - population
+  pools: []
+  concept_group: population_size_structure
+- label: Sex Ratio (males per 100 females)
+  scale_type: continuous
+  role: dependent
+  concept_stem: sex_ratio
+  domain_tags:
+  - demographic
+  - demography
+  - population
+  pools: []
+  unit: males/100 females
+  concept_group: population_size_structure
+- label: Sex Ratio at Birth (males per 100 females)
+  scale_type: continuous
+  role: dependent
+  concept_stem: sex_ratio_at_birth
+  domain_tags:
+  - demographic
+  - demography
+  - population
+  pools: []
+  unit: males/100 females
+  concept_group: population_size_structure
+- label: Population Aged 0-14 (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: population_aged_0_14
+  domain_tags:
+  - demographic
+  - demography
+  - population
+  pools: []
+  unit: '%'
+  concept_group: population_size_structure
+- label: Population Aged 15-64 (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: population_aged_15_64
+  domain_tags:
+  - demographic
+  - demography
+  - population
+  pools: []
+  unit: '%'
+  concept_group: population_size_structure
+- label: Population Aged 65+ (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: population_aged_65
+  domain_tags:
+  - demographic
+  - demography
+  - population
+  pools: []
+  unit: '%'
+  concept_group: population_size_structure
+- label: Population Aged 80+ (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: population_aged_80
+  domain_tags:
+  - demographic
+  - demography
+  - population
+  pools: []
+  unit: '%'
+  concept_group: population_size_structure
+- label: Youth Population 15-24 (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: youth_population_15_24
+  domain_tags:
+  - demographic
+  - demography
+  - population
+  pools: []
+  unit: '%'
+  concept_group: population_size_structure
+- label: Child Population (count)
+  scale_type: discrete_count
+  role: dependent
+  concept_stem: child_population
+  domain_tags:
+  - demographic
+  - demography
+  - population
+  pools: []
+  unit: persons
+  concept_group: population_size_structure
+- label: Working-Age Population (count)
+  scale_type: discrete_count
+  role: dependent
+  concept_stem: working_age_population
+  domain_tags:
+  - demographic
+  - demography
+  - population
+  pools: []
+  unit: persons
+  concept_group: population_size_structure
+- label: Elderly Population (count)
+  scale_type: discrete_count
+  role: dependent
+  concept_stem: elderly_population
+  domain_tags:
+  - demographic
+  - demography
+  - population
+  pools: []
+  unit: persons
+  concept_group: population_size_structure
+- label: Youth Dependency Ratio
+  scale_type: continuous
+  role: dependent
+  concept_stem: youth_dependency_ratio
+  domain_tags:
+  - demographic
+  - demography
+  - population
+  pools: []
+  unit: ratio
+  concept_group: population_size_structure
+- label: Old-Age Dependency Ratio
+  scale_type: continuous
+  role: dependent
+  concept_stem: old_age_dependency_ratio
+  domain_tags:
+  - demographic
+  - demography
+  - population
+  pools: []
+  unit: ratio
+  concept_group: population_size_structure
+- label: Total Dependency Ratio
+  scale_type: continuous
+  role: dependent
+  concept_stem: total_dependency_ratio
+  domain_tags:
+  - demographic
+  - demography
+  - population
+  pools: []
+  unit: ratio
+  concept_group: population_size_structure
+- label: Potential Support Ratio
+  scale_type: continuous
+  role: dependent
+  concept_stem: potential_support_ratio
+  domain_tags:
+  - demographic
+  - demography
+  - population
+  pools: []
+  unit: ratio
+  concept_group: population_size_structure
+- label: Ageing Index
+  scale_type: continuous
+  role: dependent
+  concept_stem: ageing_index
+  domain_tags:
+  - demographic
+  - demography
+  - population
+  pools: []
+  unit: ratio
+  concept_group: population_size_structure
+- label: Population Doubling Time (years)
+  scale_type: continuous
+  role: dependent
+  concept_stem: population_doubling_time
+  domain_tags:
+  - demographic
+  - demography
+  - population
+  pools: []
+  unit: years
+  concept_group: population_size_structure
+- label: Population Projection (persons)
+  scale_type: discrete_count
+  role: dependent
+  concept_stem: population_projection
+  domain_tags:
+  - demographic
+  - demography
+  - population
+  pools: []
+  unit: persons
+  concept_group: population_size_structure
+- label: Population Momentum
+  scale_type: continuous
+  role: dependent
+  concept_stem: population_momentum
+  domain_tags:
+  - demographic
+  - demography
+  - population
+  pools: []
+  unit: ratio
+  concept_group: population_size_structure
+- label: Demographic Dividend Index
+  scale_type: continuous
+  role: dependent
+  concept_stem: demographic_dividend_index
+  domain_tags:
+  - demographic
+  - demography
+  - population
+  pools: []
+  unit: index
+  concept_group: population_size_structure
+- label: Urban Population (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: urban_population
+  domain_tags:
+  - demographic
+  - demography
+  - population
+  pools: []
+  unit: '%'
+  concept_group: population_size_structure
+- label: Rural Population (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: rural_population
+  domain_tags:
+  - demographic
+  - demography
+  - population
+  pools: []
+  unit: '%'
+  concept_group: population_size_structure
+- label: Urbanization Rate (%/year)
+  scale_type: percentage
+  role: dependent
+  concept_stem: urbanization_rate
+  domain_tags:
+  - demographic
+  - demography
+  - population
+  pools: []
+  unit: '%/year'
+  concept_group: population_size_structure
+- label: Population of Largest City (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: population_of_largest_city
+  domain_tags:
+  - demographic
+  - demography
+  - population
+  pools: []
+  unit: '%'
+  concept_group: population_size_structure
+- label: Urban Primacy Index
+  scale_type: continuous
+  role: dependent
+  concept_stem: urban_primacy_index
+  domain_tags:
+  - demographic
+  - demography
+  - population
+  pools: []
+  unit: ratio
+  concept_group: population_size_structure
+- label: Number of Cities over 1 Million
+  scale_type: discrete_count
+  role: dependent
+  concept_stem: number_of_cities_over_1_million
+  domain_tags:
+  - demographic
+  - demography
+  - population
+  pools: []
+  unit: count
+  concept_group: population_size_structure
+- label: Settlement Type
+  scale_type: categorical
+  role: independent
+  concept_stem: settlement_type
+  domain_tags:
+  - demographic
+  - demography
+  - population
+  pools: []
+  concept_group: population_size_structure
+- label: Area (km²)
+  scale_type: continuous
+  role: independent
+  concept_stem: area
+  domain_tags:
+  - demographic
+  - demography
+  - population
+  pools: []
+  unit: km²
+  concept_group: population_size_structure
+- label: Census Year
+  scale_type: temporal
+  role: independent
+  concept_stem: census_year
+  domain_tags:
+  - demographic
+  - demography
+  - population
+  pools: []
+  unit: year
+  concept_group: population_size_structure
+- label: Census Enumeration Coverage (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: census_enumeration_coverage
+  domain_tags:
+  - demographic
+  - demography
+  - population
+  pools: []
+  unit: '%'
+  concept_group: population_size_structure
+- label: Census Undercount Rate (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: census_undercount_rate
+  domain_tags:
+  - demographic
+  - demography
+  - population
+  pools: []
+  unit: '%'
+  concept_group: population_size_structure
+- label: Sample Weight
+  scale_type: continuous
+  role: independent
+  concept_stem: sample_weight
+  domain_tags:
+  - demographic
+  - demography
+  - population
+  pools: []
+  unit: weight
+  concept_group: population_size_structure
+- label: Population Pyramid Skewness
+  scale_type: continuous
+  role: dependent
+  concept_stem: population_pyramid_skewness
+  domain_tags:
+  - demographic
+  - demography
+  - population
+  pools: []
+  unit: ratio
+  concept_group: population_size_structure
+- label: Age Heaping Index (Whipple)
+  scale_type: continuous
+  role: dependent
+  concept_stem: age_heaping_index
+  domain_tags:
+  - demographic
+  - demography
+  - population
+  pools: []
+  unit: index
+  concept_group: population_size_structure
+- label: Myers Blended Index
+  scale_type: continuous
+  role: dependent
+  concept_stem: myers_blended_index
+  domain_tags:
+  - demographic
+  - demography
+  - population
+  pools: []
+  unit: index
+  concept_group: population_size_structure
+- label: Total Fertility Rate (births/woman)
+  scale_type: continuous
+  role: dependent
+  concept_stem: total_fertility_rate
+  domain_tags:
+  - demographic
+  - demography
+  - fertility
+  pools: []
+  unit: births/woman
+  concept_group: fertility_natality
+- label: Crude Birth Rate (per 1,000)
+  scale_type: continuous
+  role: dependent
+  concept_stem: crude_birth_rate
+  domain_tags:
+  - demographic
+  - demography
+  - fertility
+  pools: []
+  unit: per 1,000
+  concept_group: fertility_natality
+- label: General Fertility Rate (per 1,000 women)
+  scale_type: continuous
+  role: dependent
+  concept_stem: general_fertility_rate
+  domain_tags:
+  - demographic
+  - demography
+  - fertility
+  pools: []
+  unit: per 1,000
+  concept_group: fertility_natality
+- label: Age-Specific Fertility Rate (per 1,000)
+  scale_type: continuous
+  role: dependent
+  concept_stem: age_specific_fertility_rate
+  domain_tags:
+  - demographic
+  - demography
+  - fertility
+  pools: []
+  unit: per 1,000
+  concept_group: fertility_natality
+- label: Adolescent Birth Rate (per 1,000)
+  scale_type: continuous
+  role: dependent
+  concept_stem: adolescent_birth_rate
+  domain_tags:
+  - demographic
+  - demography
+  - fertility
+  pools: []
+  unit: per 1,000
+  concept_group: fertility_natality
+- label: Net Reproduction Rate
+  scale_type: continuous
+  role: dependent
+  concept_stem: net_reproduction_rate
+  domain_tags:
+  - demographic
+  - demography
+  - fertility
+  pools: []
+  unit: ratio
+  concept_group: fertility_natality
+- label: Gross Reproduction Rate
+  scale_type: continuous
+  role: dependent
+  concept_stem: gross_reproduction_rate
+  domain_tags:
+  - demographic
+  - demography
+  - fertility
+  pools: []
+  unit: ratio
+  concept_group: fertility_natality
+- label: Mean Age at Childbirth (years)
+  scale_type: continuous
+  role: dependent
+  concept_stem: mean_age_at_childbirth
+  domain_tags:
+  - demographic
+  - demography
+  - fertility
+  pools: []
+  unit: years
+  concept_group: fertility_natality
+- label: Mean Age at First Birth (years)
+  scale_type: continuous
+  role: dependent
+  concept_stem: mean_age_at_first_birth
+  domain_tags:
+  - demographic
+  - demography
+  - fertility
+  pools: []
+  unit: years
+  concept_group: fertility_natality
+- label: Births (count)
+  scale_type: discrete_count
+  role: dependent
+  concept_stem: births
+  domain_tags:
+  - demographic
+  - demography
+  - fertility
+  pools: []
+  unit: births
+  concept_group: fertility_natality
+- label: Live Births per Year
+  scale_type: discrete_count
+  role: dependent
+  concept_stem: live_births_per_year
+  domain_tags:
+  - demographic
+  - demography
+  - fertility
+  pools: []
+  unit: births/year
+  concept_group: fertility_natality
+- label: Birth Order
+  scale_type: discrete_count
+  role: independent
+  concept_stem: birth_order
+  domain_tags:
+  - demographic
+  - demography
+  - fertility
+  pools: []
+  unit: order
+  concept_group: fertility_natality
+- label: Children Ever Born
+  scale_type: discrete_count
+  role: dependent
+  concept_stem: children_ever_born
+  domain_tags:
+  - demographic
+  - demography
+  - fertility
+  pools: []
+  unit: children
+  concept_group: fertility_natality
+- label: Number of Children in Household
+  scale_type: discrete_count
+  role: independent
+  concept_stem: number_of_children_in_household
+  domain_tags:
+  - demographic
+  - demography
+  - fertility
+  pools: []
+  unit: children
+  concept_group: fertility_natality
+- label: Desired Family Size
+  scale_type: continuous
+  role: dependent
+  concept_stem: desired_family_size
+  domain_tags:
+  - demographic
+  - demography
+  - fertility
+  pools: []
+  unit: children
+  concept_group: fertility_natality
+- label: Unmet Need for Family Planning (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: unmet_need_for_family_planning
+  domain_tags:
+  - demographic
+  - demography
+  - fertility
+  pools: []
+  unit: '%'
+  concept_group: fertility_natality
+- label: Contraceptive Prevalence Rate (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: contraceptive_prevalence_rate
+  domain_tags:
+  - demographic
+  - demography
+  - fertility
+  pools: []
+  unit: '%'
+  concept_group: fertility_natality
+- label: Modern Contraceptive Use (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: modern_contraceptive_use
+  domain_tags:
+  - demographic
+  - demography
+  - fertility
+  pools: []
+  unit: '%'
+  concept_group: fertility_natality
+- label: Childlessness Rate (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: childlessness_rate
+  domain_tags:
+  - demographic
+  - demography
+  - fertility
+  pools: []
+  unit: '%'
+  concept_group: fertility_natality
+- label: Completed Cohort Fertility (births/woman)
+  scale_type: continuous
+  role: dependent
+  concept_stem: completed_cohort_fertility
+  domain_tags:
+  - demographic
+  - demography
+  - fertility
+  pools: []
+  unit: births/woman
+  concept_group: fertility_natality
+- label: Birth Interval (months)
+  scale_type: continuous
+  role: dependent
+  concept_stem: birth_interval
+  domain_tags:
+  - demographic
+  - demography
+  - fertility
+  pools: []
+  unit: months
+  concept_group: fertility_natality
+- label: Births Outside Marriage (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: births_outside_marriage
+  domain_tags:
+  - demographic
+  - demography
+  - fertility
+  pools: []
+  unit: '%'
+  concept_group: fertility_natality
+- label: Multiple Birth Rate (per 1,000 births)
+  scale_type: continuous
+  role: dependent
+  concept_stem: multiple_birth_rate
+  domain_tags:
+  - demographic
+  - demography
+  - fertility
+  pools: []
+  unit: per 1,000
+  concept_group: fertility_natality
+- label: Teenage Pregnancy Rate (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: teenage_pregnancy_rate
+  domain_tags:
+  - demographic
+  - demography
+  - fertility
+  pools: []
+  unit: '%'
+  concept_group: fertility_natality
+- label: Abortion Rate (per 1,000 women)
+  scale_type: continuous
+  role: dependent
+  concept_stem: abortion_rate
+  domain_tags:
+  - demographic
+  - demography
+  - fertility
+  pools: []
+  unit: per 1,000
+  concept_group: fertility_natality
+- label: Assisted Reproduction Births (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: assisted_reproduction_births
+  domain_tags:
+  - demographic
+  - demography
+  - fertility
+  pools: []
+  unit: '%'
+  concept_group: fertility_natality
+- label: Cesarean Delivery Rate (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: cesarean_delivery_rate
+  domain_tags:
+  - demographic
+  - demography
+  - fertility
+  pools: []
+  unit: '%'
+  concept_group: fertility_natality
+- label: Low Birth Weight Rate (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: low_birth_weight_rate
+  domain_tags:
+  - demographic
+  - demography
+  - fertility
+  pools: []
+  unit: '%'
+  concept_group: fertility_natality
+- label: Preterm Birth Rate (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: preterm_birth_rate
+  domain_tags:
+  - demographic
+  - demography
+  - fertility
+  pools: []
+  unit: '%'
+  concept_group: fertility_natality
+- label: Place of Delivery
+  scale_type: categorical
+  role: independent
+  concept_stem: place_of_delivery
+  domain_tags:
+  - demographic
+  - demography
+  - fertility
+  pools: []
+  concept_group: fertility_natality
+- label: Birth Attendant Type
+  scale_type: categorical
+  role: independent
+  concept_stem: birth_attendant_type
+  domain_tags:
+  - demographic
+  - demography
+  - fertility
+  pools: []
+  concept_group: fertility_natality
+- label: Skilled Birth Attendance (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: skilled_birth_attendance
+  domain_tags:
+  - demographic
+  - demography
+  - fertility
+  pools: []
+  unit: '%'
+  concept_group: fertility_natality
+- label: Antenatal Care Visits (count)
+  scale_type: discrete_count
+  role: dependent
+  concept_stem: antenatal_care_visits
+  domain_tags:
+  - demographic
+  - demography
+  - fertility
+  pools: []
+  unit: visits
+  concept_group: fertility_natality
+- label: Postnatal Care Coverage (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: postnatal_care_coverage
+  domain_tags:
+  - demographic
+  - demography
+  - fertility
+  pools: []
+  unit: '%'
+  concept_group: fertility_natality
+- label: Fecundity (probability per cycle)
+  scale_type: continuous
+  role: dependent
+  concept_stem: fecundity
+  domain_tags:
+  - demographic
+  - demography
+  - fertility
+  pools: []
+  unit: ratio
+  concept_group: fertility_natality
+- label: Replacement Level Fertility Gap
+  scale_type: continuous
+  role: dependent
+  concept_stem: replacement_level_fertility_gap
+  domain_tags:
+  - demographic
+  - demography
+  - fertility
+  pools: []
+  unit: births/woman
+  concept_group: fertility_natality
+- label: Tempo-Adjusted Total Fertility Rate
+  scale_type: continuous
+  role: dependent
+  concept_stem: tempo_adjusted_total_fertility_rate
+  domain_tags:
+  - demographic
+  - demography
+  - fertility
+  pools: []
+  unit: births/woman
+  concept_group: fertility_natality
+- label: Life Expectancy at Birth (years)
+  scale_type: continuous
+  role: dependent
+  concept_stem: life_expectancy_at_birth
+  domain_tags:
+  - demographic
+  - demography
+  - mortality
+  pools: []
+  unit: years
+  concept_group: mortality_longevity
+- label: Life Expectancy at Age 60 (years)
+  scale_type: continuous
+  role: dependent
+  concept_stem: life_expectancy_at_age_60
+  domain_tags:
+  - demographic
+  - demography
+  - mortality
+  pools: []
+  unit: years
+  concept_group: mortality_longevity
+- label: Life Expectancy at Age 65 (years)
+  scale_type: continuous
+  role: dependent
+  concept_stem: life_expectancy_at_age_65
+  domain_tags:
+  - demographic
+  - demography
+  - mortality
+  pools: []
+  unit: years
+  concept_group: mortality_longevity
+- label: Healthy Life Expectancy (years)
+  scale_type: continuous
+  role: dependent
+  concept_stem: healthy_life_expectancy
+  domain_tags:
+  - demographic
+  - demography
+  - mortality
+  pools: []
+  unit: years
+  concept_group: mortality_longevity
+- label: Disability-Free Life Expectancy (years)
+  scale_type: continuous
+  role: dependent
+  concept_stem: disability_free_life_expectancy
+  domain_tags:
+  - demographic
+  - demography
+  - mortality
+  pools: []
+  unit: years
+  concept_group: mortality_longevity
+- label: Crude Death Rate (per 1,000)
+  scale_type: continuous
+  role: dependent
+  concept_stem: crude_death_rate
+  domain_tags:
+  - demographic
+  - demography
+  - mortality
+  pools: []
+  unit: per 1,000
+  concept_group: mortality_longevity
+- label: Age-Specific Mortality Rate (per 1,000)
+  scale_type: continuous
+  role: dependent
+  concept_stem: age_specific_mortality_rate
+  domain_tags:
+  - demographic
+  - demography
+  - mortality
+  pools: []
+  unit: per 1,000
+  concept_group: mortality_longevity
+- label: Age-Standardized Mortality Rate (per 100,000)
+  scale_type: continuous
+  role: dependent
+  concept_stem: age_standardized_mortality_rate
+  domain_tags:
+  - demographic
+  - demography
+  - mortality
+  pools: []
+  unit: per 100,000
+  concept_group: mortality_longevity
+- label: Infant Mortality Rate (per 1,000 births)
+  scale_type: continuous
+  role: dependent
+  concept_stem: infant_mortality_rate
+  domain_tags:
+  - demographic
+  - demography
+  - mortality
+  pools: []
+  unit: per 1,000 births
+  concept_group: mortality_longevity
+- label: Neonatal Mortality Rate (per 1,000 births)
+  scale_type: continuous
+  role: dependent
+  concept_stem: neonatal_mortality_rate
+  domain_tags:
+  - demographic
+  - demography
+  - mortality
+  pools: []
+  unit: per 1,000 births
+  concept_group: mortality_longevity
+- label: Under-5 Mortality Rate (per 1,000 births)
+  scale_type: continuous
+  role: dependent
+  concept_stem: under_5_mortality_rate
+  domain_tags:
+  - demographic
+  - demography
+  - mortality
+  pools: []
+  unit: per 1,000 births
+  concept_group: mortality_longevity
+- label: Child Mortality Rate 1-4 (per 1,000)
+  scale_type: continuous
+  role: dependent
+  concept_stem: child_mortality_rate_1_4
+  domain_tags:
+  - demographic
+  - demography
+  - mortality
+  pools: []
+  unit: per 1,000
+  concept_group: mortality_longevity
+- label: Maternal Mortality Ratio (per 100,000 births)
+  scale_type: continuous
+  role: dependent
+  concept_stem: maternal_mortality_ratio
+  domain_tags:
+  - demographic
+  - demography
+  - mortality
+  pools: []
+  unit: per 100,000
+  concept_group: mortality_longevity
+- label: Stillbirth Rate (per 1,000 births)
+  scale_type: continuous
+  role: dependent
+  concept_stem: stillbirth_rate
+  domain_tags:
+  - demographic
+  - demography
+  - mortality
+  pools: []
+  unit: per 1,000
+  concept_group: mortality_longevity
+- label: Adult Mortality Rate (per 1,000)
+  scale_type: continuous
+  role: dependent
+  concept_stem: adult_mortality_rate
+  domain_tags:
+  - demographic
+  - demography
+  - mortality
+  pools: []
+  unit: per 1,000
+  concept_group: mortality_longevity
+- label: Probability of Dying 15-60 (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: probability_of_dying_15_60
+  domain_tags:
+  - demographic
+  - demography
+  - mortality
+  pools: []
+  unit: '%'
+  concept_group: mortality_longevity
+- label: Probability of Survival to Age 65 (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: probability_of_survival_to_age_65
+  domain_tags:
+  - demographic
+  - demography
+  - mortality
+  pools: []
+  unit: '%'
+  concept_group: mortality_longevity
+- label: Survival Probability lx
+  scale_type: continuous
+  role: dependent
+  concept_stem: survival_probability_lx
+  domain_tags:
+  - demographic
+  - demography
+  - mortality
+  pools: []
+  unit: ratio
+  concept_group: mortality_longevity
+- label: Deaths (count)
+  scale_type: discrete_count
+  role: dependent
+  concept_stem: deaths
+  domain_tags:
+  - demographic
+  - demography
+  - mortality
+  pools: []
+  unit: deaths
+  concept_group: mortality_longevity
+- label: Deaths per Year
+  scale_type: discrete_count
+  role: dependent
+  concept_stem: deaths_per_year
+  domain_tags:
+  - demographic
+  - demography
+  - mortality
+  pools: []
+  unit: deaths/year
+  concept_group: mortality_longevity
+- label: Age at Death (years)
+  scale_type: continuous
+  role: dependent
+  concept_stem: age_at_death
+  domain_tags:
+  - demographic
+  - demography
+  - mortality
+  pools: []
+  unit: years
+  concept_group: mortality_longevity
+- label: Modal Age at Death (years)
+  scale_type: continuous
+  role: dependent
+  concept_stem: modal_age_at_death
+  domain_tags:
+  - demographic
+  - demography
+  - mortality
+  pools: []
+  unit: years
+  concept_group: mortality_longevity
+- label: Median Age at Death (years)
+  scale_type: continuous
+  role: dependent
+  concept_stem: median_age_at_death
+  domain_tags:
+  - demographic
+  - demography
+  - mortality
+  pools: []
+  unit: years
+  concept_group: mortality_longevity
+- label: Life Table Death Rate mx
+  scale_type: continuous
+  role: dependent
+  concept_stem: life_table_death_rate_mx
+  domain_tags:
+  - demographic
+  - demography
+  - mortality
+  pools: []
+  unit: ratio
+  concept_group: mortality_longevity
+- label: Life Table Probability of Death qx
+  scale_type: continuous
+  role: dependent
+  concept_stem: life_table_probability_of_death_qx
+  domain_tags:
+  - demographic
+  - demography
+  - mortality
+  pools: []
+  unit: ratio
+  concept_group: mortality_longevity
+- label: Life Table Person-Years Lived Lx
+  scale_type: continuous
+  role: dependent
+  concept_stem: life_table_person_years_lived_lx
+  domain_tags:
+  - demographic
+  - demography
+  - mortality
+  pools: []
+  unit: years
+  concept_group: mortality_longevity
+- label: Lifespan Inequality (years)
+  scale_type: continuous
+  role: dependent
+  concept_stem: lifespan_inequality
+  domain_tags:
+  - demographic
+  - demography
+  - mortality
+  pools: []
+  unit: years
+  concept_group: mortality_longevity
+- label: Gini Coefficient of Age at Death
+  scale_type: continuous
+  role: dependent
+  concept_stem: gini_coefficient_of_age_at_death
+  domain_tags:
+  - demographic
+  - demography
+  - mortality
+  pools: []
+  unit: ratio
+  concept_group: mortality_longevity
+- label: Years of Life Lost (years)
+  scale_type: continuous
+  role: dependent
+  concept_stem: years_of_life_lost
+  domain_tags:
+  - demographic
+  - demography
+  - mortality
+  pools: []
+  unit: years
+  concept_group: mortality_longevity
+- label: Premature Mortality Rate (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: premature_mortality_rate
+  domain_tags:
+  - demographic
+  - demography
+  - mortality
+  pools: []
+  unit: '%'
+  concept_group: mortality_longevity
+- label: Excess Mortality (deaths)
+  scale_type: discrete_count
+  role: dependent
+  concept_stem: excess_mortality
+  domain_tags:
+  - demographic
+  - demography
+  - mortality
+  pools: []
+  unit: deaths
+  concept_group: mortality_longevity
+- label: Excess Mortality Rate (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: excess_mortality_rate
+  domain_tags:
+  - demographic
+  - demography
+  - mortality
+  pools: []
+  unit: '%'
+  concept_group: mortality_longevity
+- label: Cause of Death
+  scale_type: categorical
+  role: dependent
+  concept_stem: cause_of_death
+  domain_tags:
+  - demographic
+  - demography
+  - mortality
+  pools: []
+  concept_group: mortality_longevity
+- label: Cardiovascular Mortality Rate (per 100,000)
+  scale_type: continuous
+  role: dependent
+  concept_stem: cardiovascular_mortality_rate
+  domain_tags:
+  - demographic
+  - demography
+  - mortality
+  pools: []
+  unit: per 100,000
+  concept_group: mortality_longevity
+- label: Cancer Mortality Rate (per 100,000)
+  scale_type: continuous
+  role: dependent
+  concept_stem: cancer_mortality_rate
+  domain_tags:
+  - demographic
+  - demography
+  - mortality
+  pools: []
+  unit: per 100,000
+  concept_group: mortality_longevity
+- label: Suicide Rate (per 100,000)
+  scale_type: continuous
+  role: dependent
+  concept_stem: suicide_rate
+  domain_tags:
+  - demographic
+  - demography
+  - mortality
+  pools: []
+  unit: per 100,000
+  concept_group: mortality_longevity
+- label: Homicide Rate (per 100,000)
+  scale_type: continuous
+  role: dependent
+  concept_stem: homicide_rate
+  domain_tags:
+  - demographic
+  - demography
+  - mortality
+  pools: []
+  unit: per 100,000
+  concept_group: mortality_longevity
+- label: Road Traffic Death Rate (per 100,000)
+  scale_type: continuous
+  role: dependent
+  concept_stem: road_traffic_death_rate
+  domain_tags:
+  - demographic
+  - demography
+  - mortality
+  pools: []
+  unit: per 100,000
+  concept_group: mortality_longevity
+- label: Drug Overdose Death Rate (per 100,000)
+  scale_type: continuous
+  role: dependent
+  concept_stem: drug_overdose_death_rate
+  domain_tags:
+  - demographic
+  - demography
+  - mortality
+  pools: []
+  unit: per 100,000
+  concept_group: mortality_longevity
+- label: Alcohol-Related Mortality Rate (per 100,000)
+  scale_type: continuous
+  role: dependent
+  concept_stem: alcohol_related_mortality_rate
+  domain_tags:
+  - demographic
+  - demography
+  - mortality
+  pools: []
+  unit: per 100,000
+  concept_group: mortality_longevity
+- label: Centenarians (count)
+  scale_type: discrete_count
+  role: dependent
+  concept_stem: centenarians
+  domain_tags:
+  - demographic
+  - demography
+  - mortality
+  pools: []
+  unit: persons
+  concept_group: mortality_longevity
+- label: Supercentenarian Count
+  scale_type: discrete_count
+  role: dependent
+  concept_stem: supercentenarian_count
+  domain_tags:
+  - demographic
+  - demography
+  - mortality
+  pools: []
+  unit: persons
+  concept_group: mortality_longevity
+- label: Mortality Hazard Ratio
+  scale_type: continuous
+  role: dependent
+  concept_stem: mortality_hazard_ratio
+  domain_tags:
+  - demographic
+  - demography
+  - mortality
+  pools: []
+  unit: ratio
+  concept_group: mortality_longevity
+- label: Gompertz Mortality Rate Doubling Time (years)
+  scale_type: continuous
+  role: dependent
+  concept_stem: gompertz_mortality_rate_doubling_time
+  domain_tags:
+  - demographic
+  - demography
+  - mortality
+  pools: []
+  unit: years
+  concept_group: mortality_longevity
+- label: Sex Gap in Life Expectancy (years)
+  scale_type: continuous
+  role: dependent
+  concept_stem: sex_gap_in_life_expectancy
+  domain_tags:
+  - demographic
+  - demography
+  - mortality
+  pools: []
+  unit: years
+  concept_group: mortality_longevity
+- label: Urban-Rural Life Expectancy Gap (years)
+  scale_type: continuous
+  role: dependent
+  concept_stem: urban_rural_life_expectancy_gap
+  domain_tags:
+  - demographic
+  - demography
+  - mortality
+  pools: []
+  unit: years
+  concept_group: mortality_longevity
+- label: Race Gap in Life Expectancy (years)
+  scale_type: continuous
+  role: dependent
+  concept_stem: race_gap_in_life_expectancy
+  domain_tags:
+  - demographic
+  - demography
+  - mortality
+  pools: []
+  unit: years
+  concept_group: mortality_longevity
+- label: Registered Death Coverage (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: registered_death_coverage
+  domain_tags:
+  - demographic
+  - demography
+  - mortality
+  pools: []
+  unit: '%'
+  concept_group: mortality_longevity
+- label: Net Migration (persons)
+  scale_type: discrete_count
+  role: dependent
+  concept_stem: net_migration
+  domain_tags:
+  - demographic
+  - demography
+  - migration
+  pools: []
+  unit: persons
+  concept_group: migration_mobility
+- label: Net Migration Rate (per 1,000)
+  scale_type: continuous
+  role: dependent
+  concept_stem: net_migration_rate
+  domain_tags:
+  - demographic
+  - demography
+  - migration
+  pools: []
+  unit: per 1,000
+  concept_group: migration_mobility
+- label: Immigrants (count)
+  scale_type: discrete_count
+  role: dependent
+  concept_stem: immigrants
+  domain_tags:
+  - demographic
+  - demography
+  - migration
+  pools: []
+  unit: persons
+  concept_group: migration_mobility
+- label: Emigrants (count)
+  scale_type: discrete_count
+  role: dependent
+  concept_stem: emigrants
+  domain_tags:
+  - demographic
+  - demography
+  - migration
+  pools: []
+  unit: persons
+  concept_group: migration_mobility
+- label: International Migrant Stock (persons)
+  scale_type: discrete_count
+  role: dependent
+  concept_stem: international_migrant_stock
+  domain_tags:
+  - demographic
+  - demography
+  - migration
+  pools: []
+  unit: persons
+  concept_group: migration_mobility
+- label: Foreign-Born Population (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: foreign_born_population
+  domain_tags:
+  - demographic
+  - demography
+  - migration
+  pools: []
+  unit: '%'
+  concept_group: migration_mobility
+- label: Immigrant Share of Labor Force (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: immigrant_share_of_labor_force
+  domain_tags:
+  - demographic
+  - demography
+  - migration
+  pools: []
+  unit: '%'
+  concept_group: migration_mobility
+- label: Inflow of Foreign Population (persons)
+  scale_type: discrete_count
+  role: dependent
+  concept_stem: inflow_of_foreign_population
+  domain_tags:
+  - demographic
+  - demography
+  - migration
+  pools: []
+  unit: persons
+  concept_group: migration_mobility
+- label: Refugees (count)
+  scale_type: discrete_count
+  role: dependent
+  concept_stem: refugees
+  domain_tags:
+  - demographic
+  - demography
+  - migration
+  pools: []
+  unit: persons
+  concept_group: migration_mobility
+- label: Asylum Applications (count)
+  scale_type: discrete_count
+  role: dependent
+  concept_stem: asylum_applications
+  domain_tags:
+  - demographic
+  - demography
+  - migration
+  pools: []
+  unit: applications
+  concept_group: migration_mobility
+- label: Asylum Recognition Rate (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: asylum_recognition_rate
+  domain_tags:
+  - demographic
+  - demography
+  - migration
+  pools: []
+  unit: '%'
+  concept_group: migration_mobility
+- label: Internally Displaced Persons (count)
+  scale_type: discrete_count
+  role: dependent
+  concept_stem: internally_displaced_persons
+  domain_tags:
+  - demographic
+  - demography
+  - migration
+  pools: []
+  unit: persons
+  concept_group: migration_mobility
+- label: Stateless Persons (count)
+  scale_type: discrete_count
+  role: dependent
+  concept_stem: stateless_persons
+  domain_tags:
+  - demographic
+  - demography
+  - migration
+  pools: []
+  unit: persons
+  concept_group: migration_mobility
+- label: Remittances Received ($)
+  scale_type: continuous
+  role: dependent
+  concept_stem: remittances_received
+  domain_tags:
+  - demographic
+  - demography
+  - migration
+  pools: []
+  unit: $
+  concept_group: migration_mobility
+- label: Remittances (% of GDP)
+  scale_type: percentage
+  role: dependent
+  concept_stem: remittances
+  domain_tags:
+  - demographic
+  - demography
+  - migration
+  pools: []
+  unit: '%'
+  concept_group: migration_mobility
+- label: Remittances Sent per Migrant ($)
+  scale_type: continuous
+  role: dependent
+  concept_stem: remittances_sent_per_migrant
+  domain_tags:
+  - demographic
+  - demography
+  - migration
+  pools: []
+  unit: $
+  concept_group: migration_mobility
+- label: Internal Migration Rate (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: internal_migration_rate
+  domain_tags:
+  - demographic
+  - demography
+  - migration
+  pools: []
+  unit: '%'
+  concept_group: migration_mobility
+- label: Interregional Migration (persons)
+  scale_type: discrete_count
+  role: dependent
+  concept_stem: interregional_migration
+  domain_tags:
+  - demographic
+  - demography
+  - migration
+  pools: []
+  unit: persons
+  concept_group: migration_mobility
+- label: Migration Distance (km)
+  scale_type: continuous
+  role: dependent
+  concept_stem: migration_distance
+  domain_tags:
+  - demographic
+  - demography
+  - migration
+  pools: []
+  unit: km
+  concept_group: migration_mobility
+- label: Migration Reason
+  scale_type: categorical
+  role: independent
+  concept_stem: migration_reason
+  domain_tags:
+  - demographic
+  - demography
+  - migration
+  pools: []
+  concept_group: migration_mobility
+- label: Migration Status
+  scale_type: categorical
+  role: independent
+  concept_stem: migration_status
+  domain_tags:
+  - demographic
+  - demography
+  - migration
+  pools: []
+  concept_group: migration_mobility
+- label: Citizenship
+  scale_type: categorical
+  role: independent
+  concept_stem: citizenship
+  domain_tags:
+  - demographic
+  - demography
+  - migration
+  pools: []
+  concept_group: migration_mobility
+- label: Country of Birth
+  scale_type: categorical
+  role: independent
+  concept_stem: country_of_birth
+  domain_tags:
+  - demographic
+  - demography
+  - migration
+  pools: []
+  concept_group: migration_mobility
+- label: Country of Origin
+  scale_type: categorical
+  role: independent
+  concept_stem: country_of_origin
+  domain_tags:
+  - demographic
+  - demography
+  - migration
+  pools: []
+  concept_group: migration_mobility
+- label: Country of Destination
+  scale_type: categorical
+  role: independent
+  concept_stem: country_of_destination
+  domain_tags:
+  - demographic
+  - demography
+  - migration
+  pools: []
+  concept_group: migration_mobility
+- label: Years Since Migration
+  scale_type: continuous
+  role: independent
+  concept_stem: years_since_migration
+  domain_tags:
+  - demographic
+  - demography
+  - migration
+  pools: []
+  unit: years
+  concept_group: migration_mobility
+- label: Age at Migration (years)
+  scale_type: continuous
+  role: independent
+  concept_stem: age_at_migration
+  domain_tags:
+  - demographic
+  - demography
+  - migration
+  pools: []
+  unit: years
+  concept_group: migration_mobility
+- label: Generational Status
+  scale_type: categorical
+  role: independent
+  concept_stem: generational_status
+  domain_tags:
+  - demographic
+  - demography
+  - migration
+  pools: []
+  concept_group: migration_mobility
+- label: Naturalization Rate (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: naturalization_rate
+  domain_tags:
+  - demographic
+  - demography
+  - migration
+  pools: []
+  unit: '%'
+  concept_group: migration_mobility
+- label: Visa Type
+  scale_type: categorical
+  role: independent
+  concept_stem: visa_type
+  domain_tags:
+  - demographic
+  - demography
+  - migration
+  pools: []
+  concept_group: migration_mobility
+- label: Undocumented Population (est.)
+  scale_type: discrete_count
+  role: dependent
+  concept_stem: undocumented_population
+  domain_tags:
+  - demographic
+  - demography
+  - migration
+  pools: []
+  unit: persons
+  concept_group: migration_mobility
+- label: Return Migration Rate (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: return_migration_rate
+  domain_tags:
+  - demographic
+  - demography
+  - migration
+  pools: []
+  unit: '%'
+  concept_group: migration_mobility
+- label: Emigration Rate of Tertiary Educated (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: emigration_rate_of_tertiary_educated
+  domain_tags:
+  - demographic
+  - demography
+  - migration
+  pools: []
+  unit: '%'
+  concept_group: migration_mobility
+- label: Brain Drain Index
+  scale_type: continuous
+  role: dependent
+  concept_stem: brain_drain_index
+  domain_tags:
+  - demographic
+  - demography
+  - migration
+  pools: []
+  unit: index
+  concept_group: migration_mobility
+- label: Tourism Arrivals (count)
+  scale_type: discrete_count
+  role: dependent
+  concept_stem: tourism_arrivals
+  domain_tags:
+  - demographic
+  - demography
+  - migration
+  pools: []
+  unit: arrivals
+  concept_group: migration_mobility
+- label: Commuting Time (min)
+  scale_type: continuous
+  role: dependent
+  concept_stem: commuting_time
+  domain_tags:
+  - demographic
+  - demography
+  - migration
+  pools: []
+  unit: min
+  concept_group: migration_mobility
+- label: Commuting Distance (km)
+  scale_type: continuous
+  role: dependent
+  concept_stem: commuting_distance
+  domain_tags:
+  - demographic
+  - demography
+  - migration
+  pools: []
+  unit: km
+  concept_group: migration_mobility
+- label: Residential Mobility Rate (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: residential_mobility_rate
+  domain_tags:
+  - demographic
+  - demography
+  - migration
+  pools: []
+  unit: '%'
+  concept_group: migration_mobility
+- label: Years at Current Residence
+  scale_type: continuous
+  role: independent
+  concept_stem: years_at_current_residence
+  domain_tags:
+  - demographic
+  - demography
+  - migration
+  pools: []
+  unit: years
+  concept_group: migration_mobility
+- label: Seasonal Migrant Workers (count)
+  scale_type: discrete_count
+  role: dependent
+  concept_stem: seasonal_migrant_workers
+  domain_tags:
+  - demographic
+  - demography
+  - migration
+  pools: []
+  unit: persons
+  concept_group: migration_mobility
+- label: Net Migration Contribution to Growth (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: net_migration_contribution_to_growth
+  domain_tags:
+  - demographic
+  - demography
+  - migration
+  pools: []
+  unit: '%'
+  concept_group: migration_mobility
+- label: Mobility Mode
+  scale_type: categorical
+  role: independent
+  concept_stem: mobility_mode
+  domain_tags:
+  - demographic
+  - demography
+  - migration
+  pools: []
+  concept_group: migration_mobility
+- label: Average Household Size
+  scale_type: continuous
+  role: dependent
+  concept_stem: average_household_size
+  domain_tags:
+  - demographic
+  - demography
+  - household
+  pools: []
+  unit: persons
+  concept_group: household_family
+- label: Number of Households
+  scale_type: discrete_count
+  role: dependent
+  concept_stem: number_of_households
+  domain_tags:
+  - demographic
+  - demography
+  - household
+  pools: []
+  unit: households
+  concept_group: household_family
+- label: Household Type
+  scale_type: categorical
+  role: independent
+  concept_stem: household_type
+  domain_tags:
+  - demographic
+  - demography
+  - household
+  pools: []
+  concept_group: household_family
+- label: Single-Person Households (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: single_person_households
+  domain_tags:
+  - demographic
+  - demography
+  - household
+  pools: []
+  unit: '%'
+  concept_group: household_family
+- label: Single-Parent Households (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: single_parent_households
+  domain_tags:
+  - demographic
+  - demography
+  - household
+  pools: []
+  unit: '%'
+  concept_group: household_family
+- label: Multigenerational Households (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: multigenerational_households
+  domain_tags:
+  - demographic
+  - demography
+  - household
+  pools: []
+  unit: '%'
+  concept_group: household_family
+- label: Couple Households with Children (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: couple_households_with_children
+  domain_tags:
+  - demographic
+  - demography
+  - household
+  pools: []
+  unit: '%'
+  concept_group: household_family
+- label: Household Head Age (years)
+  scale_type: continuous
+  role: independent
+  concept_stem: household_head_age
+  domain_tags:
+  - demographic
+  - demography
+  - household
+  pools: []
+  unit: years
+  concept_group: household_family
+- label: Household Head Sex
+  scale_type: categorical
+  role: independent
+  concept_stem: household_head_sex
+  domain_tags:
+  - demographic
+  - demography
+  - household
+  pools: []
+  concept_group: household_family
+- label: Female-Headed Households (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: female_headed_households
+  domain_tags:
+  - demographic
+  - demography
+  - household
+  pools: []
+  unit: '%'
+  concept_group: household_family
+- label: Number of Adults in Household
+  scale_type: discrete_count
+  role: independent
+  concept_stem: number_of_adults_in_household
+  domain_tags:
+  - demographic
+  - demography
+  - household
+  pools: []
+  unit: persons
+  concept_group: household_family
+- label: Number of Dependents
+  scale_type: discrete_count
+  role: independent
+  concept_stem: number_of_dependents
+  domain_tags:
+  - demographic
+  - demography
+  - household
+  pools: []
+  unit: persons
+  concept_group: household_family
+- label: Number of Rooms
+  scale_type: discrete_count
+  role: independent
+  concept_stem: number_of_rooms
+  domain_tags:
+  - demographic
+  - demography
+  - household
+  pools: []
+  unit: rooms
+  concept_group: household_family
+- label: Persons per Room
+  scale_type: continuous
+  role: dependent
+  concept_stem: persons_per_room
+  domain_tags:
+  - demographic
+  - demography
+  - household
+  pools: []
+  unit: persons/room
+  concept_group: household_family
+- label: Overcrowding Rate (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: overcrowding_rate
+  domain_tags:
+  - demographic
+  - demography
+  - household
+  pools: []
+  unit: '%'
+  concept_group: household_family
+- label: Housing Tenure
+  scale_type: categorical
+  role: independent
+  concept_stem: housing_tenure
+  domain_tags:
+  - demographic
+  - demography
+  - household
+  pools: []
+  concept_group: household_family
+- label: Renter Share (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: renter_share
+  domain_tags:
+  - demographic
+  - demography
+  - household
+  pools: []
+  unit: '%'
+  concept_group: household_family
+- label: Dwelling Type
+  scale_type: categorical
+  role: independent
+  concept_stem: dwelling_type
+  domain_tags:
+  - demographic
+  - demography
+  - household
+  pools: []
+  concept_group: household_family
+- label: Housing Cost Burden (% of income)
+  scale_type: percentage
+  role: dependent
+  concept_stem: housing_cost_burden
+  domain_tags:
+  - demographic
+  - demography
+  - household
+  pools: []
+  unit: '%'
+  concept_group: household_family
+- label: Rent-to-Income Ratio (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: rent_to_income_ratio
+  domain_tags:
+  - demographic
+  - demography
+  - household
+  pools: []
+  unit: '%'
+  concept_group: household_family
+- label: Median Rent ($/month)
+  scale_type: continuous
+  role: dependent
+  concept_stem: median_rent
+  domain_tags:
+  - demographic
+  - demography
+  - household
+  pools: []
+  unit: $/month
+  concept_group: household_family
+- label: Median Home Value ($)
+  scale_type: continuous
+  role: dependent
+  concept_stem: median_home_value
+  domain_tags:
+  - demographic
+  - demography
+  - household
+  pools: []
+  unit: $
+  concept_group: household_family
+- label: House Price-to-Income Ratio
+  scale_type: continuous
+  role: dependent
+  concept_stem: house_price_to_income_ratio
+  domain_tags:
+  - demographic
+  - demography
+  - household
+  pools: []
+  unit: ratio
+  concept_group: household_family
+- label: Housing Vacancy Rate (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: housing_vacancy_rate
+  domain_tags:
+  - demographic
+  - demography
+  - household
+  pools: []
+  unit: '%'
+  concept_group: household_family
+- label: Year Dwelling Built
+  scale_type: temporal
+  role: independent
+  concept_stem: year_dwelling_built
+  domain_tags:
+  - demographic
+  - demography
+  - household
+  pools: []
+  unit: year
+  concept_group: household_family
+- label: Access to Piped Water (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: access_to_piped_water
+  domain_tags:
+  - demographic
+  - demography
+  - household
+  pools: []
+  unit: '%'
+  concept_group: household_family
+- label: Access to Electricity (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: access_to_electricity
+  domain_tags:
+  - demographic
+  - demography
+  - household
+  pools: []
+  unit: '%'
+  concept_group: household_family
+- label: Access to Improved Sanitation (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: access_to_improved_sanitation
+  domain_tags:
+  - demographic
+  - demography
+  - household
+  pools: []
+  unit: '%'
+  concept_group: household_family
+- label: Access to Clean Cooking Fuel (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: access_to_clean_cooking_fuel
+  domain_tags:
+  - demographic
+  - demography
+  - household
+  pools: []
+  unit: '%'
+  concept_group: household_family
+- label: Internet Access at Home (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: internet_access_at_home
+  domain_tags:
+  - demographic
+  - demography
+  - household
+  pools: []
+  unit: '%'
+  concept_group: household_family
+- label: Household Assets Index
+  scale_type: continuous
+  role: dependent
+  concept_stem: household_assets_index
+  domain_tags:
+  - demographic
+  - demography
+  - household
+  pools: []
+  unit: index
+  concept_group: household_family
+- label: Homelessness Rate (per 10,000)
+  scale_type: continuous
+  role: dependent
+  concept_stem: homelessness_rate
+  domain_tags:
+  - demographic
+  - demography
+  - household
+  pools: []
+  unit: per 10,000
+  concept_group: household_family
+- label: Marital Status
+  scale_type: categorical
+  role: independent
+  concept_stem: marital_status
+  domain_tags:
+  - demographic
+  - demography
+  - household
+  pools: []
+  concept_group: household_family
+- label: Currently Married (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: currently_married
+  domain_tags:
+  - demographic
+  - demography
+  - household
+  pools: []
+  unit: '%'
+  concept_group: household_family
+- label: Never Married (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: never_married
+  domain_tags:
+  - demographic
+  - demography
+  - household
+  pools: []
+  unit: '%'
+  concept_group: household_family
+- label: Divorced (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: divorced
+  domain_tags:
+  - demographic
+  - demography
+  - household
+  pools: []
+  unit: '%'
+  concept_group: household_family
+- label: Widowed (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: widowed
+  domain_tags:
+  - demographic
+  - demography
+  - household
+  pools: []
+  unit: '%'
+  concept_group: household_family
+- label: Cohabiting (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: cohabiting
+  domain_tags:
+  - demographic
+  - demography
+  - household
+  pools: []
+  unit: '%'
+  concept_group: household_family
+- label: Mean Age at First Marriage (years)
+  scale_type: continuous
+  role: dependent
+  concept_stem: mean_age_at_first_marriage
+  domain_tags:
+  - demographic
+  - demography
+  - household
+  pools: []
+  unit: years
+  concept_group: household_family
+- label: Singulate Mean Age at Marriage (years)
+  scale_type: continuous
+  role: dependent
+  concept_stem: singulate_mean_age_at_marriage
+  domain_tags:
+  - demographic
+  - demography
+  - household
+  pools: []
+  unit: years
+  concept_group: household_family
+- label: Crude Marriage Rate (per 1,000)
+  scale_type: continuous
+  role: dependent
+  concept_stem: crude_marriage_rate
+  domain_tags:
+  - demographic
+  - demography
+  - household
+  pools: []
+  unit: per 1,000
+  concept_group: household_family
+- label: Crude Divorce Rate (per 1,000)
+  scale_type: continuous
+  role: dependent
+  concept_stem: crude_divorce_rate
+  domain_tags:
+  - demographic
+  - demography
+  - household
+  pools: []
+  unit: per 1,000
+  concept_group: household_family
+- label: Marriage Duration (years)
+  scale_type: continuous
+  role: dependent
+  concept_stem: marriage_duration
+  domain_tags:
+  - demographic
+  - demography
+  - household
+  pools: []
+  unit: years
+  concept_group: household_family
+- label: Same-Sex Couple Households (count)
+  scale_type: discrete_count
+  role: dependent
+  concept_stem: same_sex_couple_households
+  domain_tags:
+  - demographic
+  - demography
+  - household
+  pools: []
+  unit: households
+  concept_group: household_family
+- label: Child Marriage Rate (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: child_marriage_rate
+  domain_tags:
+  - demographic
+  - demography
+  - household
+  pools: []
+  unit: '%'
+  concept_group: household_family
+- label: Polygamy Rate (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: polygamy_rate
+  domain_tags:
+  - demographic
+  - demography
+  - household
+  pools: []
+  unit: '%'
+  concept_group: household_family
+- label: Living Arrangement of Elderly
+  scale_type: categorical
+  role: independent
+  concept_stem: living_arrangement_of_elderly
+  domain_tags:
+  - demographic
+  - demography
+  - household
+  pools: []
+  concept_group: household_family
+- label: Elderly Living Alone (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: elderly_living_alone
+  domain_tags:
+  - demographic
+  - demography
+  - household
+  pools: []
+  unit: '%'
+  concept_group: household_family
+- label: Kinship Network Size (persons)
+  scale_type: discrete_count
+  role: dependent
+  concept_stem: kinship_network_size
+  domain_tags:
+  - demographic
+  - demography
+  - household
+  pools: []
+  unit: persons
+  concept_group: household_family
+- label: Number of Siblings
+  scale_type: discrete_count
+  role: independent
+  concept_stem: number_of_siblings
+  domain_tags:
+  - demographic
+  - demography
+  - household
+  pools: []
+  unit: count
+  concept_group: household_family
+- label: Birth Order Position
+  scale_type: discrete_count
+  role: independent
+  concept_stem: birth_order_position
+  domain_tags:
+  - demographic
+  - demography
+  - household
+  pools: []
+  unit: order
+  concept_group: household_family
+- label: Grandparent Co-Residence (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: grandparent_co_residence
+  domain_tags:
+  - demographic
+  - demography
+  - household
+  pools: []
+  unit: '%'
+  concept_group: household_family
+- label: Adults Living with Parents (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: adults_living_with_parents
+  domain_tags:
+  - demographic
+  - demography
+  - household
+  pools: []
+  unit: '%'
+  concept_group: household_family
+- label: Age at Leaving Parental Home (years)
+  scale_type: continuous
+  role: dependent
+  concept_stem: age_at_leaving_parental_home
+  domain_tags:
+  - demographic
+  - demography
+  - household
+  pools: []
+  unit: years
+  concept_group: household_family
+- label: Foster Care Children (count)
+  scale_type: discrete_count
+  role: dependent
+  concept_stem: foster_care_children
+  domain_tags:
+  - demographic
+  - demography
+  - household
+  pools: []
+  unit: children
+  concept_group: household_family
+- label: Adoption Rate (per 100,000)
+  scale_type: continuous
+  role: dependent
+  concept_stem: adoption_rate
+  domain_tags:
+  - demographic
+  - demography
+  - household
+  pools: []
+  unit: per 100,000
+  concept_group: household_family
+- label: Caregiving Hours per Week
+  scale_type: continuous
+  role: dependent
+  concept_stem: caregiving_hours_per_week
+  domain_tags:
+  - demographic
+  - demography
+  - household
+  pools: []
+  unit: h/week
+  concept_group: household_family
+- label: Unpaid Domestic Work (h/day)
+  scale_type: continuous
+  role: dependent
+  concept_stem: unpaid_domestic_work
+  domain_tags:
+  - demographic
+  - demography
+  - household
+  pools: []
+  unit: h/day
+  concept_group: household_family
+- label: Highest Education Level
+  scale_type: categorical
+  role: independent
+  concept_stem: highest_education_level
+  domain_tags:
+  - demographic
+  - demography
+  - education
+  pools: []
+  concept_group: education
+- label: Years of Schooling (years)
+  scale_type: continuous
+  role: dependent
+  concept_stem: years_of_schooling
+  domain_tags:
+  - demographic
+  - demography
+  - education
+  pools: []
+  unit: years
+  concept_group: education
+- label: Mean Years of Schooling (years)
+  scale_type: continuous
+  role: dependent
+  concept_stem: mean_years_of_schooling
+  domain_tags:
+  - demographic
+  - demography
+  - education
+  pools: []
+  unit: years
+  concept_group: education
+- label: Expected Years of Schooling (years)
+  scale_type: continuous
+  role: dependent
+  concept_stem: expected_years_of_schooling
+  domain_tags:
+  - demographic
+  - demography
+  - education
+  pools: []
+  unit: years
+  concept_group: education
+- label: Adult Literacy Rate (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: adult_literacy_rate
+  domain_tags:
+  - demographic
+  - demography
+  - education
+  pools: []
+  unit: '%'
+  concept_group: education
+- label: Youth Literacy Rate (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: youth_literacy_rate
+  domain_tags:
+  - demographic
+  - demography
+  - education
+  pools: []
+  unit: '%'
+  concept_group: education
+- label: Female Literacy Rate (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: female_literacy_rate
+  domain_tags:
+  - demographic
+  - demography
+  - education
+  pools: []
+  unit: '%'
+  concept_group: education
+- label: Net Enrollment Rate Primary (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: net_enrollment_rate_primary
+  domain_tags:
+  - demographic
+  - demography
+  - education
+  pools: []
+  unit: '%'
+  concept_group: education
+- label: Net Enrollment Rate Secondary (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: net_enrollment_rate_secondary
+  domain_tags:
+  - demographic
+  - demography
+  - education
+  pools: []
+  unit: '%'
+  concept_group: education
+- label: Gross Enrollment Ratio Tertiary (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: gross_enrollment_ratio_tertiary
+  domain_tags:
+  - demographic
+  - demography
+  - education
+  pools: []
+  unit: '%'
+  concept_group: education
+- label: Primary Completion Rate (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: primary_completion_rate
+  domain_tags:
+  - demographic
+  - demography
+  - education
+  pools: []
+  unit: '%'
+  concept_group: education
+- label: Secondary Completion Rate (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: secondary_completion_rate
+  domain_tags:
+  - demographic
+  - demography
+  - education
+  pools: []
+  unit: '%'
+  concept_group: education
+- label: Tertiary Attainment 25-34 (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: tertiary_attainment_25_34
+  domain_tags:
+  - demographic
+  - demography
+  - education
+  pools: []
+  unit: '%'
+  concept_group: education
+- label: Population with No Schooling (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: population_with_no_schooling
+  domain_tags:
+  - demographic
+  - demography
+  - education
+  pools: []
+  unit: '%'
+  concept_group: education
+- label: Population with Bachelor's Degree or Higher (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: population_with_bachelor_s_degree_or_higher
+  domain_tags:
+  - demographic
+  - demography
+  - education
+  pools: []
+  unit: '%'
+  concept_group: education
+- label: Population with High School Diploma (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: population_with_high_school_diploma
+  domain_tags:
+  - demographic
+  - demography
+  - education
+  pools: []
+  unit: '%'
+  concept_group: education
+- label: Out-of-School Children (count)
+  scale_type: discrete_count
+  role: dependent
+  concept_stem: out_of_school_children
+  domain_tags:
+  - demographic
+  - demography
+  - education
+  pools: []
+  unit: children
+  concept_group: education
+- label: Out-of-School Rate (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: out_of_school_rate
+  domain_tags:
+  - demographic
+  - demography
+  - education
+  pools: []
+  unit: '%'
+  concept_group: education
+- label: School Dropout Rate (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: school_dropout_rate
+  domain_tags:
+  - demographic
+  - demography
+  - education
+  pools: []
+  unit: '%'
+  concept_group: education
+- label: Grade Repetition Rate (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: grade_repetition_rate
+  domain_tags:
+  - demographic
+  - demography
+  - education
+  pools: []
+  unit: '%'
+  concept_group: education
+- label: Gender Parity Index in Education
+  scale_type: continuous
+  role: dependent
+  concept_stem: gender_parity_index_in_education
+  domain_tags:
+  - demographic
+  - demography
+  - education
+  pools: []
+  unit: ratio
+  concept_group: education
+- label: Pupil-Teacher Ratio
+  scale_type: continuous
+  role: dependent
+  concept_stem: pupil_teacher_ratio
+  domain_tags:
+  - demographic
+  - demography
+  - education
+  pools: []
+  unit: ratio
+  concept_group: education
+- label: Class Size (students)
+  scale_type: discrete_count
+  role: independent
+  concept_stem: class_size
+  domain_tags:
+  - demographic
+  - demography
+  - education
+  pools: []
+  unit: students
+  concept_group: education
+- label: Public Education Spending (% of GDP)
+  scale_type: percentage
+  role: independent
+  concept_stem: public_education_spending
+  domain_tags:
+  - demographic
+  - demography
+  - education
+  pools: []
+  unit: '%'
+  concept_group: education
+- label: Education Spending per Student ($)
+  scale_type: continuous
+  role: independent
+  concept_stem: education_spending_per_student
+  domain_tags:
+  - demographic
+  - demography
+  - education
+  pools: []
+  unit: $
+  concept_group: education
+- label: Standardized Test Score
+  scale_type: continuous
+  role: dependent
+  concept_stem: standardized_test_score
+  domain_tags:
+  - demographic
+  - demography
+  - education
+  pools: []
+  unit: score
+  concept_group: education
+- label: PISA Reading Score
+  scale_type: continuous
+  role: dependent
+  concept_stem: pisa_reading_score
+  domain_tags:
+  - demographic
+  - demography
+  - education
+  pools: []
+  unit: score
+  concept_group: education
+- label: PISA Math Score
+  scale_type: continuous
+  role: dependent
+  concept_stem: pisa_math_score
+  domain_tags:
+  - demographic
+  - demography
+  - education
+  pools: []
+  unit: score
+  concept_group: education
+- label: PISA Science Score
+  scale_type: continuous
+  role: dependent
+  concept_stem: pisa_science_score
+  domain_tags:
+  - demographic
+  - demography
+  - education
+  pools: []
+  unit: score
+  concept_group: education
+- label: School Type
+  scale_type: categorical
+  role: independent
+  concept_stem: school_type
+  domain_tags:
+  - demographic
+  - demography
+  - education
+  pools: []
+  concept_group: education
+- label: Field of Study
+  scale_type: categorical
+  role: independent
+  concept_stem: field_of_study
+  domain_tags:
+  - demographic
+  - demography
+  - education
+  pools: []
+  concept_group: education
+- label: Student Debt ($)
+  scale_type: continuous
+  role: dependent
+  concept_stem: student_debt
+  domain_tags:
+  - demographic
+  - demography
+  - education
+  pools: []
+  unit: $
+  concept_group: education
+- label: Tuition Fees ($/year)
+  scale_type: continuous
+  role: independent
+  concept_stem: tuition_fees
+  domain_tags:
+  - demographic
+  - demography
+  - education
+  pools: []
+  unit: $/year
+  concept_group: education
+- label: NEET Rate Youth (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: neet_rate_youth
+  domain_tags:
+  - demographic
+  - demography
+  - education
+  pools: []
+  unit: '%'
+  concept_group: education
+- label: Adult Education Participation (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: adult_education_participation
+  domain_tags:
+  - demographic
+  - demography
+  - education
+  pools: []
+  unit: '%'
+  concept_group: education
+- label: Preschool Enrollment Rate (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: preschool_enrollment_rate
+  domain_tags:
+  - demographic
+  - demography
+  - education
+  pools: []
+  unit: '%'
+  concept_group: education
+- label: Language of Instruction
+  scale_type: categorical
+  role: independent
+  concept_stem: language_of_instruction
+  domain_tags:
+  - demographic
+  - demography
+  - education
+  pools: []
+  concept_group: education
+- label: Distance to School (km)
+  scale_type: continuous
+  role: independent
+  concept_stem: distance_to_school
+  domain_tags:
+  - demographic
+  - demography
+  - education
+  pools: []
+  unit: km
+  concept_group: education
+- label: School Attendance Rate (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: school_attendance_rate
+  domain_tags:
+  - demographic
+  - demography
+  - education
+  pools: []
+  unit: '%'
+  concept_group: education
+- label: Digital Skills Proficiency (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: digital_skills_proficiency
+  domain_tags:
+  - demographic
+  - demography
+  - education
+  pools: []
+  unit: '%'
+  concept_group: education
+- label: Educational Mismatch Rate (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: educational_mismatch_rate
+  domain_tags:
+  - demographic
+  - demography
+  - education
+  pools: []
+  unit: '%'
+  concept_group: education
+- label: Teacher Qualification Rate (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: teacher_qualification_rate
+  domain_tags:
+  - demographic
+  - demography
+  - education
+  pools: []
+  unit: '%'
+  concept_group: education
+- label: Educational Assortative Mating Index
+  scale_type: continuous
+  role: dependent
+  concept_stem: educational_assortative_mating_index
+  domain_tags:
+  - demographic
+  - demography
+  - education
+  pools: []
+  unit: index
+  concept_group: education
+- label: Labor Force Participation Rate (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: labor_force_participation_rate
+  domain_tags:
+  - demographic
+  - demography
+  - labor
+  pools: []
+  unit: '%'
+  concept_group: labor_employment
+- label: Employment-to-Population Ratio (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: employment_to_population_ratio
+  domain_tags:
+  - demographic
+  - demography
+  - labor
+  pools: []
+  unit: '%'
+  concept_group: labor_employment
+- label: Youth Unemployment Rate (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: youth_unemployment_rate
+  domain_tags:
+  - demographic
+  - demography
+  - labor
+  pools: []
+  unit: '%'
+  concept_group: labor_employment
+- label: Long-Term Unemployment Rate (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: long_term_unemployment_rate
+  domain_tags:
+  - demographic
+  - demography
+  - labor
+  pools: []
+  unit: '%'
+  concept_group: labor_employment
+- label: Underemployment Rate (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: underemployment_rate
+  domain_tags:
+  - demographic
+  - demography
+  - labor
+  pools: []
+  unit: '%'
+  concept_group: labor_employment
+- label: Female Labor Force Participation (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: female_labor_force_participation
+  domain_tags:
+  - demographic
+  - demography
+  - labor
+  pools: []
+  unit: '%'
+  concept_group: labor_employment
+- label: Employment Status
+  scale_type: categorical
+  role: independent
+  concept_stem: employment_status
+  domain_tags:
+  - demographic
+  - demography
+  - labor
+  pools: []
+  concept_group: labor_employment
+- label: Occupation
+  scale_type: categorical
+  role: independent
+  concept_stem: occupation
+  domain_tags:
+  - demographic
+  - demography
+  - labor
+  pools: []
+  concept_group: labor_employment
+- label: Industry of Employment
+  scale_type: categorical
+  role: independent
+  concept_stem: industry_of_employment
+  domain_tags:
+  - demographic
+  - demography
+  - labor
+  pools: []
+  concept_group: labor_employment
+- label: Class of Worker
+  scale_type: categorical
+  role: independent
+  concept_stem: class_of_worker
+  domain_tags:
+  - demographic
+  - demography
+  - labor
+  pools: []
+  concept_group: labor_employment
+- label: Self-Employment Rate (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: self_employment_rate
+  domain_tags:
+  - demographic
+  - demography
+  - labor
+  pools: []
+  unit: '%'
+  concept_group: labor_employment
+- label: Informal Employment (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: informal_employment
+  domain_tags:
+  - demographic
+  - demography
+  - labor
+  pools: []
+  unit: '%'
+  concept_group: labor_employment
+- label: Part-Time Employment (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: part_time_employment
+  domain_tags:
+  - demographic
+  - demography
+  - labor
+  pools: []
+  unit: '%'
+  concept_group: labor_employment
+- label: Temporary Employment (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: temporary_employment
+  domain_tags:
+  - demographic
+  - demography
+  - labor
+  pools: []
+  unit: '%'
+  concept_group: labor_employment
+- label: Hours Worked per Week
+  scale_type: continuous
+  role: dependent
+  concept_stem: hours_worked_per_week
+  domain_tags:
+  - demographic
+  - demography
+  - labor
+  pools: []
+  unit: h/week
+  concept_group: labor_employment
+- label: Annual Hours Worked
+  scale_type: continuous
+  role: dependent
+  concept_stem: annual_hours_worked
+  domain_tags:
+  - demographic
+  - demography
+  - labor
+  pools: []
+  unit: h/year
+  concept_group: labor_employment
+- label: Employment in Agriculture (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: employment_in_agriculture
+  domain_tags:
+  - demographic
+  - demography
+  - labor
+  pools: []
+  unit: '%'
+  concept_group: labor_employment
+- label: Employment in Industry (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: employment_in_industry
+  domain_tags:
+  - demographic
+  - demography
+  - labor
+  pools: []
+  unit: '%'
+  concept_group: labor_employment
+- label: Employment in Services (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: employment_in_services
+  domain_tags:
+  - demographic
+  - demography
+  - labor
+  pools: []
+  unit: '%'
+  concept_group: labor_employment
+- label: Median Hourly Wage ($)
+  scale_type: continuous
+  role: dependent
+  concept_stem: median_hourly_wage
+  domain_tags:
+  - demographic
+  - demography
+  - labor
+  pools: []
+  unit: $/h
+  concept_group: labor_employment
+- label: Median Annual Earnings ($)
+  scale_type: continuous
+  role: dependent
+  concept_stem: median_annual_earnings
+  domain_tags:
+  - demographic
+  - demography
+  - labor
+  pools: []
+  unit: $/year
+  concept_group: labor_employment
+- label: Minimum Wage ($/h)
+  scale_type: continuous
+  role: independent
+  concept_stem: minimum_wage
+  domain_tags:
+  - demographic
+  - demography
+  - labor
+  pools: []
+  unit: $/h
+  concept_group: labor_employment
+- label: Gender Wage Gap (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: gender_wage_gap
+  domain_tags:
+  - demographic
+  - demography
+  - labor
+  pools: []
+  unit: '%'
+  concept_group: labor_employment
+- label: Racial Wage Gap (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: racial_wage_gap
+  domain_tags:
+  - demographic
+  - demography
+  - labor
+  pools: []
+  unit: '%'
+  concept_group: labor_employment
+- label: Labor Share of Income (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: labor_share_of_income
+  domain_tags:
+  - demographic
+  - demography
+  - labor
+  pools: []
+  unit: '%'
+  concept_group: labor_employment
+- label: Union Density (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: union_density
+  domain_tags:
+  - demographic
+  - demography
+  - labor
+  pools: []
+  unit: '%'
+  concept_group: labor_employment
+- label: Collective Bargaining Coverage (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: collective_bargaining_coverage
+  domain_tags:
+  - demographic
+  - demography
+  - labor
+  pools: []
+  unit: '%'
+  concept_group: labor_employment
+- label: Retirement Age (years)
+  scale_type: continuous
+  role: dependent
+  concept_stem: retirement_age
+  domain_tags:
+  - demographic
+  - demography
+  - labor
+  pools: []
+  unit: years
+  concept_group: labor_employment
+- label: Effective Retirement Age (years)
+  scale_type: continuous
+  role: dependent
+  concept_stem: effective_retirement_age
+  domain_tags:
+  - demographic
+  - demography
+  - labor
+  pools: []
+  unit: years
+  concept_group: labor_employment
+- label: Retired Population (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: retired_population
+  domain_tags:
+  - demographic
+  - demography
+  - labor
+  pools: []
+  unit: '%'
+  concept_group: labor_employment
+- label: Pension Coverage (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: pension_coverage
+  domain_tags:
+  - demographic
+  - demography
+  - labor
+  pools: []
+  unit: '%'
+  concept_group: labor_employment
+- label: Pension Replacement Rate (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: pension_replacement_rate
+  domain_tags:
+  - demographic
+  - demography
+  - labor
+  pools: []
+  unit: '%'
+  concept_group: labor_employment
+- label: Old-Age Labor Force Participation (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: old_age_labor_force_participation
+  domain_tags:
+  - demographic
+  - demography
+  - labor
+  pools: []
+  unit: '%'
+  concept_group: labor_employment
+- label: Child Labor Rate (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: child_labor_rate
+  domain_tags:
+  - demographic
+  - demography
+  - labor
+  pools: []
+  unit: '%'
+  concept_group: labor_employment
+- label: Job Tenure (years)
+  scale_type: continuous
+  role: dependent
+  concept_stem: job_tenure
+  domain_tags:
+  - demographic
+  - demography
+  - labor
+  pools: []
+  unit: years
+  concept_group: labor_employment
+- label: Job Mobility Rate (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: job_mobility_rate
+  domain_tags:
+  - demographic
+  - demography
+  - labor
+  pools: []
+  unit: '%'
+  concept_group: labor_employment
+- label: Work Commute Mode
+  scale_type: categorical
+  role: independent
+  concept_stem: work_commute_mode
+  domain_tags:
+  - demographic
+  - demography
+  - labor
+  pools: []
+  concept_group: labor_employment
+- label: Vulnerable Employment (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: vulnerable_employment
+  domain_tags:
+  - demographic
+  - demography
+  - labor
+  pools: []
+  unit: '%'
+  concept_group: labor_employment
+- label: Public Sector Employment (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: public_sector_employment
+  domain_tags:
+  - demographic
+  - demography
+  - labor
+  pools: []
+  unit: '%'
+  concept_group: labor_employment
+- label: Skill Level
+  scale_type: categorical
+  role: independent
+  concept_stem: skill_level
+  domain_tags:
+  - demographic
+  - demography
+  - labor
+  pools: []
+  concept_group: labor_employment
+- label: Employment Protection Index
+  scale_type: continuous
+  role: independent
+  concept_stem: employment_protection_index
+  domain_tags:
+  - demographic
+  - demography
+  - labor
+  pools: []
+  unit: index
+  concept_group: labor_employment
+- label: Unemployment Duration (weeks)
+  scale_type: continuous
+  role: dependent
+  concept_stem: unemployment_duration
+  domain_tags:
+  - demographic
+  - demography
+  - labor
+  pools: []
+  unit: weeks
+  concept_group: labor_employment
+- label: Duration of Working Life (years)
+  scale_type: continuous
+  role: dependent
+  concept_stem: duration_of_working_life
+  domain_tags:
+  - demographic
+  - demography
+  - labor
+  pools: []
+  unit: years
+  concept_group: labor_employment
+- label: Veteran Status
+  scale_type: categorical
+  role: independent
+  concept_stem: veteran_status
+  domain_tags:
+  - demographic
+  - demography
+  - labor
+  pools: []
+  concept_group: labor_employment
+- label: Military Personnel (count)
+  scale_type: discrete_count
+  role: dependent
+  concept_stem: military_personnel
+  domain_tags:
+  - demographic
+  - demography
+  - labor
+  pools: []
+  unit: persons
+  concept_group: labor_employment
+- label: Disability Employment Rate (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: disability_employment_rate
+  domain_tags:
+  - demographic
+  - demography
+  - labor
+  pools: []
+  unit: '%'
+  concept_group: labor_employment
+- label: Household Income ($)
+  scale_type: continuous
+  role: dependent
+  concept_stem: household_income
+  domain_tags:
+  - demographic
+  - demography
+  - economics
+  pools: []
+  unit: $
+  concept_group: income_poverty_inequality
+- label: Median Household Income ($)
+  scale_type: continuous
+  role: dependent
+  concept_stem: median_household_income
+  domain_tags:
+  - demographic
+  - demography
+  - economics
+  pools: []
+  unit: $
+  concept_group: income_poverty_inequality
+- label: Per Capita Income ($)
+  scale_type: continuous
+  role: dependent
+  concept_stem: per_capita_income
+  domain_tags:
+  - demographic
+  - demography
+  - economics
+  pools: []
+  unit: $
+  concept_group: income_poverty_inequality
+- label: GDP per Capita ($)
+  scale_type: continuous
+  role: dependent
+  concept_stem: gdp_per_capita
+  domain_tags:
+  - demographic
+  - demography
+  - economics
+  pools: []
+  unit: $
+  concept_group: income_poverty_inequality
+- label: GNI per Capita ($)
+  scale_type: continuous
+  role: dependent
+  concept_stem: gni_per_capita
+  domain_tags:
+  - demographic
+  - demography
+  - economics
+  pools: []
+  unit: $
+  concept_group: income_poverty_inequality
+- label: Equivalized Disposable Income ($)
+  scale_type: continuous
+  role: dependent
+  concept_stem: equivalized_disposable_income
+  domain_tags:
+  - demographic
+  - demography
+  - economics
+  pools: []
+  unit: $
+  concept_group: income_poverty_inequality
+- label: Wealth Net Worth ($)
+  scale_type: continuous
+  role: dependent
+  concept_stem: wealth_net_worth
+  domain_tags:
+  - demographic
+  - demography
+  - economics
+  pools: []
+  unit: $
+  concept_group: income_poverty_inequality
+- label: Median Net Worth ($)
+  scale_type: continuous
+  role: dependent
+  concept_stem: median_net_worth
+  domain_tags:
+  - demographic
+  - demography
+  - economics
+  pools: []
+  unit: $
+  concept_group: income_poverty_inequality
+- label: Gini Coefficient (Income)
+  scale_type: continuous
+  role: dependent
+  concept_stem: gini_coefficient
+  domain_tags:
+  - demographic
+  - demography
+  - economics
+  pools: []
+  unit: ratio
+  concept_group: income_poverty_inequality
+- label: Gini Coefficient (Wealth)
+  scale_type: continuous
+  role: dependent
+  concept_stem: gini_coefficient_income_poverty_inequality
+  domain_tags:
+  - demographic
+  - demography
+  - economics
+  pools: []
+  unit: ratio
+  concept_group: income_poverty_inequality
+- label: Palma Ratio
+  scale_type: continuous
+  role: dependent
+  concept_stem: palma_ratio
+  domain_tags:
+  - demographic
+  - demography
+  - economics
+  pools: []
+  unit: ratio
+  concept_group: income_poverty_inequality
+- label: S80/S20 Income Quintile Share Ratio
+  scale_type: continuous
+  role: dependent
+  concept_stem: s80_s20_income_quintile_share_ratio
+  domain_tags:
+  - demographic
+  - demography
+  - economics
+  pools: []
+  unit: ratio
+  concept_group: income_poverty_inequality
+- label: Top 10% Income Share (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: top_10_income_share
+  domain_tags:
+  - demographic
+  - demography
+  - economics
+  pools: []
+  unit: '%'
+  concept_group: income_poverty_inequality
+- label: Top 1% Income Share (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: top_1_income_share
+  domain_tags:
+  - demographic
+  - demography
+  - economics
+  pools: []
+  unit: '%'
+  concept_group: income_poverty_inequality
+- label: Bottom 50% Income Share (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: bottom_50_income_share
+  domain_tags:
+  - demographic
+  - demography
+  - economics
+  pools: []
+  unit: '%'
+  concept_group: income_poverty_inequality
+- label: Income Quintile
+  scale_type: categorical
+  role: independent
+  concept_stem: income_quintile
+  domain_tags:
+  - demographic
+  - demography
+  - economics
+  pools: []
+  concept_group: income_poverty_inequality
+- label: Income Decile
+  scale_type: discrete_count
+  role: independent
+  concept_stem: income_decile
+  domain_tags:
+  - demographic
+  - demography
+  - economics
+  pools: []
+  unit: decile
+  concept_group: income_poverty_inequality
+- label: Absolute Poverty Rate (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: absolute_poverty_rate
+  domain_tags:
+  - demographic
+  - demography
+  - economics
+  pools: []
+  unit: '%'
+  concept_group: income_poverty_inequality
+- label: Extreme Poverty Rate $2.15/day (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: extreme_poverty_rate_2_15_day
+  domain_tags:
+  - demographic
+  - demography
+  - economics
+  pools: []
+  unit: '%'
+  concept_group: income_poverty_inequality
+- label: Relative Poverty Rate (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: relative_poverty_rate
+  domain_tags:
+  - demographic
+  - demography
+  - economics
+  pools: []
+  unit: '%'
+  concept_group: income_poverty_inequality
+- label: Poverty Headcount Ratio (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: poverty_headcount_ratio
+  domain_tags:
+  - demographic
+  - demography
+  - economics
+  pools: []
+  unit: '%'
+  concept_group: income_poverty_inequality
+- label: Poverty Gap (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: poverty_gap
+  domain_tags:
+  - demographic
+  - demography
+  - economics
+  pools: []
+  unit: '%'
+  concept_group: income_poverty_inequality
+- label: Poverty Gap Squared (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: poverty_gap_squared
+  domain_tags:
+  - demographic
+  - demography
+  - economics
+  pools: []
+  unit: '%'
+  concept_group: income_poverty_inequality
+- label: Child Poverty Rate (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: child_poverty_rate
+  domain_tags:
+  - demographic
+  - demography
+  - economics
+  pools: []
+  unit: '%'
+  concept_group: income_poverty_inequality
+- label: Elderly Poverty Rate (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: elderly_poverty_rate
+  domain_tags:
+  - demographic
+  - demography
+  - economics
+  pools: []
+  unit: '%'
+  concept_group: income_poverty_inequality
+- label: Working Poor Rate (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: working_poor_rate
+  domain_tags:
+  - demographic
+  - demography
+  - economics
+  pools: []
+  unit: '%'
+  concept_group: income_poverty_inequality
+- label: Poverty Line ($/day)
+  scale_type: continuous
+  role: independent
+  concept_stem: poverty_line
+  domain_tags:
+  - demographic
+  - demography
+  - economics
+  pools: []
+  unit: $/day
+  concept_group: income_poverty_inequality
+- label: Multidimensional Poverty Index
+  scale_type: continuous
+  role: dependent
+  concept_stem: multidimensional_poverty_index
+  domain_tags:
+  - demographic
+  - demography
+  - economics
+  pools: []
+  unit: index
+  concept_group: income_poverty_inequality
+- label: Persistent Poverty Rate (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: persistent_poverty_rate
+  domain_tags:
+  - demographic
+  - demography
+  - economics
+  pools: []
+  unit: '%'
+  concept_group: income_poverty_inequality
+- label: Material Deprivation Rate (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: material_deprivation_rate
+  domain_tags:
+  - demographic
+  - demography
+  - economics
+  pools: []
+  unit: '%'
+  concept_group: income_poverty_inequality
+- label: Food Insecurity Rate (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: food_insecurity_rate
+  domain_tags:
+  - demographic
+  - demography
+  - economics
+  pools: []
+  unit: '%'
+  concept_group: income_poverty_inequality
+- label: Social Transfers (% of Income)
+  scale_type: percentage
+  role: dependent
+  concept_stem: social_transfers
+  domain_tags:
+  - demographic
+  - demography
+  - economics
+  pools: []
+  unit: '%'
+  concept_group: income_poverty_inequality
+- label: Social Protection Coverage (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: social_protection_coverage
+  domain_tags:
+  - demographic
+  - demography
+  - economics
+  pools: []
+  unit: '%'
+  concept_group: income_poverty_inequality
+- label: Tax Burden (% of Income)
+  scale_type: percentage
+  role: dependent
+  concept_stem: tax_burden
+  domain_tags:
+  - demographic
+  - demography
+  - economics
+  pools: []
+  unit: '%'
+  concept_group: income_poverty_inequality
+- label: Savings Rate (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: savings_rate
+  domain_tags:
+  - demographic
+  - demography
+  - economics
+  pools: []
+  unit: '%'
+  concept_group: income_poverty_inequality
+- label: Household Debt-to-Income Ratio (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: household_debt_to_income_ratio
+  domain_tags:
+  - demographic
+  - demography
+  - economics
+  pools: []
+  unit: '%'
+  concept_group: income_poverty_inequality
+- label: Intergenerational Income Elasticity
+  scale_type: continuous
+  role: dependent
+  concept_stem: intergenerational_income_elasticity
+  domain_tags:
+  - demographic
+  - demography
+  - economics
+  pools: []
+  unit: ratio
+  concept_group: income_poverty_inequality
+- label: Social Mobility Index
+  scale_type: continuous
+  role: dependent
+  concept_stem: social_mobility_index
+  domain_tags:
+  - demographic
+  - demography
+  - economics
+  pools: []
+  unit: index
+  concept_group: income_poverty_inequality
+- label: Home Equity ($)
+  scale_type: continuous
+  role: dependent
+  concept_stem: home_equity
+  domain_tags:
+  - demographic
+  - demography
+  - economics
+  pools: []
+  unit: $
+  concept_group: income_poverty_inequality
+- label: Human Development Index
+  scale_type: continuous
+  role: dependent
+  concept_stem: human_development_index
+  domain_tags:
+  - demographic
+  - demography
+  - economics
+  pools: []
+  unit: index
+  concept_group: income_poverty_inequality
+- label: Inequality-Adjusted HDI
+  scale_type: continuous
+  role: dependent
+  concept_stem: inequality_adjusted_hdi
+  domain_tags:
+  - demographic
+  - demography
+  - economics
+  pools: []
+  unit: index
+  concept_group: income_poverty_inequality
+- label: Gender Development Index
+  scale_type: continuous
+  role: dependent
+  concept_stem: gender_development_index
+  domain_tags:
+  - demographic
+  - demography
+  - economics
+  pools: []
+  unit: index
+  concept_group: income_poverty_inequality
+- label: Gender Inequality Index
+  scale_type: continuous
+  role: dependent
+  concept_stem: gender_inequality_index
+  domain_tags:
+  - demographic
+  - demography
+  - economics
+  pools: []
+  unit: index
+  concept_group: income_poverty_inequality
+- label: Income Group
+  scale_type: categorical
+  role: independent
+  concept_stem: income_group
+  domain_tags:
+  - demographic
+  - demography
+  - economics
+  pools: []
+  concept_group: income_poverty_inequality
+- label: Welfare Recipients (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: welfare_recipients
+  domain_tags:
+  - demographic
+  - demography
+  - economics
+  pools: []
+  unit: '%'
+  concept_group: income_poverty_inequality
+- label: Basic Needs Cost ($/month)
+  scale_type: continuous
+  role: independent
+  concept_stem: basic_needs_cost
+  domain_tags:
+  - demographic
+  - demography
+  - economics
+  pools: []
+  unit: $/month
+  concept_group: income_poverty_inequality
+- label: Consumption Expenditure ($/month)
+  scale_type: continuous
+  role: dependent
+  concept_stem: consumption_expenditure
+  domain_tags:
+  - demographic
+  - demography
+  - economics
+  pools: []
+  unit: $/month
+  concept_group: income_poverty_inequality
+- label: Food Share of Expenditure (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: food_share_of_expenditure
+  domain_tags:
+  - demographic
+  - demography
+  - economics
+  pools: []
+  unit: '%'
+  concept_group: income_poverty_inequality
+- label: Financial Inclusion Rate (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: financial_inclusion_rate
+  domain_tags:
+  - demographic
+  - demography
+  - economics
+  pools: []
+  unit: '%'
+  concept_group: income_poverty_inequality
+- label: Bank Account Ownership (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: bank_account_ownership
+  domain_tags:
+  - demographic
+  - demography
+  - economics
+  pools: []
+  unit: '%'
+  concept_group: income_poverty_inequality
+- label: Mobile Money Account Ownership (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: mobile_money_account_ownership
+  domain_tags:
+  - demographic
+  - demography
+  - economics
+  pools: []
+  unit: '%'
+  concept_group: income_poverty_inequality
+- label: Poverty Exit Rate (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: poverty_exit_rate
+  domain_tags:
+  - demographic
+  - demography
+  - economics
+  pools: []
+  unit: '%'
+  concept_group: income_poverty_inequality
+- label: Ethnic Group
+  scale_type: categorical
+  role: independent
+  concept_stem: ethnic_group
+  domain_tags:
+  - demographic
+  - demography
+  - social
+  pools: []
+  concept_group: ethnicity_race_language_religion
+- label: Race
+  scale_type: categorical
+  role: independent
+  concept_stem: race
+  domain_tags:
+  - demographic
+  - demography
+  - social
+  pools: []
+  concept_group: ethnicity_race_language_religion
+- label: Hispanic or Latino Origin
+  scale_type: categorical
+  role: independent
+  concept_stem: hispanic_or_latino_origin
+  domain_tags:
+  - demographic
+  - demography
+  - social
+  pools: []
+  concept_group: ethnicity_race_language_religion
+- label: Indigenous Population (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: indigenous_population
+  domain_tags:
+  - demographic
+  - demography
+  - social
+  pools: []
+  unit: '%'
+  concept_group: ethnicity_race_language_religion
+- label: Ethnic Fractionalization Index
+  scale_type: continuous
+  role: dependent
+  concept_stem: ethnic_fractionalization_index
+  domain_tags:
+  - demographic
+  - demography
+  - social
+  pools: []
+  unit: index
+  concept_group: ethnicity_race_language_religion
+- label: Ethnic Diversity Index
+  scale_type: continuous
+  role: dependent
+  concept_stem: ethnic_diversity_index
+  domain_tags:
+  - demographic
+  - demography
+  - social
+  pools: []
+  unit: index
+  concept_group: ethnicity_race_language_religion
+- label: Racial Residential Segregation Index
+  scale_type: continuous
+  role: dependent
+  concept_stem: racial_residential_segregation_index
+  domain_tags:
+  - demographic
+  - demography
+  - social
+  pools: []
+  unit: index
+  concept_group: ethnicity_race_language_religion
+- label: Dissimilarity Index
+  scale_type: continuous
+  role: dependent
+  concept_stem: dissimilarity_index
+  domain_tags:
+  - demographic
+  - demography
+  - social
+  pools: []
+  unit: index
+  concept_group: ethnicity_race_language_religion
+- label: Isolation Index
+  scale_type: continuous
+  role: dependent
+  concept_stem: isolation_index
+  domain_tags:
+  - demographic
+  - demography
+  - social
+  pools: []
+  unit: index
+  concept_group: ethnicity_race_language_religion
+- label: Multiracial Population (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: multiracial_population
+  domain_tags:
+  - demographic
+  - demography
+  - social
+  pools: []
+  unit: '%'
+  concept_group: ethnicity_race_language_religion
+- label: Majority Group Share (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: majority_group_share
+  domain_tags:
+  - demographic
+  - demography
+  - social
+  pools: []
+  unit: '%'
+  concept_group: ethnicity_race_language_religion
+- label: Largest Ethnic Minority Share (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: largest_ethnic_minority_share
+  domain_tags:
+  - demographic
+  - demography
+  - social
+  pools: []
+  unit: '%'
+  concept_group: ethnicity_race_language_religion
+- label: Mother Tongue
+  scale_type: categorical
+  role: independent
+  concept_stem: mother_tongue
+  domain_tags:
+  - demographic
+  - demography
+  - social
+  pools: []
+  concept_group: ethnicity_race_language_religion
+- label: Language Spoken at Home
+  scale_type: categorical
+  role: independent
+  concept_stem: language_spoken_at_home
+  domain_tags:
+  - demographic
+  - demography
+  - social
+  pools: []
+  concept_group: ethnicity_race_language_religion
+- label: Number of Languages Spoken
+  scale_type: discrete_count
+  role: independent
+  concept_stem: number_of_languages_spoken
+  domain_tags:
+  - demographic
+  - demography
+  - social
+  pools: []
+  unit: count
+  concept_group: ethnicity_race_language_religion
+- label: Linguistic Diversity Index
+  scale_type: continuous
+  role: dependent
+  concept_stem: linguistic_diversity_index
+  domain_tags:
+  - demographic
+  - demography
+  - social
+  pools: []
+  unit: index
+  concept_group: ethnicity_race_language_religion
+- label: English Proficiency (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: english_proficiency
+  domain_tags:
+  - demographic
+  - demography
+  - social
+  pools: []
+  unit: '%'
+  concept_group: ethnicity_race_language_religion
+- label: Limited English Proficiency (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: limited_english_proficiency
+  domain_tags:
+  - demographic
+  - demography
+  - social
+  pools: []
+  unit: '%'
+  concept_group: ethnicity_race_language_religion
+- label: Bilingual Population (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: bilingual_population
+  domain_tags:
+  - demographic
+  - demography
+  - social
+  pools: []
+  unit: '%'
+  concept_group: ethnicity_race_language_religion
+- label: Religion
+  scale_type: categorical
+  role: independent
+  concept_stem: religion
+  domain_tags:
+  - demographic
+  - demography
+  - social
+  pools: []
+  concept_group: ethnicity_race_language_religion
+- label: Religious Affiliation (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: religious_affiliation
+  domain_tags:
+  - demographic
+  - demography
+  - social
+  pools: []
+  unit: '%'
+  concept_group: ethnicity_race_language_religion
+- label: Religiously Unaffiliated (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: religiously_unaffiliated
+  domain_tags:
+  - demographic
+  - demography
+  - social
+  pools: []
+  unit: '%'
+  concept_group: ethnicity_race_language_religion
+- label: Religious Service Attendance (times/month)
+  scale_type: continuous
+  role: dependent
+  concept_stem: religious_service_attendance
+  domain_tags:
+  - demographic
+  - demography
+  - social
+  pools: []
+  unit: times/month
+  concept_group: ethnicity_race_language_religion
+- label: Religious Diversity Index
+  scale_type: continuous
+  role: dependent
+  concept_stem: religious_diversity_index
+  domain_tags:
+  - demographic
+  - demography
+  - social
+  pools: []
+  unit: index
+  concept_group: ethnicity_race_language_religion
+- label: Nationality
+  scale_type: categorical
+  role: independent
+  concept_stem: nationality
+  domain_tags:
+  - demographic
+  - demography
+  - social
+  pools: []
+  concept_group: ethnicity_race_language_religion
+- label: Dual Citizenship (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: dual_citizenship
+  domain_tags:
+  - demographic
+  - demography
+  - social
+  pools: []
+  unit: '%'
+  concept_group: ethnicity_race_language_religion
+- label: National Identity Strength Score
+  scale_type: continuous
+  role: dependent
+  concept_stem: national_identity_strength_score
+  domain_tags:
+  - demographic
+  - demography
+  - social
+  pools: []
+  unit: score
+  concept_group: ethnicity_race_language_religion
+- label: Caste or Social Class
+  scale_type: categorical
+  role: independent
+  concept_stem: caste_or_social_class
+  domain_tags:
+  - demographic
+  - demography
+  - social
+  pools: []
+  concept_group: ethnicity_race_language_religion
+- label: Sexual Orientation
+  scale_type: categorical
+  role: independent
+  concept_stem: sexual_orientation
+  domain_tags:
+  - demographic
+  - demography
+  - social
+  pools: []
+  concept_group: ethnicity_race_language_religion
+- label: LGBTQ+ Population (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: lgbtq_population
+  domain_tags:
+  - demographic
+  - demography
+  - social
+  pools: []
+  unit: '%'
+  concept_group: ethnicity_race_language_religion
+- label: Disability Status
+  scale_type: categorical
+  role: independent
+  concept_stem: disability_status
+  domain_tags:
+  - demographic
+  - demography
+  - social
+  pools: []
+  concept_group: ethnicity_race_language_religion
+- label: Disability Prevalence (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: disability_prevalence
+  domain_tags:
+  - demographic
+  - demography
+  - social
+  pools: []
+  unit: '%'
+  concept_group: ethnicity_race_language_religion
+- label: Veteran Population (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: veteran_population
+  domain_tags:
+  - demographic
+  - demography
+  - social
+  pools: []
+  unit: '%'
+  concept_group: ethnicity_race_language_religion
+- label: Intermarriage Rate (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: intermarriage_rate
+  domain_tags:
+  - demographic
+  - demography
+  - social
+  pools: []
+  unit: '%'
+  concept_group: ethnicity_race_language_religion
+- label: Interethnic Marriage Rate (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: interethnic_marriage_rate
+  domain_tags:
+  - demographic
+  - demography
+  - social
+  pools: []
+  unit: '%'
+  concept_group: ethnicity_race_language_religion
+- label: Social Trust Score
+  scale_type: continuous
+  role: dependent
+  concept_stem: social_trust_score
+  domain_tags:
+  - demographic
+  - demography
+  - social
+  pools: []
+  unit: score
+  concept_group: ethnicity_race_language_religion
+- label: Discrimination Experienced (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: discrimination_experienced
+  domain_tags:
+  - demographic
+  - demography
+  - social
+  pools: []
+  unit: '%'
+  concept_group: ethnicity_race_language_religion
+- label: Hate Crime Rate (per 100,000)
+  scale_type: continuous
+  role: dependent
+  concept_stem: hate_crime_rate
+  domain_tags:
+  - demographic
+  - demography
+  - social
+  pools: []
+  unit: per 100,000
+  concept_group: ethnicity_race_language_religion
+- label: Political Party Affiliation
+  scale_type: categorical
+  role: independent
+  concept_stem: political_party_affiliation
+  domain_tags:
+  - demographic
+  - demography
+  - social
+  pools: []
+  concept_group: ethnicity_race_language_religion
+- label: Voter Turnout (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: voter_turnout
+  domain_tags:
+  - demographic
+  - demography
+  - social
+  pools: []
+  unit: '%'
+  concept_group: ethnicity_race_language_religion
+- label: Voter Registration Rate (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: voter_registration_rate
+  domain_tags:
+  - demographic
+  - demography
+  - social
+  pools: []
+  unit: '%'
+  concept_group: ethnicity_race_language_religion
+- label: Civic Participation Rate (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: civic_participation_rate
+  domain_tags:
+  - demographic
+  - demography
+  - social
+  pools: []
+  unit: '%'
+  concept_group: ethnicity_race_language_religion
+- label: Volunteer Rate (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: volunteer_rate
+  domain_tags:
+  - demographic
+  - demography
+  - social
+  pools: []
+  unit: '%'
+  concept_group: ethnicity_race_language_religion
+- label: Self-Rated Health
+  scale_type: categorical
+  role: dependent
+  concept_stem: self_rated_health
+  domain_tags:
+  - demographic
+  - demography
+  - health
+  pools: []
+  concept_group: health_demographics
+- label: Prevalence of Obesity (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: prevalence_of_obesity
+  domain_tags:
+  - demographic
+  - demography
+  - health
+  pools: []
+  unit: '%'
+  concept_group: health_demographics
+- label: Prevalence of Smoking (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: prevalence_of_smoking
+  domain_tags:
+  - demographic
+  - demography
+  - health
+  pools: []
+  unit: '%'
+  concept_group: health_demographics
+- label: Prevalence of Diabetes (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: prevalence_of_diabetes
+  domain_tags:
+  - demographic
+  - demography
+  - health
+  pools: []
+  unit: '%'
+  concept_group: health_demographics
+- label: Prevalence of Hypertension (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: prevalence_of_hypertension
+  domain_tags:
+  - demographic
+  - demography
+  - health
+  pools: []
+  unit: '%'
+  concept_group: health_demographics
+- label: Prevalence of Chronic Disease (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: prevalence_of_chronic_disease
+  domain_tags:
+  - demographic
+  - demography
+  - health
+  pools: []
+  unit: '%'
+  concept_group: health_demographics
+- label: Weight (kg)
+  scale_type: continuous
+  role: dependent
+  concept_stem: weight
+  domain_tags:
+  - demographic
+  - demography
+  - health
+  pools: []
+  unit: kg
+  concept_group: health_demographics
+- label: Child Stunting Rate (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: child_stunting_rate
+  domain_tags:
+  - demographic
+  - demography
+  - health
+  pools: []
+  unit: '%'
+  concept_group: health_demographics
+- label: Child Wasting Rate (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: child_wasting_rate
+  domain_tags:
+  - demographic
+  - demography
+  - health
+  pools: []
+  unit: '%'
+  concept_group: health_demographics
+- label: Child Underweight Rate (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: child_underweight_rate
+  domain_tags:
+  - demographic
+  - demography
+  - health
+  pools: []
+  unit: '%'
+  concept_group: health_demographics
+- label: Undernourishment Prevalence (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: undernourishment_prevalence
+  domain_tags:
+  - demographic
+  - demography
+  - health
+  pools: []
+  unit: '%'
+  concept_group: health_demographics
+- label: Anemia Prevalence in Women (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: anemia_prevalence_in_women
+  domain_tags:
+  - demographic
+  - demography
+  - health
+  pools: []
+  unit: '%'
+  concept_group: health_demographics
+- label: HIV Prevalence (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: hiv_prevalence
+  domain_tags:
+  - demographic
+  - demography
+  - health
+  pools: []
+  unit: '%'
+  concept_group: health_demographics
+- label: Tuberculosis Incidence (per 100,000)
+  scale_type: continuous
+  role: dependent
+  concept_stem: tuberculosis_incidence
+  domain_tags:
+  - demographic
+  - demography
+  - health
+  pools: []
+  unit: per 100,000
+  concept_group: health_demographics
+- label: Malaria Incidence (per 1,000)
+  scale_type: continuous
+  role: dependent
+  concept_stem: malaria_incidence
+  domain_tags:
+  - demographic
+  - demography
+  - health
+  pools: []
+  unit: per 1,000
+  concept_group: health_demographics
+- label: Immunization Coverage (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: immunization_coverage
+  domain_tags:
+  - demographic
+  - demography
+  - health
+  pools: []
+  unit: '%'
+  concept_group: health_demographics
+- label: Health Insurance Coverage (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: health_insurance_coverage
+  domain_tags:
+  - demographic
+  - demography
+  - health
+  pools: []
+  unit: '%'
+  concept_group: health_demographics
+- label: Uninsured Rate (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: uninsured_rate
+  domain_tags:
+  - demographic
+  - demography
+  - health
+  pools: []
+  unit: '%'
+  concept_group: health_demographics
+- label: Out-of-Pocket Health Spending (% of total)
+  scale_type: percentage
+  role: dependent
+  concept_stem: out_of_pocket_health_spending
+  domain_tags:
+  - demographic
+  - demography
+  - health
+  pools: []
+  unit: '%'
+  concept_group: health_demographics
+- label: Health Expenditure per Capita ($)
+  scale_type: continuous
+  role: dependent
+  concept_stem: health_expenditure_per_capita
+  domain_tags:
+  - demographic
+  - demography
+  - health
+  pools: []
+  unit: $
+  concept_group: health_demographics
+- label: Physicians per 1,000 Population
+  scale_type: continuous
+  role: dependent
+  concept_stem: physicians_per_1_000_population
+  domain_tags:
+  - demographic
+  - demography
+  - health
+  pools: []
+  unit: per 1,000
+  concept_group: health_demographics
+- label: Hospital Beds per 1,000 Population
+  scale_type: continuous
+  role: dependent
+  concept_stem: hospital_beds_per_1_000_population
+  domain_tags:
+  - demographic
+  - demography
+  - health
+  pools: []
+  unit: per 1,000
+  concept_group: health_demographics
+- label: Nurses per 1,000 Population
+  scale_type: continuous
+  role: dependent
+  concept_stem: nurses_per_1_000_population
+  domain_tags:
+  - demographic
+  - demography
+  - health
+  pools: []
+  unit: per 1,000
+  concept_group: health_demographics
+- label: Dementia Prevalence (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: dementia_prevalence
+  domain_tags:
+  - demographic
+  - demography
+  - health
+  pools: []
+  unit: '%'
+  concept_group: health_demographics
+- label: Depression Prevalence (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: depression_prevalence
+  domain_tags:
+  - demographic
+  - demography
+  - health
+  pools: []
+  unit: '%'
+  concept_group: health_demographics
+- label: Alcohol Consumption (L/capita)
+  scale_type: continuous
+  role: dependent
+  concept_stem: alcohol_consumption
+  domain_tags:
+  - demographic
+  - demography
+  - health
+  pools: []
+  unit: L/capita
+  concept_group: health_demographics
+- label: Physical Inactivity Prevalence (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: physical_inactivity_prevalence
+  domain_tags:
+  - demographic
+  - demography
+  - health
+  pools: []
+  unit: '%'
+  concept_group: health_demographics
+- label: Disability-Adjusted Life Years (per 100,000)
+  scale_type: continuous
+  role: dependent
+  concept_stem: disability_adjusted_life_years
+  domain_tags:
+  - demographic
+  - demography
+  - health
+  pools: []
+  unit: per 100,000
+  concept_group: health_demographics
+- label: Frailty Index
+  scale_type: continuous
+  role: dependent
+  concept_stem: frailty_index
+  domain_tags:
+  - demographic
+  - demography
+  - health
+  pools: []
+  unit: index
+  concept_group: health_demographics
+- label: Activities of Daily Living Limitations (count)
+  scale_type: discrete_count
+  role: dependent
+  concept_stem: activities_of_daily_living_limitations
+  domain_tags:
+  - demographic
+  - demography
+  - health
+  pools: []
+  unit: count
+  concept_group: health_demographics
+- label: Long-Term Care Recipients (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: long_term_care_recipients
+  domain_tags:
+  - demographic
+  - demography
+  - health
+  pools: []
+  unit: '%'
+  concept_group: health_demographics
+- label: Nursing Home Residents (count)
+  scale_type: discrete_count
+  role: dependent
+  concept_stem: nursing_home_residents
+  domain_tags:
+  - demographic
+  - demography
+  - health
+  pools: []
+  unit: persons
+  concept_group: health_demographics
+- label: Hospitalization Rate (per 1,000)
+  scale_type: continuous
+  role: dependent
+  concept_stem: hospitalization_rate
+  domain_tags:
+  - demographic
+  - demography
+  - health
+  pools: []
+  unit: per 1,000
+  concept_group: health_demographics
+- label: Age at Menarche (years)
+  scale_type: continuous
+  role: dependent
+  concept_stem: age_at_menarche
+  domain_tags:
+  - demographic
+  - demography
+  - health
+  pools: []
+  unit: years
+  concept_group: health_demographics
+- label: Age at Menopause (years)
+  scale_type: continuous
+  role: dependent
+  concept_stem: age_at_menopause
+  domain_tags:
+  - demographic
+  - demography
+  - health
+  pools: []
+  unit: years
+  concept_group: health_demographics
+- label: Mean Adult Height (cm)
+  scale_type: continuous
+  role: dependent
+  concept_stem: mean_adult_height
+  domain_tags:
+  - demographic
+  - demography
+  - health
+  pools: []
+  unit: cm
+  concept_group: health_demographics
+- label: Subjective Life Satisfaction (0-10)
+  scale_type: continuous
+  role: dependent
+  concept_stem: subjective_life_satisfaction
+  domain_tags:
+  - demographic
+  - demography
+  - health
+  pools: []
+  unit: score
+  concept_group: health_demographics
+- label: State or Province
+  scale_type: categorical
+  role: independent
+  concept_stem: state_or_province
+  domain_tags:
+  - demographic
+  - demography
+  - geography
+  pools: []
+  concept_group: geography_environment_context
+- label: Urban-Rural Classification
+  scale_type: categorical
+  role: independent
+  concept_stem: urban_rural_classification
+  domain_tags:
+  - demographic
+  - demography
+  - geography
+  pools: []
+  concept_group: geography_environment_context
+- label: Land Area (km²)
+  scale_type: continuous
+  role: independent
+  concept_stem: land_area
+  domain_tags:
+  - demographic
+  - demography
+  - geography
+  pools: []
+  unit: km²
+  concept_group: geography_environment_context
+- label: Arable Land per Capita (ha)
+  scale_type: continuous
+  role: dependent
+  concept_stem: arable_land_per_capita
+  domain_tags:
+  - demographic
+  - demography
+  - geography
+  pools: []
+  unit: ha
+  concept_group: geography_environment_context
+- label: Forest Area (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: forest_area
+  domain_tags:
+  - demographic
+  - demography
+  - geography
+  pools: []
+  unit: '%'
+  concept_group: geography_environment_context
+- label: Coastal Population (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: coastal_population
+  domain_tags:
+  - demographic
+  - demography
+  - geography
+  pools: []
+  unit: '%'
+  concept_group: geography_environment_context
+- label: Population Living in Slums (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: population_living_in_slums
+  domain_tags:
+  - demographic
+  - demography
+  - geography
+  pools: []
+  unit: '%'
+  concept_group: geography_environment_context
+- label: Population in Cities over 1M (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: population_in_cities_over_1m
+  domain_tags:
+  - demographic
+  - demography
+  - geography
+  pools: []
+  unit: '%'
+  concept_group: geography_environment_context
+- label: Distance to Nearest City (km)
+  scale_type: continuous
+  role: independent
+  concept_stem: distance_to_nearest_city
+  domain_tags:
+  - demographic
+  - demography
+  - geography
+  pools: []
+  unit: km
+  concept_group: geography_environment_context
+- label: Distance to Nearest Hospital (km)
+  scale_type: continuous
+  role: independent
+  concept_stem: distance_to_nearest_hospital
+  domain_tags:
+  - demographic
+  - demography
+  - geography
+  pools: []
+  unit: km
+  concept_group: geography_environment_context
+- label: Population Living in Flood-Prone Areas (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: population_living_in_flood_prone_areas
+  domain_tags:
+  - demographic
+  - demography
+  - geography
+  pools: []
+  unit: '%'
+  concept_group: geography_environment_context
+- label: Air Pollution Exposure PM2.5 (μg/m³)
+  scale_type: continuous
+  role: independent
+  concept_stem: air_pollution_exposure_pm2_5
+  domain_tags:
+  - demographic
+  - demography
+  - geography
+  pools: []
+  unit: μg/m³
+  concept_group: geography_environment_context
+- label: CO2 Emissions per Capita (t)
+  scale_type: continuous
+  role: dependent
+  concept_stem: co2_emissions_per_capita
+  domain_tags:
+  - demographic
+  - demography
+  - geography
+  pools: []
+  unit: t
+  concept_group: geography_environment_context
+- label: Energy Use per Capita (kWh)
+  scale_type: continuous
+  role: dependent
+  concept_stem: energy_use_per_capita
+  domain_tags:
+  - demographic
+  - demography
+  - geography
+  pools: []
+  unit: kWh
+  concept_group: geography_environment_context
+- label: Water Stress Population (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: water_stress_population
+  domain_tags:
+  - demographic
+  - demography
+  - geography
+  pools: []
+  unit: '%'
+  concept_group: geography_environment_context
+- label: Climate Zone
+  scale_type: categorical
+  role: independent
+  concept_stem: climate_zone
+  domain_tags:
+  - demographic
+  - demography
+  - geography
+  pools: []
+  concept_group: geography_environment_context
+- label: Natural Disaster Affected Population (count)
+  scale_type: discrete_count
+  role: dependent
+  concept_stem: natural_disaster_affected_population
+  domain_tags:
+  - demographic
+  - demography
+  - geography
+  pools: []
+  unit: persons
+  concept_group: geography_environment_context
+- label: Population Exposed to Heat Waves (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: population_exposed_to_heat_waves
+  domain_tags:
+  - demographic
+  - demography
+  - geography
+  pools: []
+  unit: '%'
+  concept_group: geography_environment_context
+- label: Land Use Type
+  scale_type: categorical
+  role: independent
+  concept_stem: land_use_type
+  domain_tags:
+  - demographic
+  - demography
+  - geography
+  pools: []
+  concept_group: geography_environment_context
+- label: Neighborhood Deprivation Index
+  scale_type: continuous
+  role: independent
+  concept_stem: neighborhood_deprivation_index
+  domain_tags:
+  - demographic
+  - demography
+  - geography
+  pools: []
+  unit: index
+  concept_group: geography_environment_context
+- label: Crime Rate (per 100,000)
+  scale_type: continuous
+  role: dependent
+  concept_stem: crime_rate
+  domain_tags:
+  - demographic
+  - demography
+  - geography
+  pools: []
+  unit: per 100,000
+  concept_group: geography_environment_context
+- label: Violent Crime Rate (per 100,000)
+  scale_type: continuous
+  role: dependent
+  concept_stem: violent_crime_rate
+  domain_tags:
+  - demographic
+  - demography
+  - geography
+  pools: []
+  unit: per 100,000
+  concept_group: geography_environment_context
+- label: Incarceration Rate (per 100,000)
+  scale_type: continuous
+  role: dependent
+  concept_stem: incarceration_rate
+  domain_tags:
+  - demographic
+  - demography
+  - geography
+  pools: []
+  unit: per 100,000
+  concept_group: geography_environment_context
+- label: Police Officers per 100,000
+  scale_type: continuous
+  role: dependent
+  concept_stem: police_officers_per_100_000
+  domain_tags:
+  - demographic
+  - demography
+  - geography
+  pools: []
+  unit: per 100,000
+  concept_group: geography_environment_context
+- label: Road Density (km/km²)
+  scale_type: continuous
+  role: independent
+  concept_stem: road_density
+  domain_tags:
+  - demographic
+  - demography
+  - geography
+  pools: []
+  unit: km/km²
+  concept_group: geography_environment_context
+- label: Public Transit Access (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: public_transit_access
+  domain_tags:
+  - demographic
+  - demography
+  - geography
+  pools: []
+  unit: '%'
+  concept_group: geography_environment_context
+- label: Car Ownership (vehicles per 1,000)
+  scale_type: continuous
+  role: dependent
+  concept_stem: car_ownership
+  domain_tags:
+  - demographic
+  - demography
+  - geography
+  pools: []
+  unit: per 1,000
+  concept_group: geography_environment_context
+- label: Internet Users (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: internet_users
+  domain_tags:
+  - demographic
+  - demography
+  - geography
+  pools: []
+  unit: '%'
+  concept_group: geography_environment_context
+- label: Mobile Phone Subscriptions (per 100)
+  scale_type: continuous
+  role: dependent
+  concept_stem: mobile_phone_subscriptions
+  domain_tags:
+  - demographic
+  - demography
+  - geography
+  pools: []
+  unit: per 100
+  concept_group: geography_environment_context
+- label: Broadband Subscriptions (per 100)
+  scale_type: continuous
+  role: dependent
+  concept_stem: broadband_subscriptions
+  domain_tags:
+  - demographic
+  - demography
+  - geography
+  pools: []
+  unit: per 100
+  concept_group: geography_environment_context
+- label: Smartphone Ownership (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: smartphone_ownership
+  domain_tags:
+  - demographic
+  - demography
+  - geography
+  pools: []
+  unit: '%'
+  concept_group: geography_environment_context
+- label: Social Media Users (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: social_media_users
+  domain_tags:
+  - demographic
+  - demography
+  - geography
+  pools: []
+  unit: '%'
+  concept_group: geography_environment_context
+- label: Postal Code
+  scale_type: categorical
+  role: independent
+  concept_stem: postal_code
+  domain_tags:
+  - demographic
+  - demography
+  - geography
+  pools: []
+  concept_group: geography_environment_context
+- label: Census Tract
+  scale_type: categorical
+  role: independent
+  concept_stem: census_tract
+  domain_tags:
+  - demographic
+  - demography
+  - geography
+  pools: []
+  concept_group: geography_environment_context
+- label: Reference Period (years)
+  scale_type: temporal
+  role: independent
+  concept_stem: reference_period
+  domain_tags:
+  - demographic
+  - demography
+  - time
+  pools: []
+  unit: years
+  concept_group: time_and_projection
+- label: Calendar Month
+  scale_type: categorical
+  role: independent
+  concept_stem: calendar_month
+  domain_tags:
+  - demographic
+  - demography
+  - time
+  pools: []
+  concept_group: time_and_projection
+- label: Time Since Baseline (years)
+  scale_type: temporal
+  role: independent
+  concept_stem: time_since_baseline
+  domain_tags:
+  - demographic
+  - demography
+  - time
+  pools: []
+  unit: years
+  concept_group: time_and_projection
+- label: Projection Scenario
+  scale_type: categorical
+  role: independent
+  concept_stem: projection_scenario
+  domain_tags:
+  - demographic
+  - demography
+  - time
+  pools: []
+  concept_group: time_and_projection
+- label: Projection Horizon (years)
+  scale_type: discrete_count
+  role: independent
+  concept_stem: projection_horizon
+  domain_tags:
+  - demographic
+  - demography
+  - time
+  pools: []
+  unit: years
+  concept_group: time_and_projection
+- label: Fertility Assumption Variant
+  scale_type: categorical
+  role: independent
+  concept_stem: fertility_assumption_variant
+  domain_tags:
+  - demographic
+  - demography
+  - time
+  pools: []
+  concept_group: time_and_projection
+- label: Mortality Assumption Variant
+  scale_type: categorical
+  role: independent
+  concept_stem: mortality_assumption_variant
+  domain_tags:
+  - demographic
+  - demography
+  - time
+  pools: []
+  concept_group: time_and_projection
+- label: Migration Assumption Variant
+  scale_type: categorical
+  role: independent
+  concept_stem: migration_assumption_variant
+  domain_tags:
+  - demographic
+  - demography
+  - time
+  pools: []
+  concept_group: time_and_projection
+- label: Cohort Size at Birth
+  scale_type: discrete_count
+  role: dependent
+  concept_stem: cohort_size_at_birth
+  domain_tags:
+  - demographic
+  - demography
+  - time
+  pools: []
+  unit: persons
+  concept_group: time_and_projection
+- label: Cohort Survival Rate (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: cohort_survival_rate
+  domain_tags:
+  - demographic
+  - demography
+  - time
+  pools: []
+  unit: '%'
+  concept_group: time_and_projection
+- label: Age-Period-Cohort Effect
+  scale_type: continuous
+  role: dependent
+  concept_stem: age_period_cohort_effect
+  domain_tags:
+  - demographic
+  - demography
+  - time
+  pools: []
+  unit: effect
+  concept_group: time_and_projection
+- label: Generation Length (years)
+  scale_type: continuous
+  role: dependent
+  concept_stem: generation_length
+  domain_tags:
+  - demographic
+  - demography
+  - time
+  pools: []
+  unit: years
+  concept_group: time_and_projection
+- label: Doubling Time of Elderly Population (years)
+  scale_type: continuous
+  role: dependent
+  concept_stem: doubling_time_of_elderly_population
+  domain_tags:
+  - demographic
+  - demography
+  - time
+  pools: []
+  unit: years
+  concept_group: time_and_projection
+- label: Year of Peak Population
+  scale_type: temporal
+  role: dependent
+  concept_stem: year_of_peak_population
+  domain_tags:
+  - demographic
+  - demography
+  - time
+  pools: []
+  unit: year
+  concept_group: time_and_projection
+- label: Year Replacement Fertility Reached
+  scale_type: temporal
+  role: dependent
+  concept_stem: year_replacement_fertility_reached
+  domain_tags:
+  - demographic
+  - demography
+  - time
+  pools: []
+  unit: year
+  concept_group: time_and_projection
+- label: Demographic Transition Stage
+  scale_type: categorical
+  role: independent
+  concept_stem: demographic_transition_stage
+  domain_tags:
+  - demographic
+  - demography
+  - time
+  pools: []
+  concept_group: time_and_projection
+- label: Time to Population Peak (years)
+  scale_type: continuous
+  role: dependent
+  concept_stem: time_to_population_peak
+  domain_tags:
+  - demographic
+  - demography
+  - time
+  pools: []
+  unit: years
+  concept_group: time_and_projection
+- label: Annualized Growth Rate (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: annualized_growth_rate
+  domain_tags:
+  - demographic
+  - demography
+  - time
+  pools: []
+  unit: '%'
+  concept_group: time_and_projection
+- label: Birth Year
+  scale_type: temporal
+  role: independent
+  concept_stem: birth_year
+  domain_tags:
+  - demographic
+  - demography
+  - time
+  pools: []
+  unit: year
+  concept_group: time_and_projection
+- label: Death Year
+  scale_type: temporal
+  role: dependent
+  concept_stem: death_year
+  domain_tags:
+  - demographic
+  - demography
+  - time
+  pools: []
+  unit: year
+  concept_group: time_and_projection
+- label: Date of Interview
+  scale_type: temporal
+  role: independent
+  concept_stem: date_of_interview
+  domain_tags:
+  - demographic
+  - demography
+  - time
+  pools: []
+  unit: date
+  concept_group: time_and_projection
+- label: Panel Attrition Rate (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: panel_attrition_rate
+  domain_tags:
+  - demographic
+  - demography
+  - time
+  pools: []
+  unit: '%'
+  concept_group: time_and_projection
+- label: Sample Size
+  scale_type: discrete_count
+  role: independent
+  concept_stem: sample_size
+  domain_tags:
+  - demographic
+  - demography
+  - time
+  pools: []
+  unit: count
+  concept_group: time_and_projection
+- label: Margin of Error (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: margin_of_error
+  domain_tags:
+  - demographic
+  - demography
+  - time
+  pools: []
+  unit: '%'
+  concept_group: time_and_projection
+- label: Confidence Level (%)
+  scale_type: percentage
+  role: independent
+  concept_stem: confidence_level
+  domain_tags:
+  - demographic
+  - demography
+  - time
+  pools: []
+  unit: '%'
+  concept_group: time_and_projection
+- label: Design Effect
+  scale_type: continuous
+  role: dependent
+  concept_stem: design_effect
+  domain_tags:
+  - demographic
+  - demography
+  - time
+  pools: []
+  unit: ratio
+  concept_group: time_and_projection
+- label: Non-Response Rate (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: non_response_rate
+  domain_tags:
+  - demographic
+  - demography
+  - time
+  pools: []
+  unit: '%'
+  concept_group: time_and_projection
+- label: Imputation Rate (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: imputation_rate
+  domain_tags:
+  - demographic
+  - demography
+  - time
+  pools: []
+  unit: '%'
+  concept_group: time_and_projection
+titles:
+- title: Survey Response Analysis
+  allowed_chart_types:
+  - bar
+  - pie
+  - histogram
+  domain_tags:
+  - business
+- title: Employee Performance Review
+  allowed_chart_types:
+  - bar
+  - box
+  - histogram
+  domain_tags:
+  - business
+- title: Training Effectiveness
+  allowed_chart_types:
+  - bar
+  - box
+  - line
+  domain_tags:
+  - business
+- title: Recruitment Analytics
+  allowed_chart_types:
+  - bar
+  - pie
+  - line
+  domain_tags:
+  - business
+- title: Patient Demographics
+  allowed_chart_types:
+  - bar
+  - pie
+  - histogram
+  domain_tags:
+  - biomedical
+- title: Healthcare Utilization
+  allowed_chart_types:
+  - bar
+  - line
+  - area
+  - pie
+  domain_tags:
+  - biomedical
+- title: Epidemic Surveillance
+  allowed_chart_types:
+  - line
+  - area
+  - bar
+  domain_tags:
+  - biomedical
+- title: Vaccination Coverage
+  allowed_chart_types:
+  - bar
+  - line
+  - area
+  - pie
+  domain_tags:
+  - biomedical
+- title: Public Health Indicators
+  allowed_chart_types:
+  - bar
+  - line
+  - pie
+  - histogram
+  domain_tags:
+  - biomedical
+- title: Geographic Distribution
+  allowed_chart_types:
+  - bar
+  - pie
+  - scatter
+  domain_tags:
+  - biomedical
+  - engineering
+  - business
+- title: Demographic Breakdown
+  allowed_chart_types:
+  - pie
+  - bar
+  - histogram
+  domain_tags:
+  - business
+- title: Population Study
+  allowed_chart_types:
+  - histogram
+  - bar
+  - pie
+  - line
+  domain_tags:
+  - biomedical
+  - engineering
+  - business
+- title: Research Publication Trends
+  allowed_chart_types:
+  - line
+  - bar
+  - area
+  domain_tags:
+  - biomedical
+  - engineering
+  - business
+- title: Citation Analysis
+  allowed_chart_types:
+  - bar
+  - line
+  - histogram
+  domain_tags:
+  - biomedical
+  - engineering
+  - business
+- title: Collaboration Network
+  allowed_chart_types:
+  - scatter
+  - bar
+  - pie
+  domain_tags:
+  - biomedical
+  - engineering
+  - business
+comparative_pairs: []
+manifest_version: 2
+default_fallbacks:
+- Age Cohort
+- Employment Rate (%)
+capabilities:
+  tabular_preset: false
+  heatmap_pools: false
+order: 4

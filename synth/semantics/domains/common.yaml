@@ -1,0 +1,1153 @@
+domain_id: common
+display_name: Common & Cross-Domain Primitives
+is_scientific: false
+default_weight: 1.0
+metrics:
+- label: Date
+  scale_type: temporal
+  role: independent
+  concept_stem: date
+  unit:
+  concept_group: temporal_date
+  domain_tags:
+  - biomedical
+  - engineering
+  - business
+  pools:
+  - canonical_independent
+- label: Timestamp
+  scale_type: temporal
+  role: independent
+  concept_stem: timestamp
+  unit:
+  concept_group: temporal_timestamp
+  domain_tags:
+  - biomedical
+  - engineering
+  - business
+  pools:
+  - canonical_independent
+- label: Calendar Week
+  scale_type: temporal
+  role: independent
+  concept_stem: calendar_week
+  unit:
+  concept_group: temporal_date
+  domain_tags:
+  - biomedical
+  - engineering
+  - business
+  pools:
+  - canonical_independent
+- label: Fiscal Year
+  scale_type: temporal
+  role: independent
+  concept_stem: fiscal_year
+  unit:
+  concept_group: business_temporal
+  domain_tags:
+  - business
+  pools:
+  - canonical_independent
+- label: Trading Day
+  scale_type: temporal
+  role: independent
+  concept_stem: trading_day
+  unit:
+  concept_group: business_temporal
+  domain_tags:
+  - business
+  pools:
+  - canonical_independent
+- label: Billing Period
+  scale_type: temporal
+  role: independent
+  concept_stem: billing_period
+  unit:
+  concept_group: business_temporal
+  domain_tags:
+  - business
+  pools:
+  - canonical_independent
+- label: Reporting Period
+  scale_type: temporal
+  role: independent
+  concept_stem: reporting_period
+  unit:
+  concept_group: business_temporal
+  domain_tags:
+  - business
+  pools:
+  - canonical_independent
+- label: Epoch
+  scale_type: discrete_count
+  role: independent
+  concept_stem: epoch
+  unit:
+  concept_group: training_step
+  domain_tags:
+  - engineering
+  pools:
+  - canonical_independent
+- label: Iteration
+  scale_type: discrete_count
+  role: independent
+  concept_stem: iteration
+  unit:
+  concept_group: training_step
+  domain_tags:
+  - engineering
+  pools:
+  - canonical_independent
+- label: Step
+  scale_type: discrete_count
+  role: independent
+  concept_stem: step
+  unit:
+  concept_group: training_step
+  domain_tags:
+  - engineering
+  pools:
+  - canonical_independent
+- label: Simulation Step
+  scale_type: discrete_count
+  role: independent
+  concept_stem: simulation_step
+  unit:
+  concept_group: training_step
+  domain_tags:
+  - engineering
+  pools:
+  - canonical_independent
+- label: Time Step
+  scale_type: continuous
+  role: independent
+  concept_stem: time_step
+  unit:
+  concept_group: training_step
+  domain_tags:
+  - engineering
+  pools:
+  - canonical_independent
+- label: Checkpoint
+  scale_type: discrete_count
+  role: independent
+  concept_stem: checkpoint
+  unit:
+  concept_group: training_step
+  domain_tags:
+  - engineering
+  pools:
+  - canonical_independent
+- label: Layer Index
+  scale_type: discrete_count
+  role: independent
+  concept_stem: layer_index
+  unit:
+  concept_group: model_architecture
+  domain_tags:
+  - engineering
+  pools:
+  - canonical_independent
+- label: Cycle Number
+  scale_type: continuous
+  role: independent
+  concept_stem: cycle_number
+  unit:
+  concept_group: cycle_index
+  domain_tags:
+  - biomedical
+  - engineering
+  pools:
+  - canonical_independent
+- label: Batch Number
+  scale_type: discrete_count
+  role: independent
+  concept_stem: batch_number
+  unit:
+  concept_group: batch_identifier
+  domain_tags:
+  - biomedical
+  - engineering
+  pools:
+  - canonical_independent
+- label: Run Number
+  scale_type: discrete_count
+  role: independent
+  concept_stem: run_number
+  unit:
+  concept_group: run_identifier
+  domain_tags:
+  - biomedical
+  - engineering
+  pools:
+  - canonical_independent
+- label: Trial Number
+  scale_type: discrete_count
+  role: independent
+  concept_stem: trial_number
+  unit:
+  concept_group: trial_identifier
+  domain_tags:
+  - biomedical
+  - engineering
+  pools:
+  - canonical_independent
+- label: Experiment Number
+  scale_type: discrete_count
+  role: independent
+  concept_stem: experiment_number
+  unit:
+  concept_group: experiment_identifier
+  domain_tags:
+  - biomedical
+  - engineering
+  pools:
+  - canonical_independent
+- label: Sweep Number
+  scale_type: discrete_count
+  role: independent
+  concept_stem: sweep_number
+  unit:
+  concept_group: sweep_identifier
+  domain_tags:
+  - biomedical
+  - engineering
+  pools:
+  - canonical_independent
+- label: Depth (m)
+  scale_type: continuous
+  role: bidirectional
+  concept_stem: depth
+  unit: m
+  concept_group: spatial_dimension
+  domain_tags:
+  - engineering
+  - biomedical
+  pools:
+  - canonical_independent
+- label: Altitude (m)
+  scale_type: continuous
+  role: bidirectional
+  concept_stem: altitude
+  unit: m
+  concept_group: spatial_dimension
+  domain_tags:
+  - engineering
+  - biomedical
+  pools:
+  - canonical_independent
+- label: Distance (km)
+  scale_type: continuous
+  role: bidirectional
+  concept_stem: distance
+  unit: km
+  concept_group: spatial_dimension
+  domain_tags:
+  - engineering
+  - biomedical
+  pools:
+  - canonical_independent
+- label: Distance (m)
+  scale_type: continuous
+  role: bidirectional
+  concept_stem: distance
+  unit: m
+  concept_group: spatial_dimension
+  domain_tags:
+  - engineering
+  - biomedical
+  pools:
+  - canonical_independent
+- label: Distance (mm)
+  scale_type: continuous
+  role: bidirectional
+  concept_stem: distance
+  unit: mm
+  concept_group: spatial_dimension
+  domain_tags:
+  - engineering
+  - biomedical
+  pools:
+  - canonical_independent
+- label: Position (mm)
+  scale_type: continuous
+  role: bidirectional
+  concept_stem: position
+  unit: mm
+  concept_group: spatial_dimension
+  domain_tags:
+  - engineering
+  - biomedical
+  pools:
+  - canonical_independent
+- label: Position (μm)
+  scale_type: continuous
+  role: bidirectional
+  concept_stem: position
+  unit: μm
+  concept_group: spatial_dimension
+  domain_tags:
+  - engineering
+  - biomedical
+  pools:
+  - canonical_independent
+- label: Displacement (mm)
+  scale_type: continuous
+  role: bidirectional
+  concept_stem: displacement
+  unit: mm
+  concept_group: spatial_dimension
+  domain_tags:
+  - engineering
+  - biomedical
+  pools:
+  - canonical_independent
+- label: Radius (mm)
+  scale_type: continuous
+  role: bidirectional
+  concept_stem: radius
+  unit: mm
+  concept_group: spatial_dimension
+  domain_tags:
+  - engineering
+  - biomedical
+  pools:
+  - canonical_independent
+- label: Elevation (m)
+  scale_type: continuous
+  role: bidirectional
+  concept_stem: elevation
+  unit: m
+  concept_group: spatial_dimension
+  domain_tags:
+  - engineering
+  - biomedical
+  - demographic
+  pools:
+  - canonical_independent
+- label: Latitude
+  scale_type: continuous
+  role: bidirectional
+  concept_stem: latitude
+  unit:
+  concept_group: geographic_coordinate
+  domain_tags:
+  - engineering
+  - biomedical
+  pools:
+  - canonical_independent
+- label: Longitude
+  scale_type: continuous
+  role: bidirectional
+  concept_stem: longitude
+  unit:
+  concept_group: geographic_coordinate
+  domain_tags:
+  - engineering
+  - biomedical
+  pools:
+  - canonical_independent
+- label: Elapsed Time (s)
+  scale_type: continuous
+  role: bidirectional
+  concept_stem: elapsed_time
+  unit: s
+  concept_group: bench_duration
+  domain_tags:
+  - biomedical
+  - engineering
+  pools:
+  - canonical_independent
+- label: Elapsed Time (min)
+  scale_type: continuous
+  role: bidirectional
+  concept_stem: elapsed_time
+  unit: min
+  concept_group: bench_duration
+  domain_tags:
+  - biomedical
+  - engineering
+  pools:
+  - canonical_independent
+- label: Elapsed Time (h)
+  scale_type: continuous
+  role: bidirectional
+  concept_stem: elapsed_time
+  unit: h
+  concept_group: bench_duration
+  domain_tags:
+  - biomedical
+  - engineering
+  pools:
+  - canonical_independent
+- label: Time Interval (s)
+  scale_type: continuous
+  role: bidirectional
+  concept_stem: time_interval
+  unit: s
+  concept_group: bench_duration
+  domain_tags:
+  - biomedical
+  - engineering
+  pools:
+  - canonical_independent
+- label: Time Interval (min)
+  scale_type: continuous
+  role: bidirectional
+  concept_stem: time_interval
+  unit: min
+  concept_group: bench_duration
+  domain_tags:
+  - biomedical
+  - engineering
+  pools:
+  - canonical_independent
+- label: Trial Duration (s)
+  scale_type: continuous
+  role: bidirectional
+  concept_stem: trial_duration
+  unit: s
+  concept_group: bench_duration
+  domain_tags:
+  - biomedical
+  - engineering
+  pools:
+  - canonical_independent
+- label: Run Time (s)
+  scale_type: continuous
+  role: bidirectional
+  concept_stem: run_time
+  unit: s
+  concept_group: bench_duration
+  domain_tags:
+  - biomedical
+  - engineering
+  pools:
+  - canonical_independent
+- label: Run Time (ms)
+  scale_type: continuous
+  role: bidirectional
+  concept_stem: run_time
+  unit: ms
+  concept_group: bench_duration
+  domain_tags:
+  - biomedical
+  - engineering
+  pools:
+  - canonical_independent
+- label: Frequency
+  scale_type: continuous
+  role: dependent
+  concept_stem: frequency
+  unit:
+  concept_group: histogram_frequency
+  domain_tags:
+  - common
+  - biomedical
+  - engineering
+  - business
+  pools:
+  - histogram_y
+- label: Count
+  scale_type: continuous
+  role: dependent
+  concept_stem: count
+  unit:
+  concept_group: histogram_frequency
+  domain_tags:
+  - common
+  - biomedical
+  - engineering
+  - business
+  pools:
+  - histogram_y
+- label: Absolute Frequency
+  scale_type: continuous
+  role: dependent
+  concept_stem: absolute_frequency
+  unit:
+  concept_group: histogram_frequency
+  domain_tags:
+  - common
+  - biomedical
+  - engineering
+  - business
+  pools:
+  - histogram_y
+- label: Relative Frequency
+  scale_type: continuous
+  role: dependent
+  concept_stem: relative_frequency
+  unit:
+  concept_group: histogram_frequency
+  domain_tags:
+  - common
+  - biomedical
+  - engineering
+  - business
+  pools:
+  - histogram_y
+- label: Density
+  scale_type: continuous
+  role: dependent
+  concept_stem: density
+  unit:
+  concept_group: histogram_frequency
+  domain_tags:
+  - common
+  - biomedical
+  - engineering
+  - business
+  pools:
+  - histogram_y
+- label: Probability Density
+  scale_type: continuous
+  role: dependent
+  concept_stem: probability_density
+  unit:
+  concept_group: histogram_frequency
+  domain_tags:
+  - common
+  - biomedical
+  - engineering
+  - business
+  pools:
+  - histogram_y
+- label: Normalized Frequency
+  scale_type: continuous
+  role: dependent
+  concept_stem: normalized_frequency
+  unit:
+  concept_group: histogram_frequency
+  domain_tags:
+  - common
+  - biomedical
+  - engineering
+  - business
+  pools:
+  - histogram_y
+- label: Percentage (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: percentage_pct
+  unit: '%'
+  concept_group: histogram_frequency
+  domain_tags:
+  - common
+  - biomedical
+  - engineering
+  - business
+  pools:
+  - histogram_y
+- label: Relative Frequency (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: relative_frequency_pct
+  unit: '%'
+  concept_group: histogram_frequency
+  domain_tags:
+  - common
+  - biomedical
+  - engineering
+  - business
+  pools:
+  - histogram_y
+- label: Proportion
+  scale_type: continuous
+  role: dependent
+  concept_stem: proportion
+  unit:
+  concept_group: histogram_frequency
+  domain_tags:
+  - common
+  - biomedical
+  - engineering
+  - business
+  pools:
+  - histogram_y
+- label: Cumulative Frequency
+  scale_type: continuous
+  role: dependent
+  concept_stem: cumulative_frequency
+  unit:
+  concept_group: histogram_frequency
+  domain_tags:
+  - common
+  - biomedical
+  - engineering
+  - business
+  pools:
+  - histogram_y
+- label: Cumulative Percentage (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: cumulative_percentage_pct
+  unit: '%'
+  concept_group: histogram_frequency
+  domain_tags:
+  - common
+  - biomedical
+  - engineering
+  - business
+  pools:
+  - histogram_y
+- label: Cumulative Proportion
+  scale_type: continuous
+  role: dependent
+  concept_stem: cumulative_proportion
+  unit:
+  concept_group: histogram_frequency
+  domain_tags:
+  - common
+  - biomedical
+  - engineering
+  - business
+  pools:
+  - histogram_y
+- label: Relative Cumulative Frequency
+  scale_type: continuous
+  role: dependent
+  concept_stem: relative_cumulative_frequency
+  unit:
+  concept_group: histogram_frequency
+  domain_tags:
+  - common
+  - biomedical
+  - engineering
+  - business
+  pools:
+  - histogram_y
+- label: Number of Observations
+  scale_type: continuous
+  role: dependent
+  concept_stem: number_of_observations
+  unit:
+  concept_group: histogram_frequency
+  domain_tags:
+  - common
+  - biomedical
+  - engineering
+  - business
+  pools:
+  - histogram_y
+- label: Number of Cases
+  scale_type: continuous
+  role: dependent
+  concept_stem: number_of_cases
+  unit:
+  concept_group: histogram_frequency
+  domain_tags:
+  - common
+  - biomedical
+  - engineering
+  - business
+  pools:
+  - histogram_y
+- label: Sample Count
+  scale_type: continuous
+  role: dependent
+  concept_stem: sample_count
+  unit:
+  concept_group: histogram_frequency
+  domain_tags:
+  - common
+  - biomedical
+  - engineering
+  - business
+  pools:
+  - histogram_y
+- label: Frequency Distribution
+  scale_type: continuous
+  role: dependent
+  concept_stem: frequency_distribution
+  unit:
+  concept_group: histogram_frequency
+  domain_tags:
+  - common
+  - biomedical
+  - engineering
+  - business
+  pools:
+  - histogram_y
+- label: Probability
+  scale_type: continuous
+  role: dependent
+  concept_stem: probability
+  unit:
+  concept_group: histogram_frequency
+  domain_tags:
+  - common
+  - biomedical
+  - engineering
+  - business
+  pools:
+  - histogram_y
+- label: Likelihood
+  scale_type: continuous
+  role: dependent
+  concept_stem: likelihood
+  unit:
+  concept_group: histogram_frequency
+  domain_tags:
+  - common
+  - biomedical
+  - engineering
+  - business
+  pools:
+  - histogram_y
+- label: Bin Count
+  scale_type: continuous
+  role: dependent
+  concept_stem: bin_count
+  unit:
+  concept_group: histogram_frequency
+  domain_tags:
+  - common
+  - biomedical
+  - engineering
+  - business
+  pools:
+  - histogram_y
+- label: Occurrence
+  scale_type: continuous
+  role: dependent
+  concept_stem: occurrence
+  unit:
+  concept_group: histogram_frequency
+  domain_tags:
+  - common
+  - biomedical
+  - engineering
+  - business
+  pools:
+  - histogram_y
+- label: Distribution
+  scale_type: continuous
+  role: dependent
+  concept_stem: distribution
+  unit:
+  concept_group: histogram_frequency
+  domain_tags:
+  - common
+  - biomedical
+  - engineering
+  - business
+  pools:
+  - histogram_y
+- label: Normalized Count
+  scale_type: continuous
+  role: dependent
+  concept_stem: normalized_count
+  unit:
+  concept_group: histogram_frequency
+  domain_tags:
+  - common
+  - biomedical
+  - engineering
+  - business
+  pools:
+  - histogram_y
+- label: Weighted Frequency
+  scale_type: continuous
+  role: dependent
+  concept_stem: weighted_frequency
+  unit:
+  concept_group: histogram_frequency
+  domain_tags:
+  - common
+  - biomedical
+  - engineering
+  - business
+  pools:
+  - histogram_y
+- label: Expected Frequency
+  scale_type: continuous
+  role: dependent
+  concept_stem: expected_frequency
+  unit:
+  concept_group: histogram_frequency
+  domain_tags:
+  - common
+  - biomedical
+  - engineering
+  - business
+  pools:
+  - histogram_y
+- label: Observed Frequency
+  scale_type: continuous
+  role: dependent
+  concept_stem: observed_frequency
+  unit:
+  concept_group: histogram_frequency
+  domain_tags:
+  - common
+  - biomedical
+  - engineering
+  - business
+  pools:
+  - histogram_y
+- label: Events per Bin
+  scale_type: continuous
+  role: dependent
+  concept_stem: events_per_bin
+  unit:
+  concept_group: histogram_frequency
+  domain_tags:
+  - common
+  - biomedical
+  - engineering
+  - business
+  pools:
+  - histogram_y
+- label: Cases per Interval
+  scale_type: continuous
+  role: dependent
+  concept_stem: cases_per_interval
+  unit:
+  concept_group: histogram_frequency
+  domain_tags:
+  - common
+  - biomedical
+  - engineering
+  - business
+  pools:
+  - histogram_y
+- label: Observations per Class
+  scale_type: continuous
+  role: dependent
+  concept_stem: observations_per_class
+  unit:
+  concept_group: histogram_frequency
+  domain_tags:
+  - common
+  - biomedical
+  - engineering
+  - business
+  pools:
+  - histogram_y
+- label: Population Frequency
+  scale_type: continuous
+  role: dependent
+  concept_stem: population_frequency
+  unit:
+  concept_group: histogram_frequency
+  domain_tags:
+  - common
+  - biomedical
+  - engineering
+  - business
+  pools:
+  - histogram_y
+- label: Sample Frequency
+  scale_type: continuous
+  role: dependent
+  concept_stem: sample_frequency
+  unit:
+  concept_group: histogram_frequency
+  domain_tags:
+  - common
+  - biomedical
+  - engineering
+  - business
+  pools:
+  - histogram_y
+- label: Group Frequency
+  scale_type: continuous
+  role: dependent
+  concept_stem: group_frequency
+  unit:
+  concept_group: histogram_frequency
+  domain_tags:
+  - common
+  - biomedical
+  - engineering
+  - business
+  pools:
+  - histogram_y
+- label: Frequency per Unit
+  scale_type: continuous
+  role: dependent
+  concept_stem: frequency_per_unit
+  unit:
+  concept_group: histogram_frequency
+  domain_tags:
+  - common
+  - biomedical
+  - engineering
+  - business
+  pools:
+  - histogram_y
+- label: Rate per Interval
+  scale_type: continuous
+  role: dependent
+  concept_stem: rate_per_interval
+  unit:
+  concept_group: histogram_frequency
+  domain_tags:
+  - common
+  - biomedical
+  - engineering
+  - business
+  pools:
+  - histogram_y
+- label: Incidence
+  scale_type: continuous
+  role: dependent
+  concept_stem: incidence
+  unit:
+  concept_group: histogram_frequency
+  domain_tags:
+  - common
+  - biomedical
+  - engineering
+  - business
+  pools:
+  - histogram_y
+- label: Frequency per 1000
+  scale_type: continuous
+  role: dependent
+  concept_stem: frequency_per_1000
+  unit:
+  concept_group: histogram_frequency
+  domain_tags:
+  - common
+  - biomedical
+  - engineering
+  - business
+  pools:
+  - histogram_y
+- label: Frequency per Million
+  scale_type: continuous
+  role: dependent
+  concept_stem: frequency_per_million
+  unit:
+  concept_group: histogram_frequency
+  domain_tags:
+  - common
+  - biomedical
+  - engineering
+  - business
+  pools:
+  - histogram_y
+- label: Parts per Million (ppm)
+  scale_type: continuous
+  role: dependent
+  concept_stem: parts_per_million_ppm
+  unit:
+  concept_group: histogram_frequency
+  domain_tags:
+  - common
+  - biomedical
+  - engineering
+  - business
+  pools:
+  - histogram_y
+- label: Normalized Density
+  scale_type: continuous
+  role: dependent
+  concept_stem: normalized_density
+  unit:
+  concept_group: histogram_frequency
+  domain_tags:
+  - common
+  - biomedical
+  - engineering
+  - business
+  pools:
+  - histogram_y
+- label: Kernel Density
+  scale_type: continuous
+  role: dependent
+  concept_stem: kernel_density
+  unit:
+  concept_group: histogram_frequency
+  domain_tags:
+  - common
+  - biomedical
+  - engineering
+  - business
+  pools:
+  - histogram_y
+- label: Empirical Density
+  scale_type: continuous
+  role: dependent
+  concept_stem: empirical_density
+  unit:
+  concept_group: histogram_frequency
+  domain_tags:
+  - common
+  - biomedical
+  - engineering
+  - business
+  pools:
+  - histogram_y
+- label: Log Frequency
+  scale_type: continuous
+  role: dependent
+  concept_stem: log_frequency
+  unit:
+  concept_group: histogram_frequency
+  domain_tags:
+  - common
+  - biomedical
+  - engineering
+  - business
+  pools:
+  - histogram_y
+- label: Log Count
+  scale_type: continuous
+  role: dependent
+  concept_stem: log_count
+  unit:
+  concept_group: histogram_frequency
+  domain_tags:
+  - common
+  - biomedical
+  - engineering
+  - business
+  pools:
+  - histogram_y
+- label: Square Root Frequency
+  scale_type: continuous
+  role: dependent
+  concept_stem: square_root_frequency
+  unit:
+  concept_group: histogram_frequency
+  domain_tags:
+  - common
+  - biomedical
+  - engineering
+  - business
+  pools:
+  - histogram_y
+- label: Standardized Frequency
+  scale_type: continuous
+  role: dependent
+  concept_stem: standardized_frequency
+  unit:
+  concept_group: histogram_frequency
+  domain_tags:
+  - common
+  - biomedical
+  - engineering
+  - business
+  pools:
+  - histogram_y
+- label: Z-Score Frequency
+  scale_type: continuous
+  role: dependent
+  concept_stem: z_score_frequency
+  unit:
+  concept_group: histogram_frequency
+  domain_tags:
+  - common
+  - biomedical
+  - engineering
+  - business
+  pools:
+  - histogram_y
+- label: Weighted Count
+  scale_type: continuous
+  role: dependent
+  concept_stem: weighted_count
+  unit:
+  concept_group: histogram_frequency
+  domain_tags:
+  - common
+  - biomedical
+  - engineering
+  - business
+  pools:
+  - histogram_y
+- label: Adjusted Frequency
+  scale_type: continuous
+  role: dependent
+  concept_stem: adjusted_frequency
+  unit:
+  concept_group: histogram_frequency
+  domain_tags:
+  - common
+  - biomedical
+  - engineering
+  - business
+  pools:
+  - histogram_y
+- label: Bootstrap Frequency
+  scale_type: continuous
+  role: dependent
+  concept_stem: bootstrap_frequency
+  unit:
+  concept_group: histogram_frequency
+  domain_tags:
+  - common
+  - biomedical
+  - engineering
+  - business
+  pools:
+  - histogram_y
+- label: Resampled Count
+  scale_type: continuous
+  role: dependent
+  concept_stem: resampled_count
+  unit:
+  concept_group: histogram_frequency
+  domain_tags:
+  - common
+  - biomedical
+  - engineering
+  - business
+  pools:
+  - histogram_y
+titles:
+- title: Overview of Collected Data
+  allowed_chart_types:
+  - bar
+  - line
+  - scatter
+  - box
+  - area
+  - histogram
+  domain_tags:
+  - common
+- title: Sample Value Distribution
+  allowed_chart_types:
+  - bar
+  - box
+  - histogram
+  domain_tags:
+  - common
+- title: Observed Measurements Summary
+  allowed_chart_types:
+  - bar
+  - line
+  - box
+  domain_tags:
+  - common
+- title: Cross-Cohort Comparison
+  allowed_chart_types:
+  - bar
+  - box
+  - scatter
+  domain_tags:
+  - common
+- title: Baseline Measurement Profile
+  allowed_chart_types:
+  - line
+  - bar
+  - area
+  domain_tags:
+  - common
+- title: Summary of Test Observations
+  allowed_chart_types:
+  - bar
+  - line
+  - histogram
+  domain_tags:
+  - common
+comparative_pairs: []
+manifest_version: 2
+capabilities:
+  tabular_preset: false
+  heatmap_pools: false
+order: 10

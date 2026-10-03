@@ -1,0 +1,34 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pytest pytest-cov
+
+      - name: AST Audit Legacy Semantic References
+        run: python scripts/audit_legacy_references.py
+
+      - name: Manifest Validation & Latency Gate
+        run: pytest tests/test_domain_manifests.py tests/test_startup_latency.py
+
+      - name: Full Test Suite
+        run: pytest tests/ --ignore=tests/regression

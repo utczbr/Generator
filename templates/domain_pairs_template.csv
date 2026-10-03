@@ -1,0 +1,6 @@
+control,treatment,domain_category,context_tags
+Monocrystalline Silicon,Perovskite Tandem,energy,solar_technology
+Fixed-Speed Turbine,Variable-Speed DFIG,energy,wind_technology
+Lead-Acid Battery,Lithium-Ion NMC,energy,energy_storage
+Baseline Grid Demand,Peak Shaving Protocol,energy,demand_response
+Standard Thermal Plant,Combined Cycle Gas Turbine,energy,generation_efficiency

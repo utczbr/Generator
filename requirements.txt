@@ -1,0 +1,19 @@
+# Core dependencies
+numpy>=1.24.0
+scipy>=1.10.0
+matplotlib>=3.7.0
+Pillow>=9.4.0
+opencv-python-headless>=4.7.0
+shapely>=2.0.0
+
+# Testing & Quality
+pytest>=7.0.0
+
+# Vector graphics & SVG parsing (P1/Phase 6)
+vl-convert-python>=1.6.0
+svgelements>=1.9.0
+lxml>=4.9.0
+
+# Declarative manifests & validation (Phase 2)
+PyYAML>=6.0
+pydantic>=2.0.0

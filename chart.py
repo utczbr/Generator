@@ -10,58 +10,56 @@ from matplotlib import colormaps
 from scipy import stats
 from scipy.stats import random_correlation
 from scipy.special import gamma, hyp1f1
-from scipy.signal import find_peaks
+from scipy.signal import find_peaks, lfilter
 from scipy.ndimage import gaussian_filter
 from scipy.spatial.distance import cdist, pdist
 from scipy.cluster.hierarchy import linkage, optimal_leaf_ordering, leaves_list
 from scipy.linalg import eigh, block_diag, toeplitz
-def make_biclusters(shape, n_clusters, noise=0.0, minval=-5.0, maxval=5.0, shuffle=True, random_state=None):
-    """Pure NumPy bicluster matrix generator."""
+def _block_matrix(shape, n_row_groups, n_col_groups, block_pairs, noise, minval, maxval, shuffle, random_state):
+    """Gaussian noise plus one uniform offset per (row_group, col_group) block, optionally shuffled."""
     if random_state is not None:
         np.random.seed(random_state)
     rows, cols = shape
-    n_cl = int(n_clusters[0]) if isinstance(n_clusters, (list, tuple)) else int(n_clusters)
-    r_clusters = max(1, n_cl)
-    c_clusters = max(1, n_cl)
-    row_groups = np.array_split(np.arange(rows), r_clusters)
-    col_groups = np.array_split(np.arange(cols), c_clusters)
+    row_groups = np.array_split(np.arange(rows), max(1, n_row_groups))
+    col_groups = np.array_split(np.arange(cols), max(1, n_col_groups))
     matrix = np.random.normal(0, noise, (rows, cols))
-    for idx, r_idx in enumerate(row_groups):
-        c_idx = col_groups[idx % len(col_groups)]
-        base_val = np.random.uniform(minval, maxval)
-        matrix[np.ix_(r_idx, c_idx)] += base_val
+    for i, j in block_pairs(len(row_groups), len(col_groups)):
+        matrix[np.ix_(row_groups[i], col_groups[j])] += np.random.uniform(minval, maxval)
     if shuffle:
-        r_perm = np.random.permutation(rows)
-        c_perm = np.random.permutation(cols)
-        matrix = matrix[np.ix_(r_perm, c_perm)]
+        matrix = matrix[np.ix_(np.random.permutation(rows), np.random.permutation(cols))]
     return matrix, None, None
+
+
+def make_biclusters(shape, n_clusters, noise=0.0, minval=-5.0, maxval=5.0, shuffle=True, random_state=None):
+    """Diagonal blocks: row group k pairs with column group k."""
+    n = int(n_clusters[0] if isinstance(n_clusters, (list, tuple)) else n_clusters)
+    return _block_matrix(shape, n, n, lambda nr, nc: ((k, k % nc) for k in range(nr)),
+                         noise, minval, maxval, shuffle, random_state)
 
 
 def make_checkerboard(shape, n_clusters, noise=0.0, minval=-5.0, maxval=5.0, shuffle=True, random_state=None):
-    """Pure NumPy checkerboard matrix generator."""
-    if random_state is not None:
-        np.random.seed(random_state)
-    rows, cols = shape
-    if isinstance(n_clusters, (list, tuple)):
-        n_r, n_c = int(n_clusters[0]), int(n_clusters[1])
-    else:
-        n_r, n_c = int(n_clusters), int(n_clusters)
-    row_groups = np.array_split(np.arange(rows), max(1, n_r))
-    col_groups = np.array_split(np.arange(cols), max(1, n_c))
-    matrix = np.random.normal(0, noise, (rows, cols))
-    for r_i, r_idx in enumerate(row_groups):
-        for c_j, c_idx in enumerate(col_groups):
-            if (r_i + c_j) % 2 == 0:
-                base_val = np.random.uniform(minval, maxval)
-                matrix[np.ix_(r_idx, c_idx)] += base_val
-    if shuffle:
-        r_perm = np.random.permutation(rows)
-        c_perm = np.random.permutation(cols)
-        matrix = matrix[np.ix_(r_perm, c_perm)]
-    return matrix, None, None
+    """Alternating blocks: (row group i, column group j) is raised when i + j is even."""
+    n_r, n_c = (int(n_clusters[0]), int(n_clusters[1])) if isinstance(n_clusters, (list, tuple)) else (int(n_clusters),) * 2
+    return _block_matrix(shape, n_r, n_c, lambda nr, nc: ((i, j) for i in range(nr) for j in range(nc) if (i + j) % 2 == 0),
+                         noise, minval, maxval, shuffle, random_state)
 
 
-from themes import THEMES, SCIENTIFIC_Y_LABELS, BUSINESS_Y_LABELS, SCIENTIFIC_X_LABELS, BUSINESS_X_LABELS, COMPARATIVE_LABELS, HISTOGRAM_Y_LABELS, FONT_FAMILIES, HEATMAP_XLABELS_SCIENTIFIC, HEATMAP_YLABELS_SCIENTIFIC, HEATMAP_XLABELS_BUSINESS, HEATMAP_YLABELS_BUSINESS, COLORBAR_TITLES_SCIENTIFIC, COLORBAR_TITLES_BUSINESS, HEATMAP_CHART_TITLES, HEATMAP_ANNOTATION_FORMATS, SCIENTIFIC_DOMAIN_DICT, BUSINESS_DOMAIN_DICT, CONTEXT_CONFIGURATIONS, STRUCTURAL_THEMES
+from themes import THEMES, FONT_FAMILIES
+from synth.structural import (
+    CONTEXT_CONFIGURATIONS,
+    STRUCTURAL_THEMES,
+    HEATMAP_ANNOTATION_FORMATS,
+    COLORBAR_TITLES_SCIENTIFIC,
+    COLORBAR_TITLES_BUSINESS,
+    HEATMAP_CHART_TITLES,
+    HEATMAP_XLABELS_SCIENTIFIC,
+    HEATMAP_YLABELS_SCIENTIFIC,
+    HEATMAP_XLABELS_BUSINESS,
+    HEATMAP_YLABELS_BUSINESS,
+)
+
+DUAL_AXIS_PROBABILITY: float = 0.15
+TREATMENT_KEY_PROBABILITY: float = 0.30
 
 # ===================================================================================
 # == DATA GENERATION & THEMES ==
@@ -487,11 +485,12 @@ def add_bar_shadows(ax, bars, fig):
                                  alpha=0.2, zorder=bar.get_zorder() - 0.1)
         ax.add_patch(shadow)
 
-def add_significance_markers(ax, bar_info, y_max, orientation='vertical', error_tops=None):
+def add_significance_markers(ax, bar_info, y_max, orientation='vertical', error_tops=None, significance_prob=None):
     """Add statistical significance markers between bars"""
     annotations = []
     
-    if len(bar_info) < 2 or random.random() < 0.4: 
+    threshold = (1.0 - significance_prob) if significance_prob is not None else 0.4
+    if len(bar_info) < 2 or random.random() < threshold: 
         return annotations
     
     mode = random.choice(['bracket', 'letters'])
@@ -1091,13 +1090,13 @@ def generate_pie_composition(pie_config=None, debug_mode=False):
 
     return comp_final, labels_final, meta
 
-def add_error_bars(ax, bar_info, orientation='vertical', measurement_type='biological'):
+def add_error_bars(ax, bar_info, orientation='vertical', measurement_type='biological', error_bar_prob=0.7):
     """Add realistic error bars with measurement-specific characteristics"""
     error_artists = []
     error_tops = [info['height'] for info in bar_info]  # Initialize with bar heights
     
     for i, info in enumerate(bar_info):
-        if random.random() < 0.7 and info['height'] >= 0:  # 70% chance for error bars
+        if random.random() < error_bar_prob and info['height'] >= 0:  # chance for error bars
             center, value = info['center'], info['height']
             
             # Realistic error bar calculation based on measurement type
@@ -1254,10 +1253,9 @@ def add_data_labels(ax, artists, orientation='vertical', chart_type='bar',
     
     return labels
 
-def add_treatment_key_xaxis(ax, bar_info_list):
+def add_treatment_key_xaxis(ax, bar_info_list, domain_category=None):
     """Add treatment key annotations below X-axis"""
     annotation_artists = []
-    treatment_labels = COMPARATIVE_LABELS
     centers = [info['center'] for info in bar_info_list]
     
     if len(centers) != 4: 
@@ -1265,7 +1263,8 @@ def add_treatment_key_xaxis(ax, bar_info_list):
     
     ax.set_xlabel(''); ax.set_xticklabels([]); ax.tick_params(axis='x', length=0)
     
-    treatment1, treatment2 = random.choice(treatment_labels)
+    from synth.semantics.sampler import sample_comparative_pair
+    treatment1, treatment2 = sample_comparative_pair(domain_category=domain_category)
     y_pos1, y_pos2 = -0.15, -0.25
     
     text1 = ax.text(-0.1, y_pos1, f"{treatment1}", transform=ax.transAxes, 
@@ -1312,10 +1311,24 @@ def _generate_bar_chart(ax, theme_name, theme_config, style_config, debug_mode=F
         print(f"DEBUG: _generate_bar_chart - Theme: {theme_name}, Style: {style_config}")
         print(f"DEBUG: _generate_bar_chart - Orientation: {orientation}")
     
+    use_synthetic = style_config.get('use_synthetic_data_engine', False) or (isinstance(theme_config, dict) and theme_config.get('use_synthetic_data_engine', False))
+    syn_domain = style_config.get('synthetic_domain', None) or (theme_config.get('synthetic_domain', None) if isinstance(theme_config, dict) else None)
+    syn_table = None
+
     # --- DUAL Y-AXIS LOGIC ---
-    if style_config.get('orientation', 'vertical') == 'vertical' and random.random() < 0.15:
+    dual_axis_prob = style_config.get('dual_axis_probability', DUAL_AXIS_PROBABILITY)
+    force_dual = style_config.get('force_dual_axis') if 'force_dual_axis' in style_config else (random.random() < dual_axis_prob)
+    if style_config.get('orientation', 'vertical') == 'vertical' and force_dual:
         print(" - Generating dual Y-axis bar chart with scientific styles")
         is_scientific = True
+        if isinstance(theme_config, dict):
+            if theme_config.get('semantic_domain') == "business" or not theme_config.get('semantic_domain'):
+                sub_weights = theme_config.get('scientific_subdomain_weights', {'biomedical': 0.70, 'engineering': 0.30})
+                subdomains = list(sub_weights.keys())
+                weights = list(sub_weights.values())
+                domain_cat = random.choices(subdomains, weights=weights, k=1)[0]
+                theme_config['semantic_domain'] = domain_cat
+            theme_config['effective_is_scientific'] = True
         ax2 = ax.twinx()
         
         num_bars_1 = random.randint(2, 5)
@@ -1323,8 +1336,17 @@ def _generate_bar_chart(ax, theme_name, theme_config, style_config, debug_mode=F
         max_scale_1 = random.choice([50, 100, 200])
         max_scale_2 = random.choice([500, 1000, 2000])
         
-        data_1 = generate_realistic_data(num_bars_1, max_scale_1, domain='scientific')
-        data_2 = generate_realistic_data(num_bars_2, max_scale_2, domain='scientific')
+        if use_synthetic:
+            from synth.tabular import sample_multivariate_table
+            table_domain = syn_domain or (theme_config.get('semantic_domain') if isinstance(theme_config, dict) else None) or ('biomedical' if is_scientific else 'business')
+            syn_table = sample_multivariate_table(num_rows=max(num_bars_1, num_bars_2), num_series=2, domain=table_domain)
+            if isinstance(theme_config, dict) and syn_table is not None:
+                theme_config['semantic_domain'] = syn_table.get('domain')
+            data_1 = syn_table['data'][:num_bars_1, 0]
+            data_2 = syn_table['data'][:num_bars_2, 1]
+        else:
+            data_1 = generate_realistic_data(num_bars_1, max_scale_1, domain='scientific')
+            data_2 = generate_realistic_data(num_bars_2, max_scale_2, domain='scientific')
         
         if debug_mode:
             print(f"DEBUG: Dual-axis chart - Data sets: {len(data_1)} and {len(data_2)} values")
@@ -1362,6 +1384,8 @@ def _generate_bar_chart(ax, theme_name, theme_config, style_config, debug_mode=F
                 'width': r.get_width(),
                 'bottom': r.get_y(),
                 'top': r.get_y() + r.get_height(),
+                'series_idx': 0,
+                'bar_idx': i,
                 'axis': 'primary'
             })
         
@@ -1372,20 +1396,35 @@ def _generate_bar_chart(ax, theme_name, theme_config, style_config, debug_mode=F
                 'width': r.get_width(),
                 'bottom': r.get_y(),
                 'top': r.get_y() + r.get_height(),
+                'series_idx': 1,
+                'bar_idx': i + len(rects1),
                 'axis': 'secondary'
             })
         
-        error_artists_1, error_tops_1 = add_error_bars(ax, bar_info_list_1, orientation='vertical')
-        error_artists_2, error_tops_2 = add_error_bars(ax2, bar_info_list_2, orientation='vertical')
+        err_prob = style_config.get('error_bar_probability', 0.70) if isinstance(style_config, dict) else 0.70
+        error_artists_1, error_tops_1 = add_error_bars(ax, bar_info_list_1, orientation='vertical', error_bar_prob=err_prob)
+        error_artists_2, error_tops_2 = add_error_bars(ax2, bar_info_list_2, orientation='vertical', error_bar_prob=err_prob)
         
         other_artists.extend(error_artists_1)
         other_artists.extend(error_artists_2)
         
         combined_error_tops = error_tops_1 + error_tops_2
         
-        ax.set_xlabel(random.choice(SCIENTIFIC_X_LABELS))
-        ax.set_ylabel(random.choice(SCIENTIFIC_Y_LABELS))
-        ax2.set_ylabel(random.choice(SCIENTIFIC_Y_LABELS))
+        if use_synthetic and syn_table is not None:
+            ax.set_xlabel(syn_table['x_label'])
+            ax.set_ylabel(syn_table['series_names'][0])
+            ax2.set_ylabel(syn_table['series_names'][1])
+            ax.set_title(syn_table['title'], fontsize=14, pad=15)
+        else:
+            from synth.semantics.sampler import sample_axis_pair, sample_secondary_y
+            sem_dom = theme_config.get('semantic_domain') if isinstance(theme_config, dict) else None
+            x_label, y1_label, domain_cat = sample_axis_pair("bar", "vertical", is_scientific=True, semantic_domain=sem_dom)
+            y2_label = sample_secondary_y(y1_label, is_scientific=True, domain_category=domain_cat)
+            ax.set_xlabel(x_label)
+            ax.set_ylabel(y1_label)
+            ax2.set_ylabel(y2_label)
+            if isinstance(theme_config, dict):
+                theme_config['semantic_domain'] = domain_cat
         
         #  Atomic position and label setting
         ax.set_xticks(all_positions)
@@ -1397,17 +1436,22 @@ def _generate_bar_chart(ax, theme_name, theme_config, style_config, debug_mode=F
         ax.grid(False)
         ax2.grid(False)
         
-        if random.random() < 0.05:
+        drop_spine_prob = style_config.get('drop_bottom_spine_probability', 0.05) if isinstance(style_config, dict) else 0.05
+        if random.random() < drop_spine_prob:
             ax.spines['bottom'].set_visible(False)
             ax.tick_params(axis='x', length=0)
         
         scale_axis_info = {'primary_scale_axis': 'y', 'secondary_scale_axis': 'y2'}
         
+        if isinstance(theme_config, dict):
+            theme_config['series_count'] = 2
+            theme_config['series_names'] = list(syn_table['series_names'][:2]) if (use_synthetic and syn_table is not None) else ['Group 1', 'Group 2']
+
         if debug_mode:
             print(f"DEBUG: Dual-axis chart completed - {len(data_artists)} data artists, {len(other_artists)} other artists")
         
         return data_artists, other_artists, bar_info_list_1 + bar_info_list_2, \
-               orientation, combined_error_tops, axis_related_artists, scale_axis_info
+               orientation, combined_error_tops, axis_related_artists, scale_axis_info, None
     
     # --- STANDARD BAR CHART LOGIC ---
     is_scientific = style_config.get('is_scientific', False)
@@ -1420,11 +1464,24 @@ def _generate_bar_chart(ax, theme_name, theme_config, style_config, debug_mode=F
     
     num_bars = random.randint(3, 8)
     max_scale = random.choice([50, 100, 200, 500, 750, 1000, 2000])
-    allow_negative = random.random() < 0.15 and not is_scientific
+    allow_neg_prob = style_config.get('allow_negative_probability', 0.15) if isinstance(style_config, dict) else 0.15
+    allow_negative = random.random() < allow_neg_prob and not is_scientific
     data_pattern_type = 'diverging' if allow_negative else None
     
-    orientation = 'horizontal' if num_bars > 6 and random.random() < 0.40 else 'vertical'
-    style_config['orientation'] = orientation
+    horiz_prob = style_config.get('horizontal_probability', 0.40) if isinstance(style_config, dict) else 0.40
+    if isinstance(style_config, dict) and style_config.get('orientation') in ('horizontal', 'vertical'):
+        orientation = style_config['orientation']
+    else:
+        orientation = 'horizontal' if num_bars > 6 and random.random() < horiz_prob else 'vertical'
+        if isinstance(style_config, dict):
+            style_config['orientation'] = orientation
+
+    from synth.semantics.sampler import sample_axis_pair
+    x_label, y_label, domain_cat = sample_axis_pair(
+        "bar", orientation, is_scientific, semantic_domain=theme_config.get('semantic_domain') if isinstance(theme_config, dict) else None
+    )
+    if isinstance(theme_config, dict):
+        theme_config['semantic_domain'] = domain_cat
     
     if debug_mode:
         print(f"DEBUG: Standard bar chart - Style: {style}, Pattern: {pattern}, Scientific: {is_scientific}")
@@ -1434,6 +1491,12 @@ def _generate_bar_chart(ax, theme_name, theme_config, style_config, debug_mode=F
     
     if is_scientific:
         num_groups, bars_per_group = random.randint(2, 6), random.randint(1, 4)
+        if use_synthetic:
+            from synth.tabular import sample_multivariate_table
+            table_domain = syn_domain or theme_config.get('semantic_domain') or 'biomedical'
+            syn_table = sample_multivariate_table(num_rows=num_groups, num_series=bars_per_group, domain=table_domain)
+            if isinstance(theme_config, dict) and syn_table is not None:
+                theme_config['semantic_domain'] = syn_table.get('domain')
         bar_styles = [{'facecolor': 'white', 'edgecolor': 'black', 'hatch': h} 
                      for h in ['', '////', '....', 'xxxx']]
         random.shuffle(bar_styles)
@@ -1442,8 +1505,11 @@ def _generate_bar_chart(ax, theme_name, theme_config, style_config, debug_mode=F
         
         for i in range(num_groups):
             group_center = i * (group_width + 0.4)
-            data = generate_realistic_data(bars_per_group, max_scale, 
-                                         allow_negative=False, domain='scientific')
+            if use_synthetic and syn_table is not None:
+                data = syn_table['data'][i, :]
+            else:
+                data = generate_realistic_data(bars_per_group, max_scale, 
+                                             allow_negative=False, domain='scientific')
             
             for j in range(bars_per_group):
                 pos = group_center - (group_width / 2) + (j + 0.5) * bar_width
@@ -1472,13 +1538,22 @@ def _generate_bar_chart(ax, theme_name, theme_config, style_config, debug_mode=F
                 data_artists.extend(bar_container.patches)
         
         ticks_positions = [i * (group_width + 0.4) for i in range(num_groups)]
-        tick_labels = [f'Group {g+1}' for g in range(num_groups)]
+        if use_synthetic and syn_table is not None:
+            tick_labels = syn_table['categories'][:num_groups]
+        else:
+            tick_labels = [f'Group {g+1}' for g in range(num_groups)]
         
         ticks_setter(ticks_positions, tick_labels)
         
-        if len(bar_info_list) == 4 and random.random() < 0.30 and orientation == 'vertical':
-            axis_related_artists.extend(add_treatment_key_xaxis(ax, bar_info_list))
+        tk_prob = style_config.get('treatment_key_probability', TREATMENT_KEY_PROBABILITY)
+        force_tk = style_config.get('force_treatment_key') if 'force_treatment_key' in style_config else (random.random() < tk_prob)
+        if len(bar_info_list) == 4 and force_tk and orientation == 'vertical':
+            axis_related_artists.extend(add_treatment_key_xaxis(ax, bar_info_list, domain_category=domain_cat))
             has_treatment_axis = True
+        
+        if isinstance(theme_config, dict):
+            theme_config['series_count'] = bars_per_group
+            theme_config['series_names'] = list(syn_table['series_names'][:bars_per_group]) if (use_synthetic and syn_table is not None) else [f'Series {j+1}' for j in range(bars_per_group)]
     
     else:  # Standard Styles
         palette_name = theme_config.get('palette', 'viridis')
@@ -1489,22 +1564,38 @@ def _generate_bar_chart(ax, theme_name, theme_config, style_config, debug_mode=F
             cmap = colormaps.get(palette_name); 
             colors = [cmap(i / (num_bars * 1.5)) for i in range(num_bars * 2)]
         
-        categories = [f'Category {i+1}' for i in range(num_bars)]
-        
-        if random.random() < 0.2: 
-            categories = [c[:random.randint(5,8)] + '...' if len(c) > 8 else c for c in categories]
+        if use_synthetic:
+            from synth.tabular import sample_multivariate_table
+            table_domain = syn_domain or theme_config.get('semantic_domain') or 'business'
+            syn_table = sample_multivariate_table(num_rows=num_bars, num_series=2 if style in ('side_by_side', 'stacked') else 1, domain=table_domain)
+            if isinstance(theme_config, dict) and syn_table is not None:
+                theme_config['semantic_domain'] = syn_table.get('domain')
+            categories = syn_table['categories'][:num_bars]
+        else:
+            categories = [f'Category {i+1}' for i in range(num_bars)]
+            trunc_prob = style_config.get('truncate_category_probability', 0.2) if isinstance(style_config, dict) else 0.2
+            if random.random() < trunc_prob: 
+                categories = [c[:random.randint(5,8)] + '...' if len(c) > 8 else c for c in categories]
         
         if style == 'side_by_side':
-            y_values1 = generate_realistic_data(num_bars, max_scale, allow_negative, data_pattern_type)
-            y_values2 = generate_realistic_data(num_bars, max_scale, allow_negative, data_pattern_type)
+            if use_synthetic and syn_table is not None:
+                y_values1 = syn_table['data'][:, 0]
+                y_values2 = syn_table['data'][:, 1]
+                series_label1 = syn_table['series_names'][0]
+                series_label2 = syn_table['series_names'][1]
+            else:
+                y_values1 = generate_realistic_data(num_bars, max_scale, allow_negative, data_pattern_type)
+                y_values2 = generate_realistic_data(num_bars, max_scale, allow_negative, data_pattern_type)
+                series_label1 = 'Series 1'
+                series_label2 = 'Series 2'
             
             bar_width = 0.35; indices = np.arange(num_bars)
             
             if orientation == 'vertical':
                 rects1 = ax.bar(indices - bar_width/2, y_values1, width=bar_width, 
-                               label='Series 1', color=colors[0], zorder=3)
+                               label=series_label1, color=colors[0], zorder=3)
                 rects2 = ax.bar(indices + bar_width/2, y_values2, width=bar_width, 
-                               label='Series 2', color=colors[1], zorder=3)
+                               label=series_label2, color=colors[1], zorder=3)
                 
                 #  Store metadata for BOTH series
                 for i in range(num_bars):
@@ -1551,26 +1642,45 @@ def _generate_bar_chart(ax, theme_name, theme_config, style_config, debug_mode=F
                     })
             
             ticks_setter(indices, categories)
+            tk_prob = style_config.get('treatment_key_probability', TREATMENT_KEY_PROBABILITY)
+            force_tk = style_config.get('force_treatment_key') if 'force_treatment_key' in style_config else (random.random() < tk_prob)
+            if len(bar_info_list) == 4 and orientation == 'vertical' and force_tk:
+                axis_related_artists.extend(add_treatment_key_xaxis(ax, bar_info_list, domain_category=domain_cat))
+                has_treatment_axis = True
+            if isinstance(theme_config, dict):
+                theme_config['series_count'] = 2
+                theme_config['series_names'] = [series_label1, series_label2]
             data_artists.extend(list(rects1) + list(rects2))
         
         elif style == 'stacked':
-            y_values1 = generate_realistic_data(num_bars, max_scale/2, allow_negative=False)
-            y_values2 = generate_realistic_data(num_bars, max_scale/2, allow_negative=False)
+            if use_synthetic and syn_table is not None:
+                y_values1 = syn_table['data'][:, 0]
+                y_values2 = syn_table['data'][:, 1]
+                portion_label1 = syn_table['series_names'][0]
+                portion_label2 = syn_table['series_names'][1]
+            else:
+                y_values1 = generate_realistic_data(num_bars, max_scale/2, allow_negative=False)
+                y_values2 = generate_realistic_data(num_bars, max_scale/2, allow_negative=False)
+                portion_label1 = 'Portion 1'
+                portion_label2 = 'Portion 2'
             
             bar_width = 0.7; indices = np.arange(num_bars)
             
             if orientation == 'vertical':
                 rects1 = ax.bar(indices, y_values1, width=bar_width, 
-                               label='Portion 1', color=colors[0], zorder=3)
+                               label=portion_label1, color=colors[0], zorder=3)
                 rects2 = ax.bar(indices, y_values2, width=bar_width, bottom=y_values1,
-                               label='Portion 2', color=colors[1], zorder=3)
+                               label=portion_label2, color=colors[1], zorder=3)
             else:
                 rects1 = ax.barh(indices, y_values1, height=bar_width, 
-                                label='Portion 1', color=colors[0], zorder=3)
+                                label=portion_label1, color=colors[0], zorder=3)
                 rects2 = ax.barh(indices, y_values2, height=bar_width, left=y_values1,
-                                label='Portion 2', color=colors[1], zorder=3)
+                                label=portion_label2, color=colors[1], zorder=3)
             
             ticks_setter(indices, categories)
+            if isinstance(theme_config, dict):
+                theme_config['series_count'] = 2
+                theme_config['series_names'] = [portion_label1, portion_label2]
             data_artists.extend(list(rects1) + list(rects2))
             
             #  Store metadata for EACH stacked segment
@@ -1598,7 +1708,10 @@ def _generate_bar_chart(ax, theme_name, theme_config, style_config, debug_mode=F
                 })
         
         else:  # default, touching, 3d_effect
-            y_values = generate_realistic_data(num_bars, max_scale, allow_negative, data_pattern_type)
+            if use_synthetic and syn_table is not None:
+                y_values = syn_table['data'][:, 0]
+            else:
+                y_values = generate_realistic_data(num_bars, max_scale, allow_negative, data_pattern_type)
             
             bar_width = 0.95 if style == 'touching' else 0.8
             gap = 0.05 if style == 'touching' else 0.2
@@ -1626,6 +1739,9 @@ def _generate_bar_chart(ax, theme_name, theme_config, style_config, debug_mode=F
                     })
             
             ticks_setter(indices, categories)
+            if isinstance(theme_config, dict):
+                theme_config['series_count'] = 1
+                theme_config['series_names'] = [syn_table['series_names'][0]] if (use_synthetic and syn_table is not None) else ['Series 1']
             data_artists.extend(list(rects))
     
     # Apply pattern styles
@@ -1633,7 +1749,18 @@ def _generate_bar_chart(ax, theme_name, theme_config, style_config, debug_mode=F
         for bar in data_artists:
             fc = bar.get_facecolor()
             if pattern == 'hollow': 
-                bar.set_facecolor('none'); bar.set_edgecolor(fc); bar.set_linewidth(1.5)
+                ec = bar.get_edgecolor()
+                is_white_fc = hasattr(fc, '__iter__') and len(fc) >= 3 and all(c >= 0.9 for c in fc[:3])
+                if is_scientific or is_white_fc:
+                    edge_color = 'black'
+                elif hasattr(ec, '__iter__') and len(ec) == 4 and ec[3] > 0 and not all(c >= 0.9 for c in ec[:3]):
+                    edge_color = ec
+                else:
+                    edge_color = fc
+                bar.set_facecolor('none')
+                bar.set_edgecolor(edge_color)
+                bar.set_hatch(None)
+                bar.set_linewidth(1.5)
             elif pattern == 'dotted': 
                 bar.set_hatch('..')
             elif pattern == 'striped': 
@@ -1644,27 +1771,32 @@ def _generate_bar_chart(ax, theme_name, theme_config, style_config, debug_mode=F
     if style == '3d_effect': 
         add_bar_shadows(ax, data_artists, ax.figure)
     
-    if not is_scientific and random.random() < 0.3 and style != 'stacked':
+    jitter_prob = style_config.get('jitter_overlay_probability', 0.3) if isinstance(style_config, dict) else 0.3
+    if not is_scientific and random.random() < jitter_prob and style != 'stacked':
         add_jitter_overlay(ax, bar_info_list, orientation)
     
     # --- Coordinated logic for error bars and significance markers ---
     error_bar_artists, error_tops = [], []
     
-    if (is_scientific or (not is_scientific and random.random() < 0.30)) and style != 'stacked':
-        error_bar_artists, error_tops = add_error_bars(ax, bar_info_list, orientation)
+    err_prob = style_config.get('error_bar_probability', 0.70 if is_scientific else 0.30) if isinstance(style_config, dict) else (0.70 if is_scientific else 0.30)
+    if (is_scientific or (not is_scientific and random.random() < err_prob)) and style != 'stacked':
+        error_bar_artists, error_tops = add_error_bars(ax, bar_info_list, orientation, error_bar_prob=err_prob)
         other_artists.extend(error_bar_artists)
     else:
         error_tops = [b['height'] for b in bar_info_list]
     
-    if random.random() < 0.1 and style != 'stacked':
+    data_label_prob = style_config.get('data_label_probability', 0.1) if isinstance(style_config, dict) else 0.1
+    if random.random() < data_label_prob and style != 'stacked':
         data_label_artists = add_data_labels(ax, data_artists, orientation, 'bar', 
                                             error_tops=error_tops, bar_info_list=bar_info_list)
         other_artists.extend(data_label_artists)
     
     if is_scientific:
+        sig_prob = style_config.get('significance_probability', 0.40) if isinstance(style_config, dict) else 0.40
         y_max_limit = ax.get_ylim()[1] if orientation == 'vertical' else ax.get_xlim()[1]
         other_artists.extend(add_significance_markers(ax, bar_info_list, y_max_limit, 
-                                                     orientation, error_tops=error_tops))
+                                                     orientation, error_tops=error_tops,
+                                                     significance_prob=sig_prob))
     
     if allow_negative:
         if orientation == 'vertical': 
@@ -1677,15 +1809,22 @@ def _generate_bar_chart(ax, theme_name, theme_config, style_config, debug_mode=F
         else: 
             ax.set_xlim(left=0)
     
-    ax.set_ylabel(random.choice(SCIENTIFIC_Y_LABELS if is_scientific else BUSINESS_Y_LABELS))
+    if use_synthetic and syn_table is not None:
+        ax.set_ylabel(syn_table['y_label'])
+        if not has_treatment_axis:
+            ax.set_xlabel(syn_table['x_label'])
+        ax.set_title(syn_table['title'], fontsize=14, pad=15)
+    else:
+        ax.set_ylabel(y_label)
+        if not has_treatment_axis:
+            ax.set_xlabel(x_label)
     
-    if not has_treatment_axis:
-        ax.set_xlabel(random.choice(SCIENTIFIC_X_LABELS if is_scientific else BUSINESS_X_LABELS))
-    
-    if random.random() < 0.3 and orientation == 'vertical': 
+    horiz_label_prob = style_config.get('horizontal_label_probability', 0.3) if isinstance(style_config, dict) else 0.3
+    if random.random() < horiz_label_prob and orientation == 'vertical': 
         ax.tick_params(axis='x', labelrotation=0)
     
-    if is_scientific and orientation == 'vertical' and random.random() < 0.05:
+    drop_spine_prob = style_config.get('drop_bottom_spine_probability', 0.05) if isinstance(style_config, dict) else 0.05
+    if is_scientific and orientation == 'vertical' and random.random() < drop_spine_prob:
         ax.spines['bottom'].set_visible(False)
         ax.tick_params(axis='x', length=0)
     
@@ -1719,6 +1858,7 @@ def _generate_bar_chart(ax, theme_name, theme_config, style_config, debug_mode=F
         print(f"DEBUG: _generate_bar_chart returning - data_artists: {len(data_artists)}, other_artists: {len(other_artists)}, bar_info_list: {len(bar_info_list)}")
         print(f"DEBUG: Scale axis info: {scale_axis_info}")
     
+    ax._bar_info_list = bar_info_list
     return data_artists, other_artists, bar_info_list, orientation, error_tops, \
            axis_related_artists, scale_axis_info, None
 
@@ -1727,6 +1867,7 @@ def _generate_line_chart(ax, theme_name, theme_config, is_scientific, debug_mode
     Generate a line chart with realistic trend data and keypoint detection.
     """
     theme = apply_chart_theme(ax, theme_name)
+    line_cfg = theme_config.get('line_chart_config', {}) if isinstance(theme_config, dict) else {}
     num_series = random.randint(1, 4)
     num_points = random.randint(8, 25)
     max_scale = random.choice([50, 100, 500, 1000])
@@ -1758,21 +1899,38 @@ def _generate_line_chart(ax, theme_name, theme_config, is_scientific, debug_mode
     
     colors = colors[:num_series]
     
+    use_synthetic = isinstance(theme_config, dict) and theme_config.get('use_synthetic_data_engine', False)
+    syn_domain = theme_config.get('synthetic_domain', None) if isinstance(theme_config, dict) else None
+    syn_table = None
+    if use_synthetic:
+        from synth.tabular import sample_multivariate_table
+        table_domain = syn_domain or (theme_config.get('semantic_domain') if isinstance(theme_config, dict) else None) or ('biomedical' if is_scientific else 'business')
+        syn_table = sample_multivariate_table(num_rows=num_points, num_series=num_series, domain=table_domain)
+        if isinstance(theme_config, dict) and syn_table is not None:
+            theme_config['semantic_domain'] = syn_table.get('domain')
+
     for series_idx in range(num_series):
-        y_data = generate_realistic_data(num_points, max_scale, allow_negative=is_scientific,
-                                        domain='scientific' if is_scientific else 'business')
+        if use_synthetic and syn_table is not None:
+            y_data = syn_table['data'][:, series_idx]
+            series_label = syn_table['series_names'][series_idx]
+        else:
+            y_data = generate_realistic_data(num_points, max_scale, allow_negative=is_scientific,
+                                            domain='scientific' if is_scientific else 'business')
+            series_label = f'Series {series_idx+1}'
         
         # Determine marker visibility and style
-        has_markers = random.random() < 0.6
+        marker_prob = line_cfg.get('marker_probability', 0.6)
+        has_markers = random.random() < marker_prob
         marker = random.choice(['o', 's', '^', 'v', 'D', 'p', '*']) if has_markers else None
         markersize = random.uniform(4.0, 7.0) if has_markers else 0.0
         
         # Determine line styling
-        linestyle = random.choice(['-', '--', '-.', ':']) if random.random() < 0.3 else '-'
+        linestyle_prob = line_cfg.get('varied_linestyle_probability', 0.3)
+        linestyle = random.choice(['-', '--', '-.', ':']) if random.random() < linestyle_prob else '-'
         linewidth = random.uniform(1.5, 3.0)
         
         line, = ax.plot(x, y_data, marker=marker, markersize=markersize, linewidth=linewidth,
-                       linestyle=linestyle, color=colors[series_idx], label=f'Series {series_idx+1}', zorder=3)
+                       linestyle=linestyle, color=colors[series_idx], label=series_label, zorder=3)
         data_artists.append(line)
         
         plotted = [(float(x[i]), float(y_data[i]), int(i)) for i in range(len(y_data))]
@@ -1811,10 +1969,22 @@ def _generate_line_chart(ax, theme_name, theme_config, is_scientific, debug_mode
             if keypoint_info[-1]['all_points']:
                 print(f"DEBUG [LINE] Series {series_idx}: First point: ({keypoint_info[-1]['all_points'][0][0]:.2f}, {keypoint_info[-1]['all_points'][0][1]:.2f}), Last point: ({keypoint_info[-1]['all_points'][-1][0]:.2f}, {keypoint_info[-1]['all_points'][-1][1]:.2f})")
     
-    ax.set_xlabel(random.choice(SCIENTIFIC_X_LABELS if is_scientific else BUSINESS_X_LABELS))
-    ax.set_ylabel(random.choice(SCIENTIFIC_Y_LABELS if is_scientific else BUSINESS_Y_LABELS))
+    if use_synthetic and syn_table is not None:
+        ax.set_xlabel(syn_table['x_label'])
+        ax.set_ylabel(syn_table['y_label'])
+        ax.set_title(syn_table['title'], fontsize=14, pad=15)
+    else:
+        from synth.semantics.sampler import sample_axis_pair
+        x_label, y_label, domain_cat = sample_axis_pair(
+            "line", "vertical", is_scientific, semantic_domain=theme_config.get('semantic_domain') if isinstance(theme_config, dict) else None
+        )
+        ax.set_xlabel(x_label)
+        ax.set_ylabel(y_label)
+        if isinstance(theme_config, dict):
+            theme_config['semantic_domain'] = domain_cat
     
-    if num_series > 1 and random.random() < 0.7:
+    legend_prob = line_cfg.get('legend_probability', 0.7)
+    if num_series > 1 and random.random() < legend_prob:
         legend = apply_legend_variation(ax, num_series)
         other_artists.append(legend)
     
@@ -1831,6 +2001,7 @@ def _generate_line_chart(ax, theme_name, theme_config, is_scientific, debug_mode
 def _generate_scatter_chart(ax, theme_name, theme_config, is_scientific, debug_mode=False):
     """Enhanced scatter with realistic correlation structures and sample sizes"""
     theme = apply_chart_theme(ax, theme_name)
+    scatter_cfg = theme_config.get('scatter_chart_config', {}) if isinstance(theme_config, dict) else {}
     palette = theme.get('palette', 'viridis')
     
     # Realistic sample sizes based on publication analysis
@@ -1858,13 +2029,26 @@ def _generate_scatter_chart(ax, theme_name, theme_config, is_scientific, debug_m
     data_artists = []
     other_artists = []
     
-    # Generate X data with realistic distribution
-    x_data = generate_realistic_data(
-        num_points, max_scale, 
-        allow_negative=False,
-        pattern_type='linear' if relationship != 'clustered' else None,
-        domain='scientific' if is_scientific else 'business'
-    )
+    use_synthetic = isinstance(theme_config, dict) and theme_config.get('use_synthetic_data_engine', False)
+    syn_domain = theme_config.get('synthetic_domain', None) if isinstance(theme_config, dict) else None
+    syn_table = None
+
+    if use_synthetic:
+        from synth.tabular import sample_multivariate_table
+        table_domain = syn_domain or (theme_config.get('semantic_domain') if isinstance(theme_config, dict) else None) or ('biomedical' if is_scientific else 'business')
+        syn_table = sample_multivariate_table(num_rows=num_points, num_series=2, domain=table_domain)
+        if isinstance(theme_config, dict) and syn_table is not None:
+            theme_config['semantic_domain'] = syn_table.get('domain')
+        x_data = syn_table['data'][:, 0]
+        y_data = syn_table['data'][:, 1]
+    else:
+        # Generate X data with realistic distribution
+        x_data = generate_realistic_data(
+            num_points, max_scale, 
+            allow_negative=False,
+            pattern_type='linear' if relationship != 'clustered' else None,
+            domain='scientific' if is_scientific else 'business'
+        )
     
     if relationship == 'clustered':
         # Generate realistic cluster data
@@ -1957,9 +2141,9 @@ def _generate_scatter_chart(ax, theme_name, theme_config, is_scientific, debug_m
             noise = np.random.normal(0, np.sqrt(noise_variance), num_points)
             y_data = y_perfect + noise
     
-    # Ensure realistic bounds
-    y_data = np.clip(y_data, 0 if not is_scientific else -max_scale*0.2, max_scale * 1.2)
-    x_data = np.clip(x_data, 0, max_scale * 1.2)
+        # Ensure realistic bounds
+        y_data = np.clip(y_data, 0 if not is_scientific else -max_scale*0.2, max_scale * 1.2)
+        x_data = np.clip(x_data, 0, max_scale * 1.2)
     
     # Realistic point styling based on sample size
     scatter_kwargs = {
@@ -1969,10 +2153,11 @@ def _generate_scatter_chart(ax, theme_name, theme_config, is_scientific, debug_m
     }
     
     # Size scaling with sample size (larger datasets = smaller points, with support for bubble variations)
-    is_bubble = (random.random() < 0.25)
+    bubble_prob = scatter_cfg.get('bubble_probability', 0.25)
+    is_bubble = (random.random() < bubble_prob)
     if is_bubble:
         base_s = np.random.randint(40, 90)
-        scatter_kwargs['s'] = np.random.uniform(base_s * 0.4, base_s * 2.2, num_points)
+        scatter_kwargs['s'] = np.random.uniform(base_s * 0.4, base_s * 2.2, len(x_data))
     else:
         if num_points < 30:
             scatter_kwargs['s'] = np.random.randint(70, 150)
@@ -1996,7 +2181,8 @@ def _generate_scatter_chart(ax, theme_name, theme_config, is_scientific, debug_m
     data_artists.append(scatter)
     
     # Add trend line for correlated data
-    if relationship not in ['no_correlation', 'clustered'] and np.random.random() < 0.7:
+    trendline_prob = scatter_cfg.get('trendline_probability', 0.70)
+    if relationship not in ['no_correlation', 'clustered'] and np.random.random() < trendline_prob:
         # Fit trend line
         coeffs = np.polyfit(x_data, y_data, 1)
         trend_line = np.poly1d(coeffs)
@@ -2008,8 +2194,19 @@ def _generate_scatter_chart(ax, theme_name, theme_config, is_scientific, debug_m
         other_artists.append(line)
     
     # Set labels
-    ax.set_xlabel(np.random.choice(SCIENTIFIC_X_LABELS if is_scientific else BUSINESS_X_LABELS))
-    ax.set_ylabel(np.random.choice(SCIENTIFIC_Y_LABELS if is_scientific else BUSINESS_Y_LABELS))
+    if use_synthetic and syn_table is not None:
+        ax.set_xlabel(syn_table['series_names'][0])
+        ax.set_ylabel(syn_table['series_names'][1])
+        ax.set_title(syn_table['title'], fontsize=14, pad=15)
+    else:
+        from synth.semantics.sampler import sample_axis_pair
+        x_label, y_label, domain_cat = sample_axis_pair(
+            "scatter", "vertical", is_scientific, semantic_domain=theme_config.get('semantic_domain') if isinstance(theme_config, dict) else None
+        )
+        ax.set_xlabel(x_label)
+        ax.set_ylabel(y_label)
+        if isinstance(theme_config, dict):
+            theme_config['semantic_domain'] = domain_cat
     
     # Realistic axis limits with padding
     x_range = np.max(x_data) - np.min(x_data)
@@ -2077,8 +2274,10 @@ def _generate_boxplot_chart(ax, theme_name, theme_config, is_scientific,
     if not theme:
         theme = {'palette': 'viridis'}
     
-    # Determine orientation (15% chance for horizontal boxplot with more boxes)
-    is_horizontal = random.random() < 0.15
+    box_cfg = theme_config.get('box_plot_config', {}) if isinstance(theme_config, dict) else {}
+    # Determine orientation (configurable chance for horizontal boxplot with more boxes)
+    horizontal_prob = box_cfg.get('horizontal_probability', 0.15)
+    is_horizontal = random.random() < horizontal_prob
     
     # Generate realistic data - more groups for horizontal orientation
     if is_horizontal:
@@ -2107,7 +2306,8 @@ def _generate_boxplot_chart(ax, theme_name, theme_config, is_scientific,
     _apply_line_styles(bp)  # Median, whisker, cap styles
     
     # Jitter overlay adapted for orientation
-    if is_scientific and random.random() < 0.2:
+    jitter_prob = box_cfg.get('jitter_points_probability', 0.20)
+    if is_scientific and random.random() < jitter_prob:
         for i, d in enumerate(datas):
             if is_horizontal:
                 y_coords = np.random.normal(i + 1, 0.04, size=len(d))
@@ -2117,14 +2317,19 @@ def _generate_boxplot_chart(ax, theme_name, theme_config, is_scientific,
                 ax.plot(x_coords, d, '.', color='black', alpha=0.3, zorder=10)
     
     # Set axis labels based on orientation
+    from synth.semantics.sampler import sample_axis_pair
+    orientation_str = 'horizontal' if is_horizontal else 'vertical'
+    x_label, y_label, domain_cat = sample_axis_pair(
+        "box", orientation_str, is_scientific, semantic_domain=theme_config.get('semantic_domain') if isinstance(theme_config, dict) else None
+    )
+    ax.set_xlabel(x_label)
+    ax.set_ylabel(y_label)
     if is_horizontal:
-        ax.set_xlabel(random.choice(SCIENTIFIC_Y_LABELS if is_scientific else BUSINESS_Y_LABELS))
-        ax.set_ylabel(random.choice(SCIENTIFIC_X_LABELS if is_scientific else BUSINESS_X_LABELS))
         ax.set_yticklabels([f'G{i+1}' for i in range(num_groups)])
     else:
-        ax.set_ylabel(random.choice(SCIENTIFIC_Y_LABELS if is_scientific else BUSINESS_Y_LABELS))
-        ax.set_xlabel(random.choice(SCIENTIFIC_X_LABELS if is_scientific else BUSINESS_X_LABELS))
         ax.set_xticklabels([f'G{i+1}' for i in range(num_groups)])
+    if isinstance(theme_config, dict):
+        theme_config['semantic_domain'] = domain_cat
     
     # Collect error bar artists (whiskers and caps)
     error_groups = []
@@ -2140,7 +2345,8 @@ def _generate_boxplot_chart(ax, theme_name, theme_config, is_scientific,
     sig_artists = []
     orientation_str = 'horizontal' if is_horizontal else 'vertical'
     
-    if show_significance and random.random() < 0.5:
+    sig_prob = box_cfg.get('significance_probability', 0.50)
+    if show_significance and random.random() < sig_prob:
         max_extent = 0
         error_tops = []
         
@@ -2396,67 +2602,12 @@ def _generate_pie_chart(ax, theme_name, theme_config, is_scientific, pie_config=
     return wedges, autotexts + texts + connector_lines, [], 'vertical', [], [], {'primary_scale_axis': 'none'}, pie_payload
 
 
-class DynamicHistogramProcessor:
-    """
-    Compute histogram edges using NumPy's optimized estimators.
-    """
-
-    @staticmethod
-    def calculate_edges_numpy_optimized(data, strategy='auto'):
-        valid_strategies = ['auto', 'fd', 'doane', 'scott', 'rice', 'sturges', 'sqrt']
-        if strategy not in valid_strategies:
-            strategy = 'auto'
-        return np.histogram_bin_edges(a=data, bins=strategy)
-
-    @staticmethod
-    def calculate_freedman_diaconis_manual(data):
-        data = np.asarray(data)
-        n_samples = data.size
-        if n_samples < 2:
-            return 1, np.array([np.min(data), np.max(data)])
-        iqr_value = stats.iqr(data)
-        if iqr_value == 0:
-            std_dev_value = np.std(data)
-            if std_dev_value == 0:
-                return 1, np.array([np.min(data), np.max(data)])
-            h_width = 3.49 * std_dev_value / (n_samples ** (1/3))
-        else:
-            h_width = 2.0 * iqr_value / (n_samples ** (1/3))
-        min_bound = np.min(data)
-        max_bound = np.max(data)
-        total_k_bins = int(np.ceil((max_bound - min_bound) / h_width))
-        interval_edges = np.linspace(min_bound, max_bound, total_k_bins + 1)
-        return total_k_bins, interval_edges
-
-    @staticmethod
-    def calculate_doane_manual(data):
-        data = np.asarray(data)
-        n_samples = data.size
-        if n_samples < 3:
-            return 1, np.array([np.min(data), np.max(data)])
-        g1_skewness = np.abs(stats.skew(data, bias=False))
-        sigma_g1 = np.sqrt((6.0 * (n_samples - 2.0)) / ((n_samples + 1.0) * (n_samples + 3.0)))
-        k_sturges_base = 1.0 + np.log2(n_samples)
-        skew_correction = np.log2(1.0 + (g1_skewness / sigma_g1))
-        total_k_bins = int(np.ceil(k_sturges_base + skew_correction))
-        min_bound = np.min(data)
-        max_bound = np.max(data)
-        interval_edges = np.linspace(min_bound, max_bound, total_k_bins + 1)
-        return total_k_bins, interval_edges
-
-
-try:
-    from numba import njit
-except ImportError:
-    def njit(*args, **kwargs):
-        return lambda func: func
-
-@njit(fastmath=True)
 def _ar1_noise(n, phi=0.6, sigma=1.0):
+    """AR(1) noise: x[0] = 0, x[t] = phi * x[t-1] + eps[t]."""
     eps = np.random.normal(0.0, sigma, n)
     noise = np.zeros(n)
-    for t in range(1, n):
-        noise[t] = phi * noise[t - 1] + eps[t]
+    if n > 1:
+        noise[1:] = lfilter([1.0], [1.0, -phi], eps[1:])
     return noise
 
 
@@ -2697,15 +2848,14 @@ def _choose_histogram_binning_strategy(data, dist_name):
 
 
 def _compute_histogram_edges(data, strategy, log_binning):
-    processor = DynamicHistogramProcessor()
     if log_binning:
         log_data = np.log10(data)
-        log_edges = processor.calculate_edges_numpy_optimized(log_data, strategy)
+        log_edges = np.histogram_bin_edges(log_data, bins=strategy)
         edges = np.power(10.0, log_edges)
         width = float(np.median(np.diff(log_edges))) if len(log_edges) > 1 else None
         width_type = "log10"
     else:
-        edges = processor.calculate_edges_numpy_optimized(data, strategy)
+        edges = np.histogram_bin_edges(data, bins=strategy)
         width = float(np.median(np.diff(edges))) if len(edges) > 1 else None
         width_type = "linear"
     return edges, width, width_type
@@ -2715,26 +2865,31 @@ def _generate_histogram(ax, theme_name, theme_config, is_scientific, debug_mode=
     """Generate histogram with realistic data distribution"""
     # Apply general theme settings (background, grid, etc.)
     theme = apply_chart_theme(ax, theme_name)
+    hist_cfg = theme_config.get('histogram_config', {}) if isinstance(theme_config, dict) else {}
 
     num_samples = random.randint(300, 1200)
     data, dist_meta = _sample_histogram_distribution(num_samples, is_scientific)
 
     degradation_meta = {}
-    if dist_meta["name"] not in ["zip", "zinb"] and random.random() < 0.35:
+    noise_prob = hist_cfg.get('heteroscedastic_noise_probability', 0.35)
+    if dist_meta["name"] not in ["zip", "zinb"] and random.random() < noise_prob:
         data, noise_meta = _apply_heteroscedastic_noise(data)
         degradation_meta["heteroscedastic_noise"] = noise_meta
 
-    if dist_meta["name"] not in ["zip", "zinb"] and random.random() < 0.20:
+    autocorr_prob = hist_cfg.get('autocorrelation_probability', 0.20)
+    if dist_meta["name"] not in ["zip", "zinb"] and random.random() < autocorr_prob:
         phi = np.random.uniform(0.3, 0.8)
         sigma = np.nanstd(data) * np.random.uniform(0.05, 0.20)
         data = data + _ar1_noise(data.size, phi=phi, sigma=sigma)
         degradation_meta["autocorrelation"] = {"phi": float(phi), "sigma": float(sigma)}
 
-    if random.random() < 0.25:
+    missing_prob = hist_cfg.get('missingness_probability', 0.25)
+    if random.random() < missing_prob:
         data, missing_meta = _inject_missingness(data)
         degradation_meta["missingness"] = missing_meta
 
-    if random.random() < 0.25:
+    outlier_prob = hist_cfg.get('outlier_probability', 0.25)
+    if random.random() < outlier_prob:
         data, outlier_meta = _inject_outliers(data)
         if outlier_meta:
             degradation_meta["outliers"] = outlier_meta
@@ -2809,14 +2964,21 @@ def _generate_histogram(ax, theme_name, theme_config, is_scientific, debug_mode=
             'x_value': r.get_x() + r.get_width()/2
         })
     
-    ax.set_ylabel(random.choice(HISTOGRAM_Y_LABELS))
-    ax.set_xlabel(random.choice(SCIENTIFIC_X_LABELS if is_scientific else BUSINESS_X_LABELS))
+    from synth.semantics.sampler import sample_axis_pair
+    x_label, y_label, domain_cat = sample_axis_pair(
+        "histogram", "vertical", is_scientific, semantic_domain=theme_config.get('semantic_domain') if isinstance(theme_config, dict) else None
+    )
+    ax.set_ylabel(y_label)
+    ax.set_xlabel(x_label)
+    if isinstance(theme_config, dict):
+        theme_config['semantic_domain'] = domain_cat
     
     # Histogram data labels typically show frequency/count values on top of bars
     data_label_artists = []
     
-    # Add data labels with 10% probability (histograms don't always have labels)
-    if random.random() < 0.1:
+    # Add data labels with configurable probability (histograms don't always have labels)
+    data_label_prob = hist_cfg.get('data_label_probability', 0.1)
+    if random.random() < data_label_prob:
         # Select subset of bars to label (not all bars, typically higher frequency ones)
         # Sort bars by height and label top 30-50% of bars
         sorted_bars = sorted(zip(patches, n), key=lambda x: x[1], reverse=True)
@@ -2907,6 +3069,7 @@ def _generate_area_chart(ax, theme_name, theme_config, is_scientific, debug_mode
     intended amodal/band distinction above.
     """
     theme = apply_chart_theme(ax, theme_name)
+    area_cfg = theme_config.get('area_chart_config', {}) if isinstance(theme_config, dict) else {}
     num_series = random.randint(1, 4)
     num_points = random.randint(8, 25)
     max_scale = random.choice([50, 100, 500, 1000])
@@ -2914,7 +3077,10 @@ def _generate_area_chart(ax, theme_name, theme_config, is_scientific, debug_mode
     if num_series == 1:
         stacking_mode = 'single'
     else:
-        stacking_mode = random.choices(['stacked', 'overlapping'], weights=[0.65, 0.35], k=1)[0]
+        mode_weights = area_cfg.get('stacked_mode_weights', {'stacked': 65, 'overlapping': 35})
+        modes = list(mode_weights.keys())
+        weights = [mode_weights[m] for m in modes]
+        stacking_mode = random.choices(modes, weights=weights, k=1)[0]
 
     if debug_mode:
         print(f"DEBUG [AREA] Stacking Mode: {stacking_mode}")
@@ -2956,16 +3122,30 @@ def _generate_area_chart(ax, theme_name, theme_config, is_scientific, debug_mode
         print(f"DEBUG AREA: Stacking mode={stacking_mode}, Total max_scale={max_scale}")
         print(f"DEBUG AREA: Num series={num_series}, Per-series max={series_max:.2f}")
 
-    for series_idx in range(num_series):
-        data_raw = generate_realistic_data(num_points, series_max, 
-                                          allow_negative=False,
-                                          domain='scientific' if is_scientific else 'business')
-        # Ensure smooth continuous variation without flat ceiling clipping
-        data = np.maximum(0.02 * series_max, data_raw)
-        all_series_data.append(data.copy())
-        
-        if debug_mode:
-            print(f"DEBUG AREA: Series {series_idx} data range: {np.min(data):.2f} to {np.max(data):.2f}")
+    use_synthetic = isinstance(theme_config, dict) and theme_config.get('use_synthetic_data_engine', False)
+    syn_domain = theme_config.get('synthetic_domain', None) if isinstance(theme_config, dict) else None
+    syn_table = None
+
+    if use_synthetic:
+        from synth.tabular import sample_multivariate_table
+        table_domain = syn_domain or (theme_config.get('semantic_domain') if isinstance(theme_config, dict) else None) or ('biomedical' if is_scientific else 'business')
+        syn_table = sample_multivariate_table(num_rows=num_points, num_series=num_series, domain=table_domain)
+        if isinstance(theme_config, dict) and syn_table is not None:
+            theme_config['semantic_domain'] = syn_table.get('domain')
+        for series_idx in range(num_series):
+            data = syn_table['data'][:, series_idx]
+            all_series_data.append(data.copy())
+    else:
+        for series_idx in range(num_series):
+            data_raw = generate_realistic_data(num_points, series_max, 
+                                              allow_negative=False,
+                                              domain='scientific' if is_scientific else 'business')
+            # Ensure smooth continuous variation without flat ceiling clipping
+            data = np.maximum(0.02 * series_max, data_raw)
+            all_series_data.append(data.copy())
+            
+            if debug_mode:
+                print(f"DEBUG AREA: Series {series_idx} data range: {np.min(data):.2f} to {np.max(data):.2f}")
 
     # 2. Plotting and annotation
     y_stack = np.zeros(num_points)
@@ -3027,21 +3207,37 @@ def _generate_area_chart(ax, theme_name, theme_config, is_scientific, debug_mode
             y_stack += data
     
     # 3. Axis configuration
-    ax.set_xlabel(random.choice(SCIENTIFIC_X_LABELS if is_scientific else BUSINESS_X_LABELS))
-    
-    if stacking_mode == 'percentage':
-        ax.set_ylabel("Percentage (%)")
+    if use_synthetic and syn_table is not None:
+        ax.set_xlabel(syn_table['x_label'])
+        if stacking_mode == 'percentage':
+            ax.set_ylabel("Percentage (%)")
+        else:
+            ax.set_ylabel(syn_table['y_label'])
+        ax.set_title(syn_table['title'], fontsize=14, pad=15)
     else:
-        ax.set_ylabel(random.choice(SCIENTIFIC_Y_LABELS if is_scientific else BUSINESS_Y_LABELS))
+        from synth.semantics.sampler import sample_axis_pair
+        x_label, y_label, domain_cat = sample_axis_pair(
+            "area", "vertical", is_scientific, semantic_domain=theme_config.get('semantic_domain') if isinstance(theme_config, dict) else None
+        )
+        ax.set_xlabel(x_label)
+        
+        if stacking_mode == 'percentage':
+            ax.set_ylabel("Percentage (%)")
+        else:
+            ax.set_ylabel(y_label)
+        if isinstance(theme_config, dict):
+            theme_config['semantic_domain'] = domain_cat
     
-    if num_series > 1 and random.random() < 0.7:
+    legend_prob = area_cfg.get('legend_probability', 0.7)
+    if num_series > 1 and random.random() < legend_prob:
         legend = apply_legend_variation(ax, num_series)
         other_artists.append(legend)
     
     apply_typography_variation(ax, domain='scientific' if is_scientific else 'business')
     
     if stacking_mode != 'percentage':
-        apply_axis_scaling(ax, data_min=0.01, orientation='vertical')
+        data_min = float(min(np.min(boundary_y), np.min(y_stack)))
+        apply_axis_scaling(ax, data_min=data_min, orientation='vertical')
     
     current_scale = ax.get_yscale()
 
@@ -3081,11 +3277,46 @@ def _generate_heatmap_chart(ax, theme_name, theme_config, is_scientific, debug_m
     data, cmap_type, heatmap_meta = generate_structured_heatmap(debug_mode=debug_mode)
     rows, cols = data.shape
     context_cfg = heatmap_meta.get("context_config") or {}
+    context_id = heatmap_meta.get("context_id")
     context_domain = context_cfg.get("domain")
-    if context_domain == "business":
+
+    HEATMAP_CONTEXT_TO_DOMAIN = {
+        "genomic_expression_heatmap": "biomedical",
+        "pharmacokinetics_heatmap": "biomedical",
+        "cohort_retention_heatmap": "business",
+        "correlation_matrix": None,
+    }
+
+    if context_id in HEATMAP_CONTEXT_TO_DOMAIN:
+        mapped_dom = HEATMAP_CONTEXT_TO_DOMAIN[context_id]
+        if mapped_dom is not None:
+            heatmap_domain = mapped_dom
+            is_scientific = (heatmap_domain != "business")
+        else:
+            sub_weights = theme_config.get('scientific_subdomain_weights', {'biomedical': 0.70, 'engineering': 0.30}) if isinstance(theme_config, dict) else {'biomedical': 0.70, 'engineering': 0.30}
+            subdomains = list(sub_weights.keys())
+            weights = list(sub_weights.values())
+            heatmap_domain = random.choices(subdomains, weights=weights, k=1)[0]
+            is_scientific = True
+    elif context_domain == "business":
         is_scientific = False
+        heatmap_domain = "business"
     elif context_domain == "scientific":
         is_scientific = True
+        sub_weights = theme_config.get('scientific_subdomain_weights', {'biomedical': 0.70, 'engineering': 0.30}) if isinstance(theme_config, dict) else {'biomedical': 0.70, 'engineering': 0.30}
+        subdomains = list(sub_weights.keys())
+        weights = list(sub_weights.values())
+        heatmap_domain = random.choices(subdomains, weights=weights, k=1)[0]
+    else:
+        if isinstance(theme_config, dict) and theme_config.get('semantic_domain'):
+            heatmap_domain = theme_config.get('semantic_domain')
+            is_scientific = (heatmap_domain != "business")
+        else:
+            heatmap_domain = "biomedical" if is_scientific else "business"
+
+    if isinstance(theme_config, dict):
+        theme_config['effective_is_scientific'] = is_scientific
+        theme_config['semantic_domain'] = heatmap_domain
 
     # 2. Selecionar colormap apropriado com base no tipo de dados
     COLORMAP_CATEGORIES = {
@@ -3162,7 +3393,9 @@ def _generate_heatmap_chart(ax, theme_name, theme_config, is_scientific, debug_m
     # A lógica de anotação encontra isso
     text_labels = []
     # Só adiciona rótulos se a grade não for muito densa
-    should_annotate = rows * cols < 150 and random.random() < 0.8
+    heatmap_cfg = theme_config.get('heatmap_config', {}) if isinstance(theme_config, dict) else {}
+    annotate_prob = heatmap_cfg.get('annotate_cells_probability', 0.8)
+    should_annotate = rows * cols < 150 and random.random() < annotate_prob
     format_str = None
     if should_annotate:
         if "annotation_format" in context_cfg:
@@ -3223,12 +3456,8 @@ def _generate_heatmap_chart(ax, theme_name, theme_config, is_scientific, debug_m
         if context_title_pool:
             chart_title = random.choice(context_title_pool)
         else:
-            chart_title = random.choice([t for t in HEATMAP_CHART_TITLES 
-                                         if any(word in t.lower() for word in 
-                                                ['gene', 'expression', 'sample', 'treatment', 
-                                                 'correlation', 'clustering', 'temporal'])])
-            if not chart_title:
-                chart_title = random.choice(HEATMAP_CHART_TITLES)
+            from synth.semantics.sampler import sample_chart_title
+            chart_title = sample_chart_title(chart_type="heatmap", is_scientific=True, domain=heatmap_domain)
     else:
         xlabel = random.choice(context_xlabel_pool) if context_xlabel_pool else random.choice(HEATMAP_XLABELS_BUSINESS)
         ylabel = random.choice(context_ylabel_pool) if context_ylabel_pool else random.choice(HEATMAP_YLABELS_BUSINESS)
@@ -3236,12 +3465,8 @@ def _generate_heatmap_chart(ax, theme_name, theme_config, is_scientific, debug_m
         if context_title_pool:
             chart_title = random.choice(context_title_pool)
         else:
-            chart_title = random.choice([t for t in HEATMAP_CHART_TITLES 
-                                         if any(word in t.lower() for word in 
-                                                ['performance', 'customer', 'sales', 'revenue',
-                                                 'market', 'product', 'regional', 'cohort'])])
-            if not chart_title:
-                chart_title = random.choice(HEATMAP_CHART_TITLES)
+            from synth.semantics.sampler import sample_chart_title
+            chart_title = sample_chart_title(chart_type="heatmap", is_scientific=False, domain=heatmap_domain)
 
     # Set labels with variety
     ax.set_xlabel(xlabel)
@@ -3385,6 +3610,7 @@ def detect_extrema(xdata, ydata, window_size=3, prominence_factor=0.05):
     return peaks, valleys
 
 
+
 HEATMAP_GENERATION_CONFIG = {
     "size_range": {"rows": (8, 30), "cols": (8, 30)},
     "type_weights": {
@@ -3502,480 +3728,410 @@ def _resolve_heatmap_size(size, cfg):
     return int(size), int(size)
 
 
-class CorrelationMatrixGenerator:
-    """Generate PSD correlation and covariance matrices for heatmap use."""
+# --- Generate PSD correlation and covariance matrices for heatmap use ---
+def generate_davies_higham(dim, correlation_strength="uniform", random_state=None):
+    if random_state is not None:
+        np.random.seed(random_state)
 
-    @staticmethod
-    def generate_davies_higham(dim, correlation_strength="uniform", random_state=None):
-        if random_state is not None:
-            np.random.seed(random_state)
+    if correlation_strength == "high":
+        eigs = np.random.dirichlet(np.ones(dim) * 0.1) * dim
+    elif correlation_strength == "low":
+        eigs = np.random.dirichlet(np.ones(dim) * 10.0) * dim
+    else:
+        eigs = np.random.dirichlet(np.ones(dim)) * dim
 
-        if correlation_strength == "high":
-            eigs = np.random.dirichlet(np.ones(dim) * 0.1) * dim
-        elif correlation_strength == "low":
-            eigs = np.random.dirichlet(np.ones(dim) * 10.0) * dim
-        else:
-            eigs = np.random.dirichlet(np.ones(dim)) * dim
+    eigs = eigs * (dim / np.sum(eigs))
+    return random_correlation.rvs(eigs)
 
-        eigs = eigs * (dim / np.sum(eigs))
-        return random_correlation.rvs(eigs)
+def generate_vine_lkj(dim, eta, random_state=None):
+    if random_state is not None:
+        np.random.seed(random_state)
 
-    @staticmethod
-    def generate_vine_lkj(dim, eta, random_state=None):
-        if random_state is not None:
-            np.random.seed(random_state)
+    beta_param = eta - 1.0 + dim / 2.0
+    P = np.zeros((dim, dim))
+    S = np.eye(dim)
 
-        beta_param = eta - 1.0 + dim / 2.0
-        P = np.zeros((dim, dim))
-        S = np.eye(dim)
+    for k in range(dim - 1):
+        for i in range(k + 1, dim):
+            sampled_beta = stats.beta.rvs(a=beta_param, b=beta_param)
+            P[k, i] = (sampled_beta - 0.5) * 2.0
 
-        for k in range(dim - 1):
-            for i in range(k + 1, dim):
-                sampled_beta = stats.beta.rvs(a=beta_param, b=beta_param)
-                P[k, i] = (sampled_beta - 0.5) * 2.0
+            p = P[k, i]
+            for l in range(k - 1, -1, -1):
+                term1 = np.sqrt((1.0 - P[l, i] ** 2) * (1.0 - P[l, k] ** 2))
+                p = p * term1 + P[l, i] * P[l, k]
 
-                p = P[k, i]
-                for l in range(k - 1, -1, -1):
-                    term1 = np.sqrt((1.0 - P[l, i] ** 2) * (1.0 - P[l, k] ** 2))
-                    p = p * term1 + P[l, i] * P[l, k]
+            S[k, i] = p
+            S[i, k] = p
 
-                S[k, i] = p
-                S[i, k] = p
-
-        S = (S + S.T) / 2.0
-        np.fill_diagonal(S, 1.0)
-        return np.clip(S, -1.0, 1.0)
-
-    @staticmethod
-    def construct_covariance(correlation_matrix, variance_vector):
-        D = np.diag(np.sqrt(variance_vector))
-        return D @ correlation_matrix @ D
+    S = (S + S.T) / 2.0
+    np.fill_diagonal(S, 1.0)
+    return np.clip(S, -1.0, 1.0)
 
 
-class BiclusterStructuralGenerator:
-    """Generate block, checkerboard, and coherent bicluster structures."""
+# --- Generate block, checkerboard, and coherent bicluster structures ---
+def generate_spectral_checkerboard(shape, clusters, noise, random_state=None):
+    matrix, rows, cols = make_checkerboard(
+        shape=shape,
+        n_clusters=clusters,
+        noise=noise,
+        minval=-5.0,
+        maxval=5.0,
+        shuffle=True,
+        random_state=random_state
+    )
+    return matrix, rows, cols
 
-    @staticmethod
-    def generate_spectral_checkerboard(shape, clusters, noise, random_state=None):
-        if make_checkerboard is None:
-            rows, cols = shape
-            if isinstance(clusters, (list, tuple)):
-                r_clusters, c_clusters = clusters
-            else:
-                r_clusters = int(clusters)
-                c_clusters = int(clusters)
-            block_r = max(1, rows // r_clusters)
-            block_c = max(1, cols // c_clusters)
-            
-            r_grid = np.arange(rows)[:, np.newaxis] // block_r
-            c_grid = np.arange(cols)[np.newaxis, :] // block_c
-            block_val = (r_grid + c_grid) % 2
-            
-            matrix = -5.0 + block_val * 10.0
-            matrix += np.random.normal(0, noise, matrix.shape)
-            return matrix, None, None
+def generate_block_biclusters(shape, clusters, noise, random_state=None):
+    if isinstance(clusters, (list, tuple)):
+        n_clusters = int(clusters[0]) if clusters else 2
+    else:
+        n_clusters = int(clusters)
 
-        matrix, rows, cols = make_checkerboard(
-            shape=shape,
-            n_clusters=clusters,
-            noise=noise,
-            minval=-5.0,
-            maxval=5.0,
-            shuffle=True,
-            random_state=random_state
-        )
-        return matrix, rows, cols
+    matrix, rows, cols = make_biclusters(
+        shape=shape,
+        n_clusters=n_clusters,
+        noise=noise,
+        minval=-5.0,
+        maxval=5.0,
+        shuffle=True,
+        random_state=random_state
+    )
+    return matrix, rows, cols
 
-    @staticmethod
-    def generate_block_biclusters(shape, clusters, noise, random_state=None):
-        if isinstance(clusters, (list, tuple)):
-            n_clusters = int(clusters[0]) if clusters else 2
-        else:
-            n_clusters = int(clusters)
+def inject_additive_coherent_bicluster(matrix, shape_ij, mu, noise):
+    n_rows, n_cols = matrix.shape
+    b_rows, b_cols = shape_ij
 
-        matrix, rows, cols = make_biclusters(
-            shape=shape,
-            n_clusters=n_clusters,
-            noise=noise,
-            minval=-5.0,
-            maxval=5.0,
-            shuffle=True,
-            random_state=random_state
-        )
-        return matrix, rows, cols
+    idx_I = np.random.choice(n_rows, b_rows, replace=False)
+    idx_J = np.random.choice(n_cols, b_cols, replace=False)
 
-    @staticmethod
-    def inject_additive_coherent_bicluster(matrix, shape_ij, mu, noise):
-        n_rows, n_cols = matrix.shape
-        b_rows, b_cols = shape_ij
+    alpha_i = np.random.uniform(2.0, 5.0, b_rows)[:, np.newaxis]
+    beta_j = np.random.uniform(2.0, 5.0, b_cols)
+    bicluster_core = mu + alpha_i + beta_j + np.random.normal(0, noise, shape_ij)
 
-        idx_I = np.random.choice(n_rows, b_rows, replace=False)
-        idx_J = np.random.choice(n_cols, b_cols, replace=False)
+    out_matrix = matrix.copy()
+    out_matrix[np.ix_(idx_I, idx_J)] = bicluster_core
 
-        alpha_i = np.random.uniform(2.0, 5.0, b_rows)[:, np.newaxis]
-        beta_j = np.random.uniform(2.0, 5.0, b_cols)
-        bicluster_core = mu + alpha_i + beta_j + np.random.normal(0, noise, shape_ij)
+    return out_matrix, idx_I, idx_J
 
-        out_matrix = matrix.copy()
-        out_matrix[np.ix_(idx_I, idx_J)] = bicluster_core
+def inject_multiplicative_coherent_bicluster(matrix, shape_ij, mu, noise):
+    n_rows, n_cols = matrix.shape
+    b_rows, b_cols = shape_ij
 
-        return out_matrix, idx_I, idx_J
+    idx_I = np.random.choice(n_rows, b_rows, replace=False)
+    idx_J = np.random.choice(n_cols, b_cols, replace=False)
 
-    @staticmethod
-    def inject_multiplicative_coherent_bicluster(matrix, shape_ij, mu, noise):
-        n_rows, n_cols = matrix.shape
-        b_rows, b_cols = shape_ij
+    alpha_i = np.random.uniform(1.1, 2.0, b_rows)[:, np.newaxis]
+    beta_j = np.random.uniform(1.1, 2.0, b_cols)
+    bicluster_core = mu * alpha_i * beta_j + np.random.normal(0, noise, shape_ij)
 
-        idx_I = np.random.choice(n_rows, b_rows, replace=False)
-        idx_J = np.random.choice(n_cols, b_cols, replace=False)
+    out_matrix = matrix.copy()
+    out_matrix[np.ix_(idx_I, idx_J)] = bicluster_core
 
-        alpha_i = np.random.uniform(1.1, 2.0, b_rows)[:, np.newaxis]
-        beta_j = np.random.uniform(1.1, 2.0, b_cols)
-        bicluster_core = mu * alpha_i * beta_j + np.random.normal(0, noise, shape_ij)
-
-        out_matrix = matrix.copy()
-        out_matrix[np.ix_(idx_I, idx_J)] = bicluster_core
-
-        return out_matrix, idx_I, idx_J
+    return out_matrix, idx_I, idx_J
 
 
-class SpatialCoherenceGenerator:
-    """Vectorized 2D Perlin noise and fractal noise."""
+# --- Vectorized 2D Perlin noise and fractal noise ---
+def _fade(t):
+    return 6 * t ** 5 - 15 * t ** 4 + 10 * t ** 3
 
-    @staticmethod
-    def _fade(t):
-        return 6 * t ** 5 - 15 * t ** 4 + 10 * t ** 3
+def generate_perlin_2d(shape, res, random_state=None):
+    if random_state is not None:
+        np.random.seed(random_state)
 
-    @classmethod
-    def generate_perlin_2d(cls, shape, res, random_state=None):
-        if random_state is not None:
-            np.random.seed(random_state)
+    shape = (int(shape[0]), int(shape[1]))
+    res = (int(res[0]), int(res[1]))
 
-        shape = (int(shape[0]), int(shape[1]))
-        res = (int(res[0]), int(res[1]))
+    delta = (res[0] / shape[0], res[1] / shape[1])
+    d = (int(np.ceil(shape[0] / res[0])), int(np.ceil(shape[1] / res[1])))
 
-        delta = (res[0] / shape[0], res[1] / shape[1])
-        d = (int(np.ceil(shape[0] / res[0])), int(np.ceil(shape[1] / res[1])))
+    grid = np.mgrid[0:res[0]:delta[0], 0:res[1]:delta[1]].transpose(1, 2, 0) % 1
+    grid = grid[:shape[0], :shape[1], :]
 
-        grid = np.mgrid[0:res[0]:delta[0], 0:res[1]:delta[1]].transpose(1, 2, 0) % 1
-        grid = grid[:shape[0], :shape[1], :]
+    angles = 2 * np.pi * np.random.rand(res[0] + 1, res[1] + 1)
+    gradients = np.dstack((np.cos(angles), np.sin(angles)))
 
-        angles = 2 * np.pi * np.random.rand(res[0] + 1, res[1] + 1)
-        gradients = np.dstack((np.cos(angles), np.sin(angles)))
+    g00 = gradients[0:-1, 0:-1].repeat(d[0], 0).repeat(d[1], 1)
+    g10 = gradients[1:, 0:-1].repeat(d[0], 0).repeat(d[1], 1)
+    g01 = gradients[0:-1, 1:].repeat(d[0], 0).repeat(d[1], 1)
+    g11 = gradients[1:, 1:].repeat(d[0], 0).repeat(d[1], 1)
 
-        g00 = gradients[0:-1, 0:-1].repeat(d[0], 0).repeat(d[1], 1)
-        g10 = gradients[1:, 0:-1].repeat(d[0], 0).repeat(d[1], 1)
-        g01 = gradients[0:-1, 1:].repeat(d[0], 0).repeat(d[1], 1)
-        g11 = gradients[1:, 1:].repeat(d[0], 0).repeat(d[1], 1)
+    g00 = g00[:shape[0], :shape[1]]
+    g10 = g10[:shape[0], :shape[1]]
+    g01 = g01[:shape[0], :shape[1]]
+    g11 = g11[:shape[0], :shape[1]]
 
-        g00 = g00[:shape[0], :shape[1]]
-        g10 = g10[:shape[0], :shape[1]]
-        g01 = g01[:shape[0], :shape[1]]
-        g11 = g11[:shape[0], :shape[1]]
+    n00 = np.sum(grid * g00, 2)
+    n10 = np.sum(np.dstack((grid[:, :, 0] - 1, grid[:, :, 1])) * g10, 2)
+    n01 = np.sum(np.dstack((grid[:, :, 0], grid[:, :, 1] - 1)) * g01, 2)
+    n11 = np.sum(np.dstack((grid[:, :, 0] - 1, grid[:, :, 1] - 1)) * g11, 2)
 
-        n00 = np.sum(grid * g00, 2)
-        n10 = np.sum(np.dstack((grid[:, :, 0] - 1, grid[:, :, 1])) * g10, 2)
-        n01 = np.sum(np.dstack((grid[:, :, 0], grid[:, :, 1] - 1)) * g01, 2)
-        n11 = np.sum(np.dstack((grid[:, :, 0] - 1, grid[:, :, 1] - 1)) * g11, 2)
+    t = _fade(grid)
+    n0 = n00 * (1 - t[:, :, 0]) + t[:, :, 0] * n10
+    n1 = n01 * (1 - t[:, :, 0]) + t[:, :, 0] * n11
 
-        t = cls._fade(grid)
-        n0 = n00 * (1 - t[:, :, 0]) + t[:, :, 0] * n10
-        n1 = n01 * (1 - t[:, :, 0]) + t[:, :, 0] * n11
+    return np.sqrt(2) * ((1 - t[:, :, 1]) * n0 + t[:, :, 1] * n1)
 
-        return np.sqrt(2) * ((1 - t[:, :, 1]) * n0 + t[:, :, 1] * n1)
+def generate_fractal_noise_2d(shape, res, octaves=1, persistence=0.5):
+    noise = np.zeros(shape, dtype=float)
+    frequency = 1
+    amplitude = 1.0
 
-    @classmethod
-    def generate_fractal_noise_2d(cls, shape, res, octaves=1, persistence=0.5):
-        noise = np.zeros(shape, dtype=float)
-        frequency = 1
-        amplitude = 1.0
+    for _ in range(int(octaves)):
+        res_octave = (frequency * res[0], frequency * res[1])
+        noise += amplitude * generate_perlin_2d(shape, res_octave)
+        frequency *= 2
+        amplitude *= persistence
 
-        for _ in range(int(octaves)):
-            res_octave = (frequency * res[0], frequency * res[1])
-            noise += amplitude * cls.generate_perlin_2d(shape, res_octave)
-            frequency *= 2
-            amplitude *= persistence
-
-        return noise
+    return noise
 
 
-class SpatioTemporalMatrixGenerator:
-    """SARIMA temporal rows with SAR spatial dependence across columns."""
+# --- SARIMA temporal rows with SAR spatial dependence across columns ---
+def generate_sarima_matrix(n_steps, n_series, order=(1, 0, 0), seasonal_order=(1, 0, 0, 4)):
+    matrix = np.zeros((n_steps, n_series))
+    for j in range(n_series):
+        matrix[:, j] = _ar1_noise(n_steps, phi=0.6)
+    return matrix
 
-    @staticmethod
-    def generate_sarima_matrix(n_steps, n_series, order=(1, 0, 0), seasonal_order=(1, 0, 0, 4)):
-        matrix = np.zeros((n_steps, n_series))
-        phi = 0.6
-        for j in range(n_series):
-            eps = np.random.normal(0, 1, n_steps)
-            series = np.zeros(n_steps)
-            for t in range(1, n_steps):
-                series[t] = phi * series[t - 1] + eps[t]
-            matrix[:, j] = series
-        return matrix
+def apply_sar_spatial_dependence(matrix, rho):
+    n_cols = matrix.shape[1]
 
-    @staticmethod
-    def apply_sar_spatial_dependence(matrix, rho):
-        n_cols = matrix.shape[1]
+    indices = np.arange(n_cols)
+    dist = np.abs(indices[:, np.newaxis] - indices[np.newaxis, :])
 
-        indices = np.arange(n_cols)
-        dist = np.abs(indices[:, np.newaxis] - indices[np.newaxis, :])
+    W = 1.0 / (dist + np.eye(n_cols))
+    np.fill_diagonal(W, 0)
+    W = W / np.sum(W, axis=1, keepdims=True)
 
-        W = 1.0 / (dist + np.eye(n_cols))
-        np.fill_diagonal(W, 0)
-        W = W / np.sum(W, axis=1, keepdims=True)
-
-        spatial_multiplier = np.linalg.inv(np.eye(n_cols) - rho * W)
-        return matrix @ spatial_multiplier.T
+    spatial_multiplier = np.linalg.inv(np.eye(n_cols) - rho * W)
+    return matrix @ spatial_multiplier.T
 
 
-class MissingDataInjector:
-    """Apply MCAR and MNAR missingness patterns."""
+# --- Apply MCAR and MNAR missingness patterns ---
+def inject_mcar(matrix, missing_rate):
+    degraded = matrix.copy()
+    mask = np.random.rand(*matrix.shape) < missing_rate
+    degraded[mask] = np.nan
+    return degraded, mask
 
-    @staticmethod
-    def inject_mcar(matrix, missing_rate):
-        degraded = matrix.copy()
-        mask = np.random.rand(*matrix.shape) < missing_rate
-        degraded[mask] = np.nan
-        return degraded, mask
+def inject_mnar_logistic(matrix, beta_0, beta_1):
+    degraded = matrix.copy()
+    prob_missing = 1.0 / (1.0 + np.exp(-(beta_0 + beta_1 * matrix)))
+    mask = np.random.rand(*matrix.shape) < prob_missing
+    degraded[mask] = np.nan
+    return degraded, mask
 
-    @staticmethod
-    def inject_mnar_logistic(matrix, beta_0, beta_1):
-        degraded = matrix.copy()
-        prob_missing = 1.0 / (1.0 + np.exp(-(beta_0 + beta_1 * matrix)))
-        mask = np.random.rand(*matrix.shape) < prob_missing
-        degraded[mask] = np.nan
-        return degraded, mask
+def inject_mnar_quantile_censorship(matrix, q, drop_prob, upper_bound=True):
+    degraded = matrix.copy()
+    threshold = np.nanquantile(matrix, q)
+    if upper_bound:
+        condition_mask = matrix > threshold
+    else:
+        condition_mask = matrix < threshold
+    prob_mask = np.random.rand(*matrix.shape) < drop_prob
+    mask = condition_mask & prob_mask
+    degraded[mask] = np.nan
+    return degraded, mask
 
-    @staticmethod
-    def inject_mnar_quantile_censorship(matrix, q, drop_prob, upper_bound=True):
-        degraded = matrix.copy()
-        threshold = np.nanquantile(matrix, q)
-        if upper_bound:
-            condition_mask = matrix > threshold
-        else:
-            condition_mask = matrix < threshold
-        prob_mask = np.random.rand(*matrix.shape) < drop_prob
-        mask = condition_mask & prob_mask
-        degraded[mask] = np.nan
-        return degraded, mask
-
-    @staticmethod
-    def inject_mnar_detection_limits(
-        matrix,
-        llod=None,
-        uloq=None,
-        llod_quantile=None,
-        uloq_quantile=None,
-        jitter_range=(0.85, 1.15),
-        min_span=1e-6
-    ):
-        degraded = matrix.copy()
-        finite_vals = degraded[np.isfinite(degraded)]
-        if finite_vals.size == 0:
-            mask = np.zeros_like(degraded, dtype=bool)
-            return degraded, mask, {"llod": None, "uloq": None}
-
-        llod_val = llod
-        uloq_val = uloq
-
-        if llod_val is None and llod_quantile is not None:
-            llod_val = float(np.nanquantile(finite_vals, llod_quantile))
-        if uloq_val is None and uloq_quantile is not None:
-            uloq_val = float(np.nanquantile(finite_vals, uloq_quantile))
-
-        if llod_val is None and uloq_val is None:
-            llod_val = float(np.nanmin(finite_vals))
-            uloq_val = float(np.nanmax(finite_vals))
-
-        jitter_min, jitter_max = jitter_range
-        if llod_val is not None:
-            llod_val *= random.uniform(jitter_min, jitter_max)
-        if uloq_val is not None:
-            uloq_val *= random.uniform(jitter_min, jitter_max)
-
-        if llod_val is not None and uloq_val is not None:
-            if (uloq_val - llod_val) < min_span:
-                mid = 0.5 * (llod_val + uloq_val)
-                llod_val = mid - min_span * 0.5
-                uloq_val = mid + min_span * 0.5
-            if llod_val > uloq_val:
-                llod_val, uloq_val = uloq_val, llod_val
-
+def inject_mnar_detection_limits(
+    matrix,
+    llod=None,
+    uloq=None,
+    llod_quantile=None,
+    uloq_quantile=None,
+    jitter_range=(0.85, 1.15),
+    min_span=1e-6
+):
+    degraded = matrix.copy()
+    finite_vals = degraded[np.isfinite(degraded)]
+    if finite_vals.size == 0:
         mask = np.zeros_like(degraded, dtype=bool)
-        if llod_val is not None:
-            mask |= degraded < llod_val
-        if uloq_val is not None:
-            mask |= degraded > uloq_val
+        return degraded, mask, {"llod": None, "uloq": None}
 
-        degraded[mask] = np.nan
-        return degraded, mask, {"llod": float(llod_val) if llod_val is not None else None,
-                                "uloq": float(uloq_val) if uloq_val is not None else None}
+    llod_val = llod
+    uloq_val = uloq
 
+    if llod_val is None and llod_quantile is not None:
+        llod_val = float(np.nanquantile(finite_vals, llod_quantile))
+    if uloq_val is None and uloq_quantile is not None:
+        uloq_val = float(np.nanquantile(finite_vals, uloq_quantile))
 
-class HeteroscedasticNoiseGenerator:
-    """Magnitude-scaled noise and Poisson-like variance."""
+    if llod_val is None and uloq_val is None:
+        llod_val = float(np.nanmin(finite_vals))
+        uloq_val = float(np.nanmax(finite_vals))
 
-    @staticmethod
-    def inject_magnitude_scaled_gaussian(matrix, omega, delta):
-        local_variance = (omega * np.abs(matrix)) ** 2 + delta ** 2
-        local_sigma = np.sqrt(local_variance)
-        noise = np.random.normal(loc=0.0, scale=local_sigma)
-        noisy = matrix + noise
-        noisy[~np.isfinite(matrix)] = np.nan
-        return noisy
+    jitter_min, jitter_max = jitter_range
+    if llod_val is not None:
+        llod_val *= random.uniform(jitter_min, jitter_max)
+    if uloq_val is not None:
+        uloq_val *= random.uniform(jitter_min, jitter_max)
 
-    @staticmethod
-    def inject_poisson_like_variance(matrix, k_dispersion):
-        min_val = np.nanmin(matrix)
-        shift = 0.0 if min_val >= 0 else np.abs(min_val) + 1e-6
-        positive_matrix = matrix + shift
+    if llod_val is not None and uloq_val is not None:
+        if (uloq_val - llod_val) < min_span:
+            mid = 0.5 * (llod_val + uloq_val)
+            llod_val = mid - min_span * 0.5
+            uloq_val = mid + min_span * 0.5
+        if llod_val > uloq_val:
+            llod_val, uloq_val = uloq_val, llod_val
 
-        local_sigma = np.sqrt(k_dispersion * positive_matrix)
-        noise = np.random.normal(loc=0.0, scale=local_sigma)
-        noisy = matrix + noise
-        noisy[~np.isfinite(matrix)] = np.nan
-        return noisy
+    mask = np.zeros_like(degraded, dtype=bool)
+    if llod_val is not None:
+        mask |= degraded < llod_val
+    if uloq_val is not None:
+        mask |= degraded > uloq_val
 
-    @staticmethod
-    def inject_parametric_heteroscedastic(
-        matrix,
-        alpha,
-        beta,
-        gamma=1.0,
-        pareto_outliers=False,
-        outlier_prob=0.005,
-        outlier_scale=10.0
-    ):
-        finite_mask = np.isfinite(matrix)
-        base = matrix.astype(float).copy()
-        if not np.any(finite_mask):
-            return base
-
-        local_variance = alpha + beta * np.power(np.abs(base), gamma)
-        local_variance = np.where(local_variance > 0, local_variance, alpha)
-        local_std = np.sqrt(local_variance)
-        noise = np.random.normal(loc=0.0, scale=local_std)
-        corrupted = base + noise
-
-        if outlier_prob > 0:
-            outlier_mask = (np.random.rand(*base.shape) < outlier_prob) & finite_mask
-            if np.any(outlier_mask):
-                if pareto_outliers:
-                    pareto_shape = 3.0
-                    pareto_noise = np.random.pareto(a=pareto_shape, size=base.shape) * outlier_scale
-                    direction = np.sign(np.random.uniform(-1, 1, size=base.shape))
-                    corrupted[outlier_mask] += pareto_noise[outlier_mask] * direction[outlier_mask]
-                else:
-                    extreme_noise = np.random.normal(loc=0.0, scale=local_std * outlier_scale)
-                    corrupted[outlier_mask] += extreme_noise[outlier_mask]
-
-        corrupted[~finite_mask] = np.nan
-        return corrupted
+    degraded[mask] = np.nan
+    return degraded, mask, {"llod": float(llod_val) if llod_val is not None else None,
+                            "uloq": float(uloq_val) if uloq_val is not None else None}
 
 
-class MatrixSeriator:
-    """Ordering helpers for heatmaps."""
+# --- Magnitude-scaled noise and Poisson-like variance ---
+def inject_magnitude_scaled_gaussian(matrix, omega, delta):
+    local_variance = (omega * np.abs(matrix)) ** 2 + delta ** 2
+    local_sigma = np.sqrt(local_variance)
+    noise = np.random.normal(loc=0.0, scale=local_sigma)
+    noisy = matrix + noise
+    noisy[~np.isfinite(matrix)] = np.nan
+    return noisy
 
-    @staticmethod
-    def seriate_optimal_leaf_ordering(matrix, metric="euclidean", method="ward"):
-        row_dist = pdist(matrix, metric=metric)
-        row_linkage = linkage(row_dist, method=method)
-        row_optimal_Z = optimal_leaf_ordering(row_linkage, row_dist)
-        row_order = leaves_list(row_optimal_Z)
+def inject_poisson_like_variance(matrix, k_dispersion):
+    min_val = np.nanmin(matrix)
+    shift = 0.0 if min_val >= 0 else np.abs(min_val) + 1e-6
+    positive_matrix = matrix + shift
 
-        col_dist = pdist(matrix.T, metric=metric)
-        col_linkage = linkage(col_dist, method=method)
-        col_optimal_Z = optimal_leaf_ordering(col_linkage, col_dist)
-        col_order = leaves_list(col_optimal_Z)
+    local_sigma = np.sqrt(k_dispersion * positive_matrix)
+    noise = np.random.normal(loc=0.0, scale=local_sigma)
+    noisy = matrix + noise
+    noisy[~np.isfinite(matrix)] = np.nan
+    return noisy
 
-        ordered = matrix[row_order, :][:, col_order]
-        return ordered, row_order, col_order
+def inject_parametric_heteroscedastic(
+    matrix,
+    alpha,
+    beta,
+    gamma=1.0,
+    pareto_outliers=False,
+    outlier_prob=0.005,
+    outlier_scale=10.0
+):
+    finite_mask = np.isfinite(matrix)
+    base = matrix.astype(float).copy()
+    if not np.any(finite_mask):
+        return base
 
-    @staticmethod
-    def _compute_rbf_kernel(X, gamma):
-        pairwise_sq_dists = np.sum((X[:, np.newaxis] - X[np.newaxis, :]) ** 2, axis=2)
-        return np.exp(-gamma * pairwise_sq_dists)
+    local_variance = alpha + beta * np.power(np.abs(base), gamma)
+    local_variance = np.where(local_variance > 0, local_variance, alpha)
+    local_std = np.sqrt(local_variance)
+    noise = np.random.normal(loc=0.0, scale=local_std)
+    corrupted = base + noise
 
-    @classmethod
-    def seriate_spectral_fiedler(cls, matrix, gamma=1.0):
-        def get_fiedler_indices(data):
-            A = cls._compute_rbf_kernel(data, gamma=gamma)
-            D = np.diag(np.sum(A, axis=1))
-            L = D - A
-            eigenvalues, eigenvectors = eigh(L)
-            fiedler_vector = eigenvectors[:, 1]
-            return np.argsort(fiedler_vector)
+    if outlier_prob > 0:
+        outlier_mask = (np.random.rand(*base.shape) < outlier_prob) & finite_mask
+        if np.any(outlier_mask):
+            if pareto_outliers:
+                pareto_shape = 3.0
+                pareto_noise = np.random.pareto(a=pareto_shape, size=base.shape) * outlier_scale
+                direction = np.sign(np.random.uniform(-1, 1, size=base.shape))
+                corrupted[outlier_mask] += pareto_noise[outlier_mask] * direction[outlier_mask]
+            else:
+                extreme_noise = np.random.normal(loc=0.0, scale=local_std * outlier_scale)
+                corrupted[outlier_mask] += extreme_noise[outlier_mask]
 
-        row_order = get_fiedler_indices(matrix)
-        col_order = get_fiedler_indices(matrix.T)
-        ordered = matrix[row_order, :][:, col_order]
-        return ordered, row_order, col_order
+    corrupted[~finite_mask] = np.nan
+    return corrupted
 
 
-class ContextNormalizer:
-    """Normalization helpers for heatmaps."""
+# --- Ordering helpers for heatmaps ---
+def seriate_optimal_leaf_ordering(matrix, metric="euclidean", method="ward"):
+    row_dist = pdist(matrix, metric=metric)
+    row_linkage = linkage(row_dist, method=method)
+    row_optimal_Z = optimal_leaf_ordering(row_linkage, row_dist)
+    row_order = leaves_list(row_optimal_Z)
 
-    @staticmethod
-    def row_wise_zscore(matrix, epsilon=1e-8):
-        out = matrix.astype(float).copy()
-        finite_mask = np.isfinite(out)
-        if not np.any(finite_mask):
-            return out
-        row_means = np.nanmean(out, axis=1, keepdims=True)
-        row_stds = np.nanstd(out, axis=1, keepdims=True)
-        normed = (out - row_means) / (row_stds + epsilon)
-        out[finite_mask] = normed[finite_mask]
+    col_dist = pdist(matrix.T, metric=metric)
+    col_linkage = linkage(col_dist, method=method)
+    col_optimal_Z = optimal_leaf_ordering(col_linkage, col_dist)
+    col_order = leaves_list(col_optimal_Z)
+
+    ordered = matrix[row_order, :][:, col_order]
+    return ordered, row_order, col_order
+
+def _compute_rbf_kernel(X, gamma):
+    pairwise_sq_dists = np.sum((X[:, np.newaxis] - X[np.newaxis, :]) ** 2, axis=2)
+    return np.exp(-gamma * pairwise_sq_dists)
+
+def seriate_spectral_fiedler(matrix, gamma=1.0):
+    def get_fiedler_indices(data):
+        A = _compute_rbf_kernel(data, gamma=gamma)
+        D = np.diag(np.sum(A, axis=1))
+        L = D - A
+        eigenvalues, eigenvectors = eigh(L)
+        fiedler_vector = eigenvectors[:, 1]
+        return np.argsort(fiedler_vector)
+
+    row_order = get_fiedler_indices(matrix)
+    col_order = get_fiedler_indices(matrix.T)
+    ordered = matrix[row_order, :][:, col_order]
+    return ordered, row_order, col_order
+
+
+# --- Normalization helpers for heatmaps ---
+def row_wise_zscore(matrix, epsilon=1e-8):
+    out = matrix.astype(float).copy()
+    finite_mask = np.isfinite(out)
+    if not np.any(finite_mask):
         return out
+    row_means = np.nanmean(out, axis=1, keepdims=True)
+    row_stds = np.nanstd(out, axis=1, keepdims=True)
+    normed = (out - row_means) / (row_stds + epsilon)
+    out[finite_mask] = normed[finite_mask]
+    return out
 
-    @staticmethod
-    def global_minmax(matrix):
-        out = matrix.astype(float).copy()
-        finite_mask = np.isfinite(out)
-        if not np.any(finite_mask):
-            return out
-        mat_min = np.nanmin(out)
-        mat_max = np.nanmax(out)
-        if not np.isfinite(mat_min) or not np.isfinite(mat_max):
-            return out
-        if np.isclose(mat_max, mat_min):
-            out[finite_mask] = 0.0
-            return out
-        normed = (out - mat_min) / (mat_max - mat_min)
-        out[finite_mask] = normed[finite_mask]
+def global_minmax(matrix):
+    out = matrix.astype(float).copy()
+    finite_mask = np.isfinite(out)
+    if not np.any(finite_mask):
         return out
+    mat_min = np.nanmin(out)
+    mat_max = np.nanmax(out)
+    if not np.isfinite(mat_min) or not np.isfinite(mat_max):
+        return out
+    if np.isclose(mat_max, mat_min):
+        out[finite_mask] = 0.0
+        return out
+    normed = (out - mat_min) / (mat_max - mat_min)
+    out[finite_mask] = normed[finite_mask]
+    return out
 
-    @staticmethod
-    def robust_iqr_scaler(matrix, epsilon=1e-8):
-        out = matrix.astype(float).copy()
-        finite_mask = np.isfinite(out)
-        if not np.any(finite_mask):
-            return out
-        medians = np.nanmedian(out, axis=0, keepdims=True)
-        q75 = np.nanpercentile(out, 75, axis=0, keepdims=True)
-        q25 = np.nanpercentile(out, 25, axis=0, keepdims=True)
-        iqr = q75 - q25
-        normed = (out - medians) / (iqr + epsilon)
-        out[finite_mask] = normed[finite_mask]
+def robust_iqr_scaler(matrix, epsilon=1e-8):
+    out = matrix.astype(float).copy()
+    finite_mask = np.isfinite(out)
+    if not np.any(finite_mask):
         return out
+    medians = np.nanmedian(out, axis=0, keepdims=True)
+    q75 = np.nanpercentile(out, 75, axis=0, keepdims=True)
+    q25 = np.nanpercentile(out, 25, axis=0, keepdims=True)
+    iqr = q75 - q25
+    normed = (out - medians) / (iqr + epsilon)
+    out[finite_mask] = normed[finite_mask]
+    return out
 
-    @staticmethod
-    def fixed_bounds_pm1(matrix):
-        out = matrix.astype(float).copy()
-        finite_mask = np.isfinite(out)
-        out[finite_mask] = np.clip(out[finite_mask], -1.0, 1.0)
-        return out
+def fixed_bounds_pm1(matrix):
+    out = matrix.astype(float).copy()
+    finite_mask = np.isfinite(out)
+    out[finite_mask] = np.clip(out[finite_mask], -1.0, 1.0)
+    return out
 
-    @staticmethod
-    def log10_scale(matrix, epsilon=1e-6):
-        out = matrix.astype(float).copy()
-        finite_mask = np.isfinite(out)
-        if not np.any(finite_mask):
-            return out
-        sign = np.sign(out)
-        scaled = np.log10(np.abs(out) + epsilon)
-        out[finite_mask] = (sign * scaled)[finite_mask]
+def log10_scale(matrix, epsilon=1e-6):
+    out = matrix.astype(float).copy()
+    finite_mask = np.isfinite(out)
+    if not np.any(finite_mask):
         return out
+    sign = np.sign(out)
+    scaled = np.log10(np.abs(out) + epsilon)
+    out[finite_mask] = (sign * scaled)[finite_mask]
+    return out
 
 
 def _inject_heatmap_outliers(matrix, frac_range, scale_range):
@@ -3997,7 +4153,7 @@ def generate_perlin_heatmap(rows, cols, scale=6.0, octaves=4, persistence=0.5, s
     if seed is not None:
         np.random.seed(seed)
     res = (max(2, int(scale)), max(2, int(scale)))
-    base = SpatialCoherenceGenerator.generate_fractal_noise_2d(
+    base = generate_fractal_noise_2d(
         (rows, cols), res, octaves=octaves, persistence=persistence
     )
     if np.nanmax(base) == np.nanmin(base):
@@ -4110,7 +4266,7 @@ def _generate_structural_theme(theme_id, rows, cols):
     if theme_id == "biclustered_checkerboard":
         clusters = params.get("n_clusters", (5, 4))
         noise = params.get("noise", 12.5)
-        data, _, _ = BiclusterStructuralGenerator.generate_spectral_checkerboard(
+        data, _, _ = generate_spectral_checkerboard(
             (rows, cols), clusters, noise
         )
         return data, meta
@@ -4186,11 +4342,11 @@ def generate_structured_heatmap(heatmap_type="auto", size=None, debug_mode=False
             dim = random.randint(dim_min, dim_max)
         strength = _pick_weighted_option(cfg["correlation"]["strength_weights"], default="uniform")
         if heatmap_type == "correlation_davies_higham":
-            data = CorrelationMatrixGenerator.generate_davies_higham(dim, strength)
+            data = generate_davies_higham(dim, strength)
         else:
             eta_min, eta_max = cfg["correlation"]["lkj_eta_range"]
             eta = random.uniform(eta_min, eta_max)
-            data = CorrelationMatrixGenerator.generate_vine_lkj(dim, eta)
+            data = generate_vine_lkj(dim, eta)
         cmap_type = "diverging"
         meta["is_correlation"] = True
         rows, cols = dim, dim
@@ -4198,14 +4354,14 @@ def generate_structured_heatmap(heatmap_type="auto", size=None, debug_mode=False
     elif heatmap_type == "bicluster_checkerboard":
         clusters = random.randint(*cfg["bicluster"]["clusters_range"])
         noise = random.uniform(*cfg["bicluster"]["checkerboard_noise_range"])
-        data, _, _ = BiclusterStructuralGenerator.generate_spectral_checkerboard(
+        data, _, _ = generate_spectral_checkerboard(
             (rows, cols), (clusters, clusters), noise
         )
 
     elif heatmap_type == "bicluster_block":
         clusters = random.randint(*cfg["bicluster"]["clusters_range"])
         noise = random.uniform(*cfg["bicluster"]["block_noise_range"])
-        data, _, _ = BiclusterStructuralGenerator.generate_block_biclusters(
+        data, _, _ = generate_block_biclusters(
             (rows, cols), clusters, noise
         )
 
@@ -4214,7 +4370,7 @@ def generate_structured_heatmap(heatmap_type="auto", size=None, debug_mode=False
         mu = random.uniform(*cfg["bicluster"]["additive_mu_range"])
         noise = random.uniform(*cfg["bicluster"]["bicluster_noise_range"])
         shape_ij = (random.randint(3, max(3, rows // 2)), random.randint(3, max(3, cols // 2)))
-        data, _, _ = BiclusterStructuralGenerator.inject_additive_coherent_bicluster(
+        data, _, _ = inject_additive_coherent_bicluster(
             base, shape_ij, mu, noise
         )
 
@@ -4223,7 +4379,7 @@ def generate_structured_heatmap(heatmap_type="auto", size=None, debug_mode=False
         mu = random.uniform(*cfg["bicluster"]["additive_mu_range"])
         noise = random.uniform(*cfg["bicluster"]["bicluster_noise_range"])
         shape_ij = (random.randint(3, max(3, rows // 2)), random.randint(3, max(3, cols // 2)))
-        data, _, _ = BiclusterStructuralGenerator.inject_multiplicative_coherent_bicluster(
+        data, _, _ = inject_multiplicative_coherent_bicluster(
             base, shape_ij, mu, noise
         )
 
@@ -4235,7 +4391,7 @@ def generate_structured_heatmap(heatmap_type="auto", size=None, debug_mode=False
     elif heatmap_type == "perlin":
         res_min, res_max = cfg["spatial"]["res_range"]
         res = random.randint(res_min, res_max)
-        data = SpatialCoherenceGenerator.generate_perlin_2d((rows, cols), (res, res))
+        data = generate_perlin_2d((rows, cols), (res, res))
 
     elif heatmap_type == "fractal":
         res_min, res_max = cfg["spatial"]["res_range"]
@@ -4244,7 +4400,7 @@ def generate_structured_heatmap(heatmap_type="auto", size=None, debug_mode=False
         octaves = random.randint(oct_min, oct_max)
         p_min, p_max = cfg["spatial"]["persistence_range"]
         persistence = random.uniform(p_min, p_max)
-        data = SpatialCoherenceGenerator.generate_fractal_noise_2d(
+        data = generate_fractal_noise_2d(
             (rows, cols), (res, res), octaves=octaves, persistence=persistence
         )
 
@@ -4252,9 +4408,9 @@ def generate_structured_heatmap(heatmap_type="auto", size=None, debug_mode=False
         order = random.choice(cfg["sarima"]["order_choices"])
         seasonal_order = random.choice(cfg["sarima"]["seasonal_order_choices"])
         try:
-            base = SpatioTemporalMatrixGenerator.generate_sarima_matrix(rows, cols, order, seasonal_order)
+            base = generate_sarima_matrix(rows, cols, order, seasonal_order)
             rho = random.uniform(*cfg["sarima"]["rho_range"])
-            data = SpatioTemporalMatrixGenerator.apply_sar_spatial_dependence(base, rho)
+            data = apply_sar_spatial_dependence(base, rho)
         except Exception:
             data = np.random.normal(0, 1, (rows, cols))
 
@@ -4284,17 +4440,17 @@ def generate_structured_heatmap(heatmap_type="auto", size=None, debug_mode=False
     if missing_mode != "none":
         if missing_mode == "mcar":
             rate = random.uniform(*missing_cfg["missing_rate_range"])
-            data, missing_mask = MissingDataInjector.inject_mcar(data, rate)
+            data, missing_mask = inject_mcar(data, rate)
             missing_params = {"rate": float(rate)}
         elif missing_mode == "mnar_logistic":
             beta_0 = random.uniform(*missing_cfg["logistic_beta0_range"])
             beta_1 = random.uniform(*missing_cfg["logistic_beta1_range"])
-            data, missing_mask = MissingDataInjector.inject_mnar_logistic(data, beta_0, beta_1)
+            data, missing_mask = inject_mnar_logistic(data, beta_0, beta_1)
             missing_params = {"beta_0": float(beta_0), "beta_1": float(beta_1)}
         elif missing_mode == "mnar_quantile":
             q = random.uniform(*missing_cfg["quantile_range"])
             drop_prob = random.uniform(*missing_cfg["drop_prob_range"])
-            data, missing_mask = MissingDataInjector.inject_mnar_quantile_censorship(
+            data, missing_mask = inject_mnar_quantile_censorship(
                 data, q=q, drop_prob=drop_prob, upper_bound=True
             )
             missing_params = {"quantile": float(q), "drop_prob": float(drop_prob)}
@@ -4303,7 +4459,7 @@ def generate_structured_heatmap(heatmap_type="auto", size=None, debug_mode=False
             uloq_q = random.uniform(*missing_cfg["uloq_quantile_range"])
             jitter = missing_cfg.get("llod_uloq_jitter", (0.85, 1.15))
             min_span = missing_cfg.get("llod_uloq_min_span", 1e-6)
-            data, missing_mask, det_meta = MissingDataInjector.inject_mnar_detection_limits(
+            data, missing_mask, det_meta = inject_mnar_detection_limits(
                 data,
                 llod_quantile=llod_q,
                 uloq_quantile=uloq_q,
@@ -4347,7 +4503,7 @@ def generate_structured_heatmap(heatmap_type="auto", size=None, debug_mode=False
             use_pareto = random.random() < noise_cfg.get("pareto_outlier_chance", 0.0)
             outlier_prob = noise_cfg.get("pareto_outlier_prob", 0.005)
             outlier_scale = random.uniform(*noise_cfg["pareto_outlier_scale_range"])
-            data = HeteroscedasticNoiseGenerator.inject_parametric_heteroscedastic(
+            data = inject_parametric_heteroscedastic(
                 data,
                 alpha,
                 beta,
@@ -4369,7 +4525,7 @@ def generate_structured_heatmap(heatmap_type="auto", size=None, debug_mode=False
         else:
             omega = random.uniform(*noise_cfg["omega_range"])
             delta = random.uniform(*noise_cfg["delta_range"])
-            data = HeteroscedasticNoiseGenerator.inject_magnitude_scaled_gaussian(data, omega, delta)
+            data = inject_magnitude_scaled_gaussian(data, omega, delta)
             meta["noise"].append("heteroscedastic")
             meta["noise_params"].append({
                 "type": "magnitude_scaled",
@@ -4379,7 +4535,7 @@ def generate_structured_heatmap(heatmap_type="auto", size=None, debug_mode=False
 
     if not meta["is_correlation"] and random.random() < noise_cfg["poisson_prob"]:
         k_dispersion = random.uniform(*noise_cfg["k_dispersion_range"])
-        data = HeteroscedasticNoiseGenerator.inject_poisson_like_variance(data, k_dispersion)
+        data = inject_poisson_like_variance(data, k_dispersion)
         meta["noise"].append("poisson")
 
     if not meta["is_correlation"] and random.random() < noise_cfg["outlier_prob"]:
@@ -4419,15 +4575,15 @@ def generate_structured_heatmap(heatmap_type="auto", size=None, debug_mode=False
         norm_mode = "none"
 
     if norm_mode == "row_zscore":
-        data = ContextNormalizer.row_wise_zscore(data)
+        data = row_wise_zscore(data)
     elif norm_mode == "global_minmax":
-        data = ContextNormalizer.global_minmax(data)
+        data = global_minmax(data)
     elif norm_mode == "robust_iqr":
-        data = ContextNormalizer.robust_iqr_scaler(data)
+        data = robust_iqr_scaler(data)
     elif norm_mode == "fixed_bounds_pm1":
-        data = ContextNormalizer.fixed_bounds_pm1(data)
+        data = fixed_bounds_pm1(data)
     elif norm_mode == "log10_scale":
-        data = ContextNormalizer.log10_scale(data)
+        data = log10_scale(data)
 
     meta["normalization"] = norm_mode
 
@@ -4439,7 +4595,7 @@ def generate_structured_heatmap(heatmap_type="auto", size=None, debug_mode=False
     data_for_order = np.nan_to_num(data, nan=fill_val)
     if ordering_mode == "olo" and data_for_order.shape[0] > 2 and data_for_order.shape[1] > 2:
         try:
-            _, row_order, col_order = MatrixSeriator.seriate_optimal_leaf_ordering(data_for_order)
+            _, row_order, col_order = seriate_optimal_leaf_ordering(data_for_order)
             data = data[row_order, :][:, col_order]
             meta["ordering"] = "olo"
             meta["row_order"] = row_order
@@ -4448,7 +4604,7 @@ def generate_structured_heatmap(heatmap_type="auto", size=None, debug_mode=False
             meta["ordering"] = "none"
     elif ordering_mode == "fiedler" and data_for_order.shape[0] > 2 and data_for_order.shape[1] > 2:
         try:
-            _, row_order, col_order = MatrixSeriator.seriate_spectral_fiedler(data_for_order)
+            _, row_order, col_order = seriate_spectral_fiedler(data_for_order)
             data = data[row_order, :][:, col_order]
             meta["ordering"] = "fiedler"
             meta["row_order"] = row_order
@@ -4640,6 +4796,9 @@ def extract_bar_info(ax, chart_type_str):
     """
     if chart_type_str not in ['bar', 'histogram']:
         return []
+
+    if hasattr(ax, '_bar_info_list') and ax._bar_info_list:
+        return ax._bar_info_list
 
     bar_info_list = []
 
