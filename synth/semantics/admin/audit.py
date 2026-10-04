@@ -17,6 +17,7 @@ import rapidfuzz.fuzz
 
 from synth.semantics.admin.normalize import make_dedup_key, strip_unit_suffix
 from synth.semantics.loader import (
+    ALL_CHART_TYPES,
     CARTESIAN_CHART_TYPES,
     _load_manifest_raw_data,
     get_domains_dir,
@@ -37,6 +38,7 @@ class AuditFinding:
 class AuditReport:
     findings: List[AuditFinding] = field(default_factory=list)
     degenerate_pools: List[Tuple[str, str, str, str]] = field(default_factory=list)  # (dom, ctype, orient, axis)
+    chart_type_stats: Dict[str, Any] = field(default_factory=dict)
 
     @property
     def has_errors(self) -> bool:
@@ -51,7 +53,7 @@ class AuditReport:
         return sum(1 for f in self.findings if f.severity == "WARNING")
 
     def summary_dict(self) -> Dict[str, Any]:
-        return {
+        res: Dict[str, Any] = {
             "total_findings": len(self.findings),
             "errors": self.error_count,
             "warnings": self.warning_count,
@@ -61,6 +63,80 @@ class AuditReport:
                 for cat in {f.category for f in self.findings}
             },
         }
+        if "chart_type_totals" in self.chart_type_stats:
+            res["chart_type_totals"] = self.chart_type_stats["chart_type_totals"]
+        return res
+
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "summary": self.summary_dict(),
+            "findings": [
+                {
+                    "category": f.category,
+                    "severity": f.severity,
+                    "domain": f.domain,
+                    "item": f.item,
+                    "message": f.message,
+                }
+                for f in self.findings
+            ],
+            "degenerate_pools": [list(p) for p in self.degenerate_pools],
+            "chart_type_coverage": self.chart_type_stats,
+        }
+
+
+def compute_chart_type_stats(
+    raw: Optional[Dict[str, Any]] = None,
+    reg: Optional[SemanticRegistry] = None,
+    domains_dir: Optional[Path] = None,
+) -> Dict[str, Any]:
+    """Compute title counts and Cartesian metric pool depths across chart types and domains."""
+    from synth.semantics.sampler import _build_axis_pools
+
+    target_dir = domains_dir or get_domains_dir()
+    if raw is None:
+        raw = _load_manifest_raw_data(domains_dir=target_dir)
+
+    if reg is None:
+        reg = SemanticRegistry.load(raw=raw)
+
+    axis_pools, _ = _build_axis_pools(reg)
+
+    chart_type_totals = {ct: 0 for ct in ALL_CHART_TYPES}
+    by_domain: Dict[str, Dict[str, Any]] = {}
+
+    for dom_id, doc in sorted(raw.items()):
+        titles = doc.get("titles", [])
+        dom_title_counts = {ct: 0 for ct in ALL_CHART_TYPES}
+        for t in titles:
+            cts = t.get("allowed_chart_types") or list(ALL_CHART_TYPES)
+            for ct in cts:
+                if ct in dom_title_counts:
+                    dom_title_counts[ct] += 1
+                    chart_type_totals[ct] += 1
+
+        dom_pools: Dict[str, Dict[str, Dict[str, int]]] = {}
+        for ct in CARTESIAN_CHART_TYPES:
+            dom_pools[ct] = {
+                "vertical": {
+                    "x": len(axis_pools.get((dom_id, ct, "vertical", "x"), ())),
+                    "y": len(axis_pools.get((dom_id, ct, "vertical", "y"), ())),
+                },
+                "horizontal": {
+                    "x": len(axis_pools.get((dom_id, ct, "horizontal", "x"), ())),
+                    "y": len(axis_pools.get((dom_id, ct, "horizontal", "y"), ())),
+                },
+            }
+
+        by_domain[dom_id] = {
+            "titles": dom_title_counts,
+            "axis_pools_depth": dom_pools,
+        }
+
+    return {
+        "chart_type_totals": chart_type_totals,
+        "by_domain": by_domain,
+    }
 
 
 WHITELISTED_NEAR_DUPLICATES: Set[frozenset] = {
@@ -230,5 +306,8 @@ def run_audit(
                                 message=f"Candidate pool is empty; chart will silently draw from static fallback",
                             )
                         )
+
+    # 7. Compute chart type statistics across domains
+    report.chart_type_stats = compute_chart_type_stats(raw=raw, reg=reg, domains_dir=target_dir)
 
     return report

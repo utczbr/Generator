@@ -146,6 +146,27 @@ class IngestPlan:
         return json.dumps(self.to_dict(), indent=indent)
 
 
+def batch_plans_to_dict(folder: str | Path, plans: List[IngestPlan], policy: str) -> Dict[str, Any]:
+    """Serialize a collection of IngestPlans from batch directory import."""
+    batch_totals: Dict[str, int] = {}
+    for p in plans:
+        for k, v in p.status_counts.items():
+            batch_totals[k] = batch_totals.get(k, 0) + v
+    return {
+        "mode": "batch",
+        "source_folder": str(folder),
+        "policy": policy,
+        "batch_totals": batch_totals,
+        "files_count": len(plans),
+        "files": [p.to_dict() for p in plans],
+    }
+
+
+def batch_plans_to_json(folder: str | Path, plans: List[IngestPlan], policy: str, indent: int = 2) -> str:
+    """Serialize batch plans dictionary to formatted JSON string."""
+    return json.dumps(batch_plans_to_dict(folder, plans, policy), indent=indent)
+
+
 def build_plan(
     ingest_result: IngestResult,
     target_domain: str,

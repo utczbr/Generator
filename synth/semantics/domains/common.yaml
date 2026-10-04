@@ -11,8 +11,10 @@ metrics:
   concept_group: temporal_date
   domain_tags:
   - biomedical
-  - engineering
   - business
+  - common
+  - engineering
+  - general
   pools:
   - canonical_independent
 - label: Timestamp
@@ -356,7 +358,9 @@ metrics:
   concept_group: bench_duration
   domain_tags:
   - biomedical
+  - common
   - engineering
+  - general
   pools:
   - canonical_independent
 - label: Elapsed Time (min)
@@ -456,10 +460,11 @@ metrics:
   unit:
   concept_group: histogram_frequency
   domain_tags:
-  - common
   - biomedical
-  - engineering
   - business
+  - common
+  - engineering
+  - general
   pools:
   - histogram_y
 - label: Absolute Frequency
@@ -495,10 +500,11 @@ metrics:
   unit:
   concept_group: histogram_frequency
   domain_tags:
-  - common
   - biomedical
-  - engineering
   - business
+  - common
+  - engineering
+  - general
   pools:
   - histogram_y
 - label: Probability Density
@@ -1099,6 +1105,354 @@ metrics:
   - business
   pools:
   - histogram_y
+- label: Total
+  scale_type: continuous
+  role: dependent
+  concept_stem: total
+  domain_tags:
+  - common
+  - general
+  pools: []
+  concept_group: generic_measures
+- label: Average
+  scale_type: continuous
+  role: dependent
+  concept_stem: average
+  domain_tags:
+  - common
+  - general
+  pools: []
+  concept_group: generic_measures
+- label: Median
+  scale_type: continuous
+  role: dependent
+  concept_stem: median
+  domain_tags:
+  - common
+  - general
+  pools: []
+  concept_group: generic_measures
+- label: Standard Deviation
+  scale_type: continuous
+  role: dependent
+  concept_stem: standard_deviation
+  domain_tags:
+  - common
+  - general
+  pools: []
+  concept_group: dispersion
+- label: Variance
+  scale_type: continuous
+  role: dependent
+  concept_stem: variance
+  domain_tags:
+  - common
+  - general
+  pools: []
+  concept_group: dispersion
+- label: Minimum Value
+  scale_type: continuous
+  role: dependent
+  concept_stem: minimum_value
+  domain_tags:
+  - common
+  - general
+  pools: []
+  concept_group: generic_measures
+- label: Maximum Value
+  scale_type: continuous
+  role: dependent
+  concept_stem: maximum_value
+  domain_tags:
+  - common
+  - general
+  pools: []
+  concept_group: generic_measures
+- label: Percentage Change (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: percentage_change
+  domain_tags:
+  - common
+  - general
+  pools: []
+  unit: '%'
+  concept_group: change_metrics
+- label: Share of Total (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: share_of_total
+  domain_tags:
+  - common
+  - general
+  pools: []
+  unit: '%'
+  concept_group: composition
+- label: Cumulative Total
+  scale_type: continuous
+  role: dependent
+  concept_stem: cumulative_total
+  domain_tags:
+  - common
+  - general
+  pools: []
+  concept_group: generic_measures
+- label: Rate of Change (per period)
+  scale_type: continuous
+  role: dependent
+  concept_stem: rate_of_change
+  domain_tags:
+  - common
+  - general
+  pools: []
+  unit: per period
+  concept_group: change_metrics
+- label: Growth Rate (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: growth_rate
+  domain_tags:
+  - common
+  - general
+  pools: []
+  unit: '%'
+  concept_group: change_metrics
+- label: Ratio
+  scale_type: continuous
+  role: dependent
+  concept_stem: ratio
+  domain_tags:
+  - common
+  - general
+  pools: []
+  concept_group: generic_measures
+- label: Rank (rank)
+  scale_type: discrete_count
+  role: dependent
+  concept_stem: rank
+  domain_tags:
+  - common
+  - general
+  pools: []
+  unit: rank
+  concept_group: ordering
+- label: Frequency (count)
+  scale_type: discrete_count
+  role: dependent
+  concept_stem: frequency
+  domain_tags:
+  - common
+  - general
+  pools: []
+  unit: count
+  concept_group: distribution
+- label: Probability (%)
+  scale_type: percentage
+  role: dependent
+  concept_stem: probability
+  domain_tags:
+  - common
+  - general
+  pools: []
+  unit: '%'
+  concept_group: distribution
+- label: Z-Score (σ)
+  scale_type: continuous
+  role: dependent
+  concept_stem: z_score
+  domain_tags:
+  - common
+  - general
+  pools: []
+  unit: σ
+  concept_group: dispersion
+- label: Correlation Coefficient (r)
+  scale_type: continuous
+  role: bidirectional
+  concept_stem: correlation_coefficient
+  domain_tags:
+  - common
+  - general
+  pools: []
+  unit: r
+  concept_group: association
+- label: Residual
+  scale_type: continuous
+  role: dependent
+  concept_stem: residual
+  domain_tags:
+  - common
+  - general
+  pools: []
+  concept_group: model_diagnostics
+- label: Predicted Value
+  scale_type: continuous
+  role: dependent
+  concept_stem: predicted_value
+  domain_tags:
+  - common
+  - general
+  pools: []
+  concept_group: model_diagnostics
+- label: Observed Value
+  scale_type: continuous
+  role: dependent
+  concept_stem: observed_value
+  domain_tags:
+  - common
+  - general
+  pools: []
+  concept_group: model_diagnostics
+- label: Subgroup
+  scale_type: categorical
+  role: independent
+  concept_stem: subgroup
+  domain_tags:
+  - common
+  - general
+  pools: []
+  concept_group: grouping
+- label: Treatment Group
+  scale_type: categorical
+  role: independent
+  concept_stem: treatment_group
+  domain_tags:
+  - common
+  - general
+  pools: []
+  concept_group: grouping
+- label: Status
+  scale_type: categorical
+  role: independent
+  concept_stem: status
+  domain_tags:
+  - common
+  - general
+  pools: []
+  concept_group: grouping
+- label: Type
+  scale_type: categorical
+  role: independent
+  concept_stem: type
+  domain_tags:
+  - common
+  - general
+  pools: []
+  concept_group: grouping
+- label: Cluster
+  scale_type: categorical
+  role: independent
+  concept_stem: cluster
+  domain_tags:
+  - common
+  - general
+  pools: []
+  concept_group: grouping
+- label: Class Label
+  scale_type: categorical
+  role: independent
+  concept_stem: class_label
+  domain_tags:
+  - common
+  - general
+  pools: []
+  concept_group: grouping
+- label: Source
+  scale_type: categorical
+  role: independent
+  concept_stem: source
+  domain_tags:
+  - common
+  - general
+  pools: []
+  concept_group: grouping
+- label: Version
+  scale_type: categorical
+  role: independent
+  concept_stem: version
+  domain_tags:
+  - common
+  - general
+  pools: []
+  concept_group: grouping
+- label: Time
+  scale_type: temporal
+  role: independent
+  concept_stem: time
+  domain_tags:
+  - common
+  - general
+  pools: []
+  concept_group: temporal_index
+- label: Year (year)
+  scale_type: temporal
+  role: independent
+  concept_stem: year
+  domain_tags:
+  - common
+  - general
+  pools: []
+  unit: year
+  concept_group: temporal_index
+- label: Week (week)
+  scale_type: temporal
+  role: independent
+  concept_stem: week
+  domain_tags:
+  - common
+  - general
+  pools: []
+  unit: week
+  concept_group: temporal_index
+- label: Day (day)
+  scale_type: temporal
+  role: independent
+  concept_stem: day
+  domain_tags:
+  - common
+  - general
+  pools: []
+  unit: day
+  concept_group: temporal_index
+- label: Hour (h)
+  scale_type: temporal
+  role: independent
+  concept_stem: hour
+  domain_tags:
+  - common
+  - general
+  pools: []
+  unit: h
+  concept_group: temporal_index
+- label: Minute (min)
+  scale_type: temporal
+  role: independent
+  concept_stem: minute
+  domain_tags:
+  - common
+  - general
+  pools: []
+  unit: min
+  concept_group: temporal_index
+- label: Iteration (step)
+  scale_type: temporal
+  role: independent
+  concept_stem: iteration
+  domain_tags:
+  - common
+  - general
+  pools: []
+  unit: step
+  concept_group: temporal_index
+- label: Period
+  scale_type: temporal
+  role: independent
+  concept_stem: period
+  domain_tags:
+  - common
+  - general
+  pools: []
+  concept_group: temporal_index
 titles:
 - title: Overview of Collected Data
   allowed_chart_types:
@@ -1145,7 +1499,507 @@ titles:
   - histogram
   domain_tags:
   - common
-comparative_pairs: []
+- title: Variable A vs Variable B
+  allowed_chart_types:
+  - scatter
+  domain_tags:
+  - common
+- title: Predicted Value vs Observed Value
+  allowed_chart_types:
+  - scatter
+  domain_tags:
+  - common
+- title: Input vs Output
+  allowed_chart_types:
+  - scatter
+  domain_tags:
+  - common
+- title: Cost vs Benefit
+  allowed_chart_types:
+  - scatter
+  domain_tags:
+  - common
+- title: Effort vs Outcome
+  allowed_chart_types:
+  - scatter
+  domain_tags:
+  - common
+- title: Size vs Frequency
+  allowed_chart_types:
+  - scatter
+  domain_tags:
+  - common
+- title: Dose vs Response
+  allowed_chart_types:
+  - scatter
+  domain_tags:
+  - common
+- title: Time Spent vs Score
+  allowed_chart_types:
+  - scatter
+  domain_tags:
+  - common
+- title: Sample Mean vs Sample Variance
+  allowed_chart_types:
+  - scatter
+  domain_tags:
+  - common
+- title: Baseline vs Follow-Up
+  allowed_chart_types:
+  - scatter
+  domain_tags:
+  - common
+- title: Age vs Value
+  allowed_chart_types:
+  - scatter
+  domain_tags:
+  - common
+- title: Group Mean vs Group Size
+  allowed_chart_types:
+  - scatter
+  domain_tags:
+  - common
+- title: Variable A and Variable B Correlation
+  allowed_chart_types:
+  - scatter
+  domain_tags:
+  - common
+- title: Input and Output Correlation
+  allowed_chart_types:
+  - scatter
+  domain_tags:
+  - common
+- title: Effort and Outcome Correlation
+  allowed_chart_types:
+  - scatter
+  domain_tags:
+  - common
+- title: Dose and Response Correlation
+  allowed_chart_types:
+  - scatter
+  domain_tags:
+  - common
+- title: Sample Mean and Sample Variance Correlation
+  allowed_chart_types:
+  - scatter
+  domain_tags:
+  - common
+- title: Age and Value Correlation
+  allowed_chart_types:
+  - scatter
+  domain_tags:
+  - common
+- title: Category Composition
+  allowed_chart_types:
+  - pie
+  - bar
+  domain_tags:
+  - common
+- title: Share of Category
+  allowed_chart_types:
+  - pie
+  - bar
+  - area
+  domain_tags:
+  - common
+- title: Total Composition
+  allowed_chart_types:
+  - pie
+  - bar
+  domain_tags:
+  - common
+- title: Share of Total
+  allowed_chart_types:
+  - pie
+  - bar
+  - area
+  domain_tags:
+  - common
+- title: Outcomes Composition
+  allowed_chart_types:
+  - pie
+  - bar
+  domain_tags:
+  - common
+- title: Share of Outcomes
+  allowed_chart_types:
+  - pie
+  - bar
+  - area
+  domain_tags:
+  - common
+- title: Groups Composition
+  allowed_chart_types:
+  - pie
+  - bar
+  domain_tags:
+  - common
+- title: Share of Groups
+  allowed_chart_types:
+  - pie
+  - bar
+  - area
+  domain_tags:
+  - common
+- title: Responses Composition
+  allowed_chart_types:
+  - pie
+  - bar
+  domain_tags:
+  - common
+- title: Share of Responses
+  allowed_chart_types:
+  - pie
+  - bar
+  - area
+  domain_tags:
+  - common
+- title: Segments Composition
+  allowed_chart_types:
+  - pie
+  - bar
+  domain_tags:
+  - common
+- title: Share of Segments
+  allowed_chart_types:
+  - pie
+  - bar
+  - area
+  domain_tags:
+  - common
+- title: Resources Composition
+  allowed_chart_types:
+  - pie
+  - bar
+  domain_tags:
+  - common
+- title: Share of Resources
+  allowed_chart_types:
+  - pie
+  - bar
+  - area
+  domain_tags:
+  - common
+- title: Status Composition
+  allowed_chart_types:
+  - pie
+  - bar
+  domain_tags:
+  - common
+- title: Share of Status
+  allowed_chart_types:
+  - pie
+  - bar
+  - area
+  domain_tags:
+  - common
+- title: Category by Time Period Heatmap
+  allowed_chart_types:
+  - heatmap
+  domain_tags:
+  - common
+- title: Category–Time Period Intensity Matrix
+  allowed_chart_types:
+  - heatmap
+  - bar
+  domain_tags:
+  - common
+- title: Value by Group Heatmap
+  allowed_chart_types:
+  - heatmap
+  domain_tags:
+  - common
+- title: Value–Group Intensity Matrix
+  allowed_chart_types:
+  - heatmap
+  - bar
+  domain_tags:
+  - common
+- title: Count by Hour of Day Heatmap
+  allowed_chart_types:
+  - heatmap
+  domain_tags:
+  - common
+- title: Count–Hour of Day Intensity Matrix
+  allowed_chart_types:
+  - heatmap
+  - bar
+  domain_tags:
+  - common
+- title: Correlation by Variable Pair Heatmap
+  allowed_chart_types:
+  - heatmap
+  domain_tags:
+  - common
+- title: Correlation–Variable Pair Intensity Matrix
+  allowed_chart_types:
+  - heatmap
+  - bar
+  domain_tags:
+  - common
+- title: Error by Class Label Heatmap
+  allowed_chart_types:
+  - heatmap
+  domain_tags:
+  - common
+- title: Error–Class Label Intensity Matrix
+  allowed_chart_types:
+  - heatmap
+  - bar
+  domain_tags:
+  - common
+- title: Score by Segment Heatmap
+  allowed_chart_types:
+  - heatmap
+  domain_tags:
+  - common
+- title: Score–Segment Intensity Matrix
+  allowed_chart_types:
+  - heatmap
+  - bar
+  domain_tags:
+  - common
+- title: Frequency by Day of Week Heatmap
+  allowed_chart_types:
+  - heatmap
+  domain_tags:
+  - common
+- title: Frequency–Day of Week Intensity Matrix
+  allowed_chart_types:
+  - heatmap
+  - bar
+  domain_tags:
+  - common
+- title: Values Distribution
+  allowed_chart_types:
+  - histogram
+  - box
+  domain_tags:
+  - common
+- title: Values Frequency Histogram
+  allowed_chart_types:
+  - histogram
+  domain_tags:
+  - common
+- title: Scores Distribution
+  allowed_chart_types:
+  - histogram
+  - box
+  domain_tags:
+  - common
+- title: Scores Frequency Histogram
+  allowed_chart_types:
+  - histogram
+  domain_tags:
+  - common
+- title: Measurements Distribution
+  allowed_chart_types:
+  - histogram
+  - box
+  domain_tags:
+  - common
+- title: Measurements Frequency Histogram
+  allowed_chart_types:
+  - histogram
+  domain_tags:
+  - common
+- title: Residuals Distribution
+  allowed_chart_types:
+  - histogram
+  - box
+  domain_tags:
+  - common
+- title: Residuals Frequency Histogram
+  allowed_chart_types:
+  - histogram
+  domain_tags:
+  - common
+- title: Response Times Distribution
+  allowed_chart_types:
+  - histogram
+  - box
+  domain_tags:
+  - common
+- title: Response Times Frequency Histogram
+  allowed_chart_types:
+  - histogram
+  domain_tags:
+  - common
+- title: Counts Distribution
+  allowed_chart_types:
+  - histogram
+  - box
+  domain_tags:
+  - common
+- title: Counts Frequency Histogram
+  allowed_chart_types:
+  - histogram
+  domain_tags:
+  - common
+- title: Errors Distribution
+  allowed_chart_types:
+  - histogram
+  - box
+  domain_tags:
+  - common
+- title: Errors Frequency Histogram
+  allowed_chart_types:
+  - histogram
+  domain_tags:
+  - common
+- title: Sample Values Distribution
+  allowed_chart_types:
+  - histogram
+  - box
+  domain_tags:
+  - common
+- title: Sample Values Frequency Histogram
+  allowed_chart_types:
+  - histogram
+  domain_tags:
+  - common
+- title: Comparison by Category
+  allowed_chart_types:
+  - bar
+  - box
+  domain_tags:
+  - common
+- title: Trend Over Time
+  allowed_chart_types:
+  - line
+  - area
+  - bar
+  domain_tags:
+  - common
+- title: Group Comparison
+  allowed_chart_types:
+  - bar
+  - box
+  domain_tags:
+  - common
+- title: Cumulative Total Over Time
+  allowed_chart_types:
+  - area
+  - line
+  domain_tags:
+  - common
+- title: Summary by Group
+  allowed_chart_types:
+  - bar
+  - box
+  - histogram
+  domain_tags:
+  - common
+- title: Change Over Period
+  allowed_chart_types:
+  - line
+  - area
+  - bar
+  domain_tags:
+  - common
+comparative_pairs:
+- control: Control Group
+  treatment: Treatment Group
+  domain_category: common
+  context_tags:
+  - common
+  - experimental_design
+- control: Baseline
+  treatment: Follow-Up
+  domain_category: common
+  context_tags:
+  - common
+  - longitudinal
+- control: Group A
+  treatment: Group B
+  domain_category: common
+  context_tags:
+  - common
+  - ab_testing
+- control: Old Method
+  treatment: New Method
+  domain_category: common
+  context_tags:
+  - common
+  - method_comparison
+- control: Low Level
+  treatment: High Level
+  domain_category: common
+  context_tags:
+  - common
+  - level_comparison
+- control: Reference Condition
+  treatment: Test Condition
+  domain_category: common
+  context_tags:
+  - common
+  - condition_comparison
+- control: Original Version
+  treatment: Revised Version
+  domain_category: common
+  context_tags:
+  - common
+  - version_comparison
+- control: Training Set
+  treatment: Test Set
+  domain_category: common
+  context_tags:
+  - common
+  - model_evaluation
+- control: Observed
+  treatment: Expected
+  domain_category: common
+  context_tags:
+  - common
+  - goodness_of_fit
+- control: Manual Process
+  treatment: Automated Process
+  domain_category: common
+  context_tags:
+  - common
+  - process_comparison
+- control: Early Period
+  treatment: Late Period
+  domain_category: common
+  context_tags:
+  - common
+  - period_comparison
+- control: Standard Protocol
+  treatment: Modified Protocol
+  domain_category: common
+  context_tags:
+  - common
+  - protocol_comparison
+- control: Small Sample
+  treatment: Large Sample
+  domain_category: common
+  context_tags:
+  - common
+  - sample_size
+- control: Weekday
+  treatment: Weekend
+  domain_category: common
+  context_tags:
+  - common
+  - temporal_contrast
+- control: Intervention A
+  treatment: Intervention B
+  domain_category: common
+  context_tags:
+  - common
+  - head_to_head
+- control: No Treatment
+  treatment: Active Treatment
+  domain_category: common
+  context_tags:
+  - common
+  - experimental_design
+- control: Current State
+  treatment: Target State
+  domain_category: common
+  context_tags:
+  - common
+  - gap_analysis
 manifest_version: 2
 capabilities:
   tabular_preset: false

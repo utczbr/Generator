@@ -24,6 +24,7 @@ import_plan.json
 # Staging Template Ingestion (keep if local-only)
 templates/metrics/
 templates/pairs/
+templates/titles/
 
 # Generated Images (ignore loose PNGs, but preserve documentation figures)
 *.png

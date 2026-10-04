@@ -142,24 +142,37 @@ def restore_backup(backup_ts: str, domains_dir: Optional[Path] = None) -> bool:
     return True
 
 
-def apply_plan(
-    plan: IngestPlan,
+def apply_batch_plans(
+    plans: List[IngestPlan],
     domains_dir: Optional[Path] = None,
     verify_tests: bool = False,
 ) -> Dict[str, Any]:
     """
-    Transactional apply engine (ADM-10):
+    Transactional batch apply engine (ADM-08, ADM-10):
     1. Lock directory
     2. Snapshot backup
-    3. Validate candidate manifests via Pydantic
+    3. Validate candidate manifests via Pydantic from accumulated final candidate state
     4. Validate candidate registry invariants
     5. Write round-trip YAMLs via atomic tmp + fsync + os.replace
-    6. Rebuild cache
+    6. Rebuild cache once
     7. Optional verify subprocess
-    8. Rollback on any failure
+    8. Rollback to snapshot on any failure
     """
-    if plan.has_abort_condition:
-        raise ApplyError("Plan has abort/error conditions. Refusing to apply.")
+    if not plans:
+        return {
+            "success": True,
+            "snapshot": None,
+            "touched_domains": [],
+            "metrics_added": 0,
+            "metrics_shared": 0,
+            "titles_added": 0,
+            "pairs_added": 0,
+        }
+
+    for p in plans:
+        if p.has_abort_condition:
+            src = p.source_file or p.target_domain
+            raise ApplyError(f"Plan for '{src}' has abort/error conditions. Refusing to apply batch.")
 
     target_dir = domains_dir or get_domains_dir()
     lock_path = target_dir / ".lock"
@@ -167,36 +180,43 @@ def apply_plan(
     with FileLock(lock_path):
         snapshot_dir = _create_snapshot(target_dir)
         try:
+            # Candidate manifests are taken from the last plan (which chained all mutations)
+            final_candidates = plans[-1].candidate_manifests
+
             # 1. Validate each candidate manifest with Pydantic
-            for dom_id, candidate_data in plan.candidate_manifests.items():
+            for dom_id, candidate_data in final_candidates.items():
                 try:
                     DomainManifest.model_validate(candidate_data)
                 except Exception as exc:
                     raise ApplyError(f"Pydantic validation failed for domain '{dom_id}': {exc}")
 
             # 2. Compile candidate registry in-memory
-            candidate_reg = SemanticRegistry.load(raw=plan.candidate_manifests)
+            candidate_reg = SemanticRegistry.load(raw=final_candidates)
+
+            # Determine touched domains across all plans
+            touched_domains: Set[str] = set()
+            for p in plans:
+                touched_domains.add(p.target_domain)
+                for a in p.metric_actions:
+                    if a.action == "SHARE":
+                        touched_domains.add(a.target_manifest)
 
             # 3. Check Cartesian pool coverage in candidate registry
-            touched_domain = plan.target_domain
-            if touched_domain in candidate_reg.domains and touched_domain != "common":
-                dom_metrics = tuple(m for m in candidate_reg.axis_metrics_catalog if touched_domain in m.domain_tags)
-                if not dom_metrics:
-                    raise ApplyError(f"Touched domain '{touched_domain}' has zero metrics in candidate registry.")
+            for touched_domain in touched_domains:
+                if touched_domain in candidate_reg.domains and touched_domain != "common":
+                    dom_metrics = tuple(m for m in candidate_reg.axis_metrics_catalog if touched_domain in m.domain_tags)
+                    if not dom_metrics:
+                        raise ApplyError(f"Touched domain '{touched_domain}' has zero metrics in candidate registry.")
 
             # 4. Write modified files via ruamel.yaml round-trip
             yaml = YAML()
             yaml.preserve_quotes = True
             yaml.indent(mapping=2, sequence=2, offset=0)
 
-            # Determine touched domains
-            touched_domains: Set[str] = {plan.target_domain}
-            for a in plan.metric_actions:
-                if a.action == "SHARE":
-                    touched_domains.add(a.target_manifest)
-
             for dom_id in touched_domains:
-                data = plan.candidate_manifests[dom_id]
+                if dom_id not in final_candidates:
+                    continue
+                data = final_candidates[dom_id]
                 out_path = target_dir / f"{dom_id}.yaml"
                 tmp_path = target_dir / f"{dom_id}.yaml.tmp.{os.getpid()}"
 
@@ -224,10 +244,10 @@ def apply_plan(
                 "success": True,
                 "snapshot": str(snapshot_dir),
                 "touched_domains": sorted(touched_domains),
-                "metrics_added": len([a for a in plan.metric_actions if a.action == "APPEND"]),
-                "metrics_shared": len([a for a in plan.metric_actions if a.action == "SHARE"]),
-                "titles_added": len([a for a in plan.title_actions if a.action == "APPEND"]),
-                "pairs_added": len([a for a in plan.pair_actions if a.action == "APPEND"]),
+                "metrics_added": sum(len([a for a in p.metric_actions if a.action == "APPEND"]) for p in plans),
+                "metrics_shared": sum(len([a for a in p.metric_actions if a.action == "SHARE"]) for p in plans),
+                "titles_added": sum(len([a for a in p.title_actions if a.action == "APPEND"]) for p in plans),
+                "pairs_added": sum(len([a for a in p.pair_actions if a.action == "APPEND"]) for p in plans),
             }
 
         except Exception as exc:
@@ -235,3 +255,16 @@ def apply_plan(
             _restore_snapshot(snapshot_dir, target_dir)
             rebuild_cache(force=True, domains_dir=target_dir)
             raise ApplyError(f"Transaction aborted and rolled back to snapshot {snapshot_dir.name}: {exc}") from exc
+
+
+def apply_plan(
+    plan: IngestPlan,
+    domains_dir: Optional[Path] = None,
+    verify_tests: bool = False,
+) -> Dict[str, Any]:
+    """
+    Transactional apply engine for a single plan (ADM-10).
+    Delegates to apply_batch_plans.
+    """
+    return apply_batch_plans([plan], domains_dir=domains_dir, verify_tests=verify_tests)
+

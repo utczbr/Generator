@@ -224,21 +224,7 @@ def handle_audit_cmd(args: argparse.Namespace) -> int:
     summary = report.summary_dict()
 
     if getattr(args, "json", False):
-        out_dict = {
-            "summary": summary,
-            "findings": [
-                {
-                    "category": f.category,
-                    "severity": f.severity,
-                    "domain": f.domain,
-                    "item": f.item,
-                    "message": f.message,
-                }
-                for f in report.findings
-            ],
-            "degenerate_pools": [list(p) for p in report.degenerate_pools],
-        }
-        print(json.dumps(out_dict, indent=2))
+        print(json.dumps(report.to_dict(), indent=2))
     else:
         print("=== Corpus Audit Report ===")
         print(f"Total findings: {summary['total_findings']} ({summary['errors']} errors, {summary['warnings']} warnings)")
@@ -249,6 +235,11 @@ def handle_audit_cmd(args: argparse.Namespace) -> int:
         else:
             print("Degenerate pools: NONE")
 
+        chart_totals = summary.get("chart_type_totals", {})
+        if chart_totals:
+            totals_str = ", ".join(f"{k}={v}" for k, v in chart_totals.items())
+            print(f"Chart type totals: {totals_str}")
+
         if report.findings:
             print("\nFindings:")
             for f in report.findings:
@@ -256,20 +247,7 @@ def handle_audit_cmd(args: argparse.Namespace) -> int:
 
     if getattr(args, "report", None):
         with open(args.report, "w", encoding="utf-8") as f:
-            json.dump({
-                "summary": summary,
-                "findings": [
-                    {
-                        "category": f.category,
-                        "severity": f.severity,
-                        "domain": f.domain,
-                        "item": f.item,
-                        "message": f.message,
-                    }
-                    for f in report.findings
-                ],
-                "degenerate_pools": [list(p) for p in report.degenerate_pools],
-            }, f, indent=2)
+            json.dump(report.to_dict(), f, indent=2)
         print(f"[OK] Audit report exported to {args.report}")
 
     if strict and (report.has_errors or len(report.degenerate_pools) > 0):
@@ -444,8 +422,8 @@ def build_parser() -> argparse.ArgumentParser:
 
     # import
     import_parser = subparsers.add_parser("import", help="Import & deduplicate spreadsheet into domain manifest (ADM-01..10)")
-    import_parser.add_argument("file", help="Path to spreadsheet (.xlsx or .csv)")
-    import_parser.add_argument("-d", "--domain", required=True, help="Target domain ID (e.g. aerospace)")
+    import_parser.add_argument("file", help="Path to spreadsheet (.xlsx, .csv, or folder)")
+    import_parser.add_argument("-d", "--domain", required=False, default=None, help="Target domain ID (e.g. aerospace). Optional if inferred from filename.")
     import_parser.add_argument("--on-collision", choices=["skip", "merge", "overwrite", "abort"], default="skip", help="Collision policy (default: skip)")
     import_parser.add_argument("--report", type=str, help="Export pre-flight diff plan to JSON file")
     import_parser.add_argument("-y", "--yes", action="store_true", help="Commit changes (skip confirmation prompt / dry-run)")

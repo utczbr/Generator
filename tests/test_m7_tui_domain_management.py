@@ -53,6 +53,8 @@ def sandbox_env(tmp_path: Path) -> Generator[Path, None, None]:
     real_domains = Path("synth/semantics/domains").resolve()
     temp_domains = tmp_path / "domains"
     shutil.copytree(real_domains, temp_domains)
+    if (temp_domains / ".backups").exists():
+        shutil.rmtree(temp_domains / ".backups")
 
     # Backup custom_config.py content
     custom_cfg_path = Path("custom_config.py")
@@ -474,3 +476,136 @@ def test_run_main_menu_exit(monkeypatch):
     monkeypatch.setattr("builtins.input", lambda _: next(inputs))
     # Should complete without error
     run_main_menu(ascii_mode=True, no_color=True)
+
+
+# ==============================================================================
+# BATCH FOLDER IMPORT & DOMAIN INFERENCE
+# ==============================================================================
+
+def test_infer_domain_from_filename():
+    """Verify filename-to-domain inference logic (exact, prefix, plural aliases, token scan)."""
+    from synth.semantics.admin.normalize import infer_domain_from_filename
+
+    registered = ["business", "demographic", "engineering", "finance", "healthcare", "technology"]
+
+    # 1. Exact match
+    assert infer_domain_from_filename("business.csv", registered) == "business"
+    assert infer_domain_from_filename("engineering.xlsx", registered) == "engineering"
+
+    # 2. Separator prefix (underscore / hyphen)
+    assert infer_domain_from_filename("business_domain_titles.csv", registered) == "business"
+    assert infer_domain_from_filename("engineering-metrics.csv", registered) == "engineering"
+    assert infer_domain_from_filename("healthcare_pairs_template.xlsx", registered) == "healthcare"
+
+    # 3. Plural aliases
+    assert infer_domain_from_filename("demographics_domain_pairs.csv", registered) == "demographic"
+    assert infer_domain_from_filename("technologies_titles.csv", registered) == "technology"
+
+    # 4. In-token match
+    assert infer_domain_from_filename("q3_finance_metrics.csv", registered) == "finance"
+
+    # 5. Non-matching / unknown
+    assert infer_domain_from_filename("random_dataset.csv", registered) is None
+    assert infer_domain_from_filename("domain_template.csv", registered) is None
+
+
+def test_batch_plans_serialization():
+    """Verify batch_plans_to_dict and batch_plans_to_json structure."""
+    from synth.semantics.admin.plan import IngestPlan, batch_plans_to_dict, batch_plans_to_json
+
+    p1 = IngestPlan(source_file="file1.csv", target_domain="business", policy="skip", status_counts={"NEW": 3, "DUPLICATE": 1})
+    p2 = IngestPlan(source_file="file2.csv", target_domain="engineering", policy="skip", status_counts={"NEW": 2, "SHARED": 1})
+
+    b_dict = batch_plans_to_dict("templates/news", [p1, p2], policy="skip")
+    assert b_dict["mode"] == "batch"
+    assert b_dict["source_folder"] == "templates/news"
+    assert b_dict["files_count"] == 2
+    assert b_dict["batch_totals"]["NEW"] == 5
+    assert b_dict["batch_totals"]["DUPLICATE"] == 1
+    assert b_dict["batch_totals"]["SHARED"] == 1
+    assert len(b_dict["files"]) == 2
+
+    b_json = batch_plans_to_json("templates/news", [p1, p2], policy="skip")
+    assert '"mode": "batch"' in b_json
+    assert '"files_count": 2' in b_json
+
+
+def test_batch_folder_import_flow(sandbox_env: Path, tmp_path: Path, monkeypatch):
+    """Test importing a directory with multiple domain CSVs atomically."""
+    from synth.semantics.admin.tui import run_import_flow
+    from synth.semantics.loader import SemanticRegistry
+
+    monkeypatch.setenv("SYNTH_DOMAINS_DIR", str(sandbox_env))
+
+    # Create folder with 2 CSVs with domain prefixes
+    batch_dir = tmp_path / "news_batch"
+    batch_dir.mkdir()
+
+    csv_business = batch_dir / "business_domain_titles.csv"
+    csv_business.write_text(
+        "Title Template,Domain,Allowed Chart Types\n"
+        "Quarterly Revenue Overview for Business,business,bar|line\n",
+        encoding="utf-8",
+    )
+
+    csv_engineering = batch_dir / "engineering_domain_titles.csv"
+    csv_engineering.write_text(
+        "Title Template,Domain,Allowed Chart Types\n"
+        "Thermal Stress Distribution across Turbines,engineering,scatter|heatmap\n",
+        encoding="utf-8",
+    )
+
+    report_out = tmp_path / "batch_report.json"
+
+    # Run batch import flow
+    ret = run_import_flow(
+        ascii_mode=True,
+        no_color=True,
+        interactive=False,
+        file_path=str(batch_dir),
+        auto_commit=True,
+        report_path=str(report_out),
+    )
+    assert ret == 0
+
+    # Verify report was generated
+    assert report_out.exists()
+    rep_data = json.loads(report_out.read_text(encoding="utf-8"))
+    assert rep_data["mode"] == "batch"
+    assert rep_data["files_count"] == 2
+    assert rep_data["batch_totals"].get("NEW", 0) >= 2
+
+    # Verify both manifests got the new titles on disk
+    reg = SemanticRegistry.load()
+    biz_titles = [t.title for t in reg.titles_catalog if "business" in t.domain_tags]
+    eng_titles = [t.title for t in reg.titles_catalog if "engineering" in t.domain_tags]
+
+    assert any("Quarterly Revenue Overview for Business" in t for t in biz_titles)
+    assert any("Thermal Stress Distribution across Turbines" in t for t in eng_titles)
+
+
+def test_batch_folder_import_cli_headless(sandbox_env: Path, tmp_path: Path):
+    """Test `scripts/manage_domains.py import <dir> -y` without specifying -d/--domain."""
+    batch_dir = tmp_path / "cli_batch"
+    batch_dir.mkdir()
+
+    csv1 = batch_dir / "business_extra_titles.csv"
+    csv1.write_text(
+        "Title Template,Domain,Allowed Chart Types\n"
+        "Annual Operating Margin Breakdown,business,bar|box\n",
+        encoding="utf-8",
+    )
+
+    env = dict(os.environ, SYNTH_DOMAINS_DIR=str(sandbox_env))
+    cmd = [
+        sys.executable,
+        "scripts/manage_domains.py",
+        "import",
+        str(batch_dir),
+        "-y",
+    ]
+    res = subprocess.run(cmd, capture_output=True, text=True, env=env)
+    assert res.returncode == 0
+    assert "Found 1 file(s) to import:" in res.stdout
+    assert "Transaction successfully committed!" in res.stdout
+

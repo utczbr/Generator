@@ -54,6 +54,8 @@ METRIC_HEADER_MAP: Dict[str, str] = {
 TITLE_HEADER_MAP: Dict[str, str] = {
     "title": "title",
     "charttitle": "title",
+    "titletemplate": "title",
+    "template": "title",
     "name": "title",
     "allowedcharttypes": "allowed_chart_types",
     "charttypes": "allowed_chart_types",
@@ -157,14 +159,14 @@ def _clean_header_key(col: Any) -> str:
 
 
 def _parse_comma_list(val: Any) -> List[str]:
-    """Parse comma, semicolon, or newline separated list of values."""
+    """Parse comma, semicolon, pipe, or newline separated list of values."""
     if val is None:
         return []
     s = str(val).strip()
     if not s:
         return []
-    # Split by comma or semicolon
-    raw_items = [part.strip() for part in s.replace(";", ",").replace("\n", ",").split(",")]
+    # Split by comma, semicolon, pipe, or newline
+    raw_items = [part.strip() for part in s.replace(";", ",").replace("|", ",").replace("\n", ",").split(",")]
     return [item for item in raw_items if item]
 
 

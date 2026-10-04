@@ -391,3 +391,29 @@ def test_plan_status_counts_for_titles_and_pairs(tmp_path):
     plan = build_plan(ingest_res, "test_dom", policy="skip", domains_dir=tmp_path)
     assert plan.status_counts["NEW"] == 2
     assert plan.status_counts["DUPLICATE"] == 0
+
+
+def test_audit_chart_type_coverage_and_export(tmp_path):
+    """Verify compute_chart_type_stats and AuditReport.to_dict() chart type coverage serialization."""
+    from synth.semantics.admin.audit import compute_chart_type_stats, run_audit
+    from synth.semantics.loader import ALL_CHART_TYPES
+
+    stats = compute_chart_type_stats()
+    assert "chart_type_totals" in stats
+    assert "by_domain" in stats
+    for ct in ALL_CHART_TYPES:
+        assert ct in stats["chart_type_totals"]
+        assert stats["chart_type_totals"][ct] >= 0
+
+    report = run_audit()
+    d = report.to_dict()
+    assert "chart_type_coverage" in d
+    assert "chart_type_totals" in d["summary"]
+    for ct in ALL_CHART_TYPES:
+        assert ct in d["summary"]["chart_type_totals"]
+
+    # Verify JSON export
+    rep_file = tmp_path / "audit_report.json"
+    rep_file.write_text(json.dumps(d, indent=2), encoding="utf-8")
+    loaded = json.loads(rep_file.read_text(encoding="utf-8"))
+    assert loaded["chart_type_coverage"]["chart_type_totals"] == stats["chart_type_totals"]
