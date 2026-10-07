@@ -34,6 +34,7 @@ from synth.semantics.admin.configsvc import (
     patch_config_defaults_literal,
 )
 from synth.semantics.admin.runner import run_generator_subprocess, GeneratorSubprocessResult
+from synth.semantics.admin.plan import IngestPlan
 
 # ANSI color codes
 COLORS = {
@@ -1537,7 +1538,7 @@ def render_preflight_table(plan: IngestPlan, ascii_mode: bool = False, no_color:
 
 def render_batch_preflight_table(
     folder_name: str,
-    plans: List[Any],
+    plans: List[IngestPlan],
     ascii_mode: bool = False,
     no_color: bool = False,
 ) -> str:

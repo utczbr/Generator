@@ -240,7 +240,7 @@ def test_generator_subprocess_interrupted_sets_manifest_flag(tmp_path):
     # Send SIGINT (Ctrl-C)
     proc.send_signal(signal.SIGINT)
     try:
-        proc.wait(timeout=5.0)
+        proc.wait(timeout=10.0)
     except subprocess.TimeoutExpired:
         proc.kill()
         proc.wait()

@@ -43,12 +43,13 @@ except ImportError:
     cv2 = None
     _HAS_CV2 = False
 
-from versions import (
+from config_defaults import (
     ANNOTATION_SCHEMA_VERSION, DATASET_VERSION,
     ANNOTATION_SCHEMA_VERSION_V4, DATASET_VERSION_V4,
 )
+from feature_rng import feature_rng, feature_seed
 from synth.semantics import sample_chart_title
-from themes import THEMES
+from themes import THEMES, PUBLICATION_THEMES
 from effects import (
     apply_jpeg_compression_effect, apply_noise_effect, apply_blur_effect,
     apply_motion_blur_effect, apply_low_res_effect, apply_pixelation_effect,
@@ -58,7 +59,8 @@ from effects import (
     apply_text_degradation_effect, apply_grid_occlusion_effect, apply_scan_rotation_effect,
     apply_grayscale_effect, apply_perspective_warp_effect,
     apply_uneven_lighting_effect, apply_chromatic_aberration_effect,
-    apply_pdf_document_context_effect, apply_page_curl
+    apply_pdf_document_context_effect, apply_page_curl, apply_resize_effect,
+    apply_canvas_reframe_effect
 )
 from chart import (
     _generate_bar_chart, _generate_line_chart, _generate_scatter_chart,
@@ -102,10 +104,12 @@ def _build_chart_class_maps(cfg):
         'box': cfg.get('CLASS_MAP_BOX', {}),
         'histogram': cfg.get('CLASS_MAP_HISTOGRAM', {}),
         'heatmap': cfg.get('CLASS_MAP_HEATMAP', {}),
+        'area': cfg.get('CLASS_MAP_AREA_OBJ', {}),
         'area_obj': cfg.get('CLASS_MAP_AREA_OBJ', {}),
         'area_seg': cfg.get('CLASS_MAP_AREA_SEG', {}),
         'pie': cfg.get('CLASS_MAP_PIE_OBJ', {}),
         'pie_pose': cfg.get('CLASS_MAP_PIE_POSE', {}),
+        'line': cfg.get('CLASS_MAP_LINE_OBJ', {}),
         'line_obj': cfg.get('CLASS_MAP_LINE_OBJ', {}),
         'line_seg': cfg.get('CLASS_MAP_LINE_SEG', {}),
         'line_markers': cfg.get('CLASS_MAP_LINE_MARKERS', {})
@@ -500,7 +504,7 @@ def get_granular_annotations(fig, chart_info_map, cls_map):
         # Axis Titles
         if 'axis_title' in reverse_map:
             # X-axis title
-            if ax.xaxis.label.get_visible() and ax.xaxis.label.get_text().strip():
+            if ax.xaxis.get_visible() and ax.xaxis.label.get_visible() and ax.xaxis.label.get_text().strip():
                 try:
                     xlabel_bbox, xlabel_obb = get_text_obb_and_bbox(ax.xaxis.label, renderer, img_h=img_h)
                     if add_unique_annotation(reverse_map['axis_title'], xlabel_bbox, text=ax.xaxis.label.get_text().strip(), obb=xlabel_obb):
@@ -511,7 +515,7 @@ def get_granular_annotations(fig, chart_info_map, cls_map):
                         print(f"DEBUG: AX[{ax_idx}]: X-axis title bbox failed: {e}")
 
             # Y-axis title
-            if ax.yaxis.label.get_visible() and ax.yaxis.label.get_text().strip():
+            if ax.yaxis.get_visible() and ax.yaxis.label.get_visible() and ax.yaxis.label.get_text().strip():
                 try:
                     ylabel_bbox, ylabel_obb = get_text_obb_and_bbox(ax.yaxis.label, renderer, img_h=img_h)
                     if add_unique_annotation(reverse_map['axis_title'], ylabel_bbox, text=ax.yaxis.label.get_text().strip(), obb=ylabel_obb):
@@ -532,31 +536,50 @@ def get_granular_annotations(fig, chart_info_map, cls_map):
 
             # X-axis labels
             x_labels_added = 0
-            for label in ax.get_xticklabels():
-                if label.get_visible() and label.get_text().strip():
-                    if x_min <= label.get_position()[0] <= x_max:
-                        if has_non_background_pixels(label, fig, ax, bg_color, threshold=5):
-                            try:
-                                label_bbox, label_obb = get_text_obb_and_bbox(label, renderer, img_h=img_h)
-                                if add_unique_annotation(reverse_map['axis_labels'], label_bbox, text=label.get_text().strip(), obb=label_obb):
-                                    x_labels_added += 1
-                            except Exception as e:
-                                if GENERATION_CONFIG.get('debug_mode', False):
-                                    print(f"DEBUG: AX[{ax_idx}]: X-label bbox failed: {e}")
+            if ax.xaxis.get_visible():
+                for label in ax.get_xticklabels():
+                    if label.get_visible() and label.get_text().strip():
+                        if x_min <= label.get_position()[0] <= x_max:
+                            if has_non_background_pixels(label, fig, ax, bg_color, threshold=5):
+                                try:
+                                    label_bbox, label_obb = get_text_obb_and_bbox(label, renderer, img_h=img_h)
+                                    if add_unique_annotation(reverse_map['axis_labels'], label_bbox, text=label.get_text().strip(), obb=label_obb):
+                                        x_labels_added += 1
+                                except Exception as e:
+                                    if GENERATION_CONFIG.get('debug_mode', False):
+                                        print(f"DEBUG: AX[{ax_idx}]: X-label bbox failed: {e}")
 
             # Y-axis labels
             y_labels_added = 0
-            for label in ax.get_yticklabels():
-                if label.get_visible() and label.get_text().strip():
-                    if y_min <= label.get_position()[1] <= y_max:
-                        if has_non_background_pixels(label, fig, ax, bg_color, threshold=5):
+            if ax.yaxis.get_visible():
+                for label in ax.get_yticklabels():
+                    if label.get_visible() and label.get_text().strip():
+                        if y_min <= label.get_position()[1] <= y_max:
+                            if has_non_background_pixels(label, fig, ax, bg_color, threshold=5):
+                                try:
+                                    label_bbox, label_obb = get_text_obb_and_bbox(label, renderer, img_h=img_h)
+                                    if add_unique_annotation(reverse_map['axis_labels'], label_bbox, text=label.get_text().strip(), obb=label_obb):
+                                        y_labels_added += 1
+                                except Exception as e:
+                                    if GENERATION_CONFIG.get('debug_mode', False):
+                                        print(f"DEBUG: AX[{ax_idx}]: Y-label bbox failed: {e}")
+
+            # Offset text (scientific multiplier, e.g. \times 10^4)
+            for axis_obj in (ax.xaxis, ax.yaxis):
+                if axis_obj.get_visible():
+                    off_text = axis_obj.get_offset_text()
+                    if off_text and off_text.get_visible() and off_text.get_text().strip():
+                        if has_non_background_pixels(off_text, fig, ax, bg_color, threshold=5):
                             try:
-                                label_bbox, label_obb = get_text_obb_and_bbox(label, renderer, img_h=img_h)
-                                if add_unique_annotation(reverse_map['axis_labels'], label_bbox, text=label.get_text().strip(), obb=label_obb):
-                                    y_labels_added += 1
+                                off_bbox, off_obb = get_text_obb_and_bbox(off_text, renderer, img_h=img_h)
+                                if add_unique_annotation(reverse_map['axis_labels'], off_bbox, text=off_text.get_text().strip(), obb=off_obb):
+                                    if axis_obj is ax.xaxis:
+                                        x_labels_added += 1
+                                    else:
+                                        y_labels_added += 1
                             except Exception as e:
                                 if GENERATION_CONFIG.get('debug_mode', False):
-                                    print(f"DEBUG: AX[{ax_idx}]: Y-label bbox failed: {e}")
+                                    print(f"DEBUG: AX[{ax_idx}]: Offset text bbox failed: {e}")
 
             if GENERATION_CONFIG.get('debug_mode', False):
                 print(f"DEBUG: AX[{ax_idx}]: Added {x_labels_added} x-labels, {y_labels_added} y-labels")
@@ -693,30 +716,32 @@ def get_granular_annotations(fig, chart_info_map, cls_map):
                 y_min, y_max = sorted(ax.get_ylim())
 
                 # X-axis tick labels
-                for label in ax.get_xticklabels():
-                    if label.get_visible() and label.get_text().strip():
-                        if x_min <= label.get_position()[0] <= x_max:
-                            if has_non_background_pixels(label, fig, ax, bg_color, threshold=5):
-                                try:
-                                    label_bbox = label.get_window_extent(renderer)
-                                    if add_unique_annotation(reverse_map['axis_labels'], label_bbox, text=label.get_text().strip()):
-                                        labels_added += 1
-                                except Exception as e:
-                                    if debug:
-                                        print(f"DEBUG [AX{ax_idx}] Histogram X-label error: {e}")
+                if ax.xaxis.get_visible():
+                    for label in ax.get_xticklabels():
+                        if label.get_visible() and label.get_text().strip():
+                            if x_min <= label.get_position()[0] <= x_max:
+                                if has_non_background_pixels(label, fig, ax, bg_color, threshold=5):
+                                    try:
+                                        label_bbox = label.get_window_extent(renderer)
+                                        if add_unique_annotation(reverse_map['axis_labels'], label_bbox, text=label.get_text().strip()):
+                                            labels_added += 1
+                                    except Exception as e:
+                                        if debug:
+                                            print(f"DEBUG [AX{ax_idx}] Histogram X-label error: {e}")
 
                 # Y-axis tick labels
-                for label in ax.get_yticklabels():
-                    if label.get_visible() and label.get_text().strip():
-                        if y_min <= label.get_position()[1] <= y_max:
-                            if has_non_background_pixels(label, fig, ax, bg_color, threshold=5):
-                                try:
-                                    label_bbox = label.get_window_extent(renderer)
-                                    if add_unique_annotation(reverse_map['axis_labels'], label_bbox, text=label.get_text().strip()):
-                                        labels_added += 1
-                                except Exception as e:
-                                    if debug:
-                                        print(f"DEBUG [AX{ax_idx}] Histogram Y-label error: {e}")
+                if ax.yaxis.get_visible():
+                    for label in ax.get_yticklabels():
+                        if label.get_visible() and label.get_text().strip():
+                            if y_min <= label.get_position()[1] <= y_max:
+                                if has_non_background_pixels(label, fig, ax, bg_color, threshold=5):
+                                    try:
+                                        label_bbox = label.get_window_extent(renderer)
+                                        if add_unique_annotation(reverse_map['axis_labels'], label_bbox, text=label.get_text().strip()):
+                                            labels_added += 1
+                                    except Exception as e:
+                                        if debug:
+                                            print(f"DEBUG [AX{ax_idx}] Histogram Y-label error: {e}")
 
                 if debug:
                     print(f"DEBUG [AX{ax_idx}] HISTOGRAM axis labels: {labels_added}")
@@ -1062,30 +1087,32 @@ def get_granular_annotations(fig, chart_info_map, cls_map):
                 y_min, y_max = sorted(ax.get_ylim())
 
                 # X-axis tick labels
-                for label in ax.get_xticklabels():
-                    if label.get_visible() and label.get_text().strip():
-                        if x_min <= label.get_position()[0] <= x_max:
-                            if has_non_background_pixels(label, fig, ax, bg_color, threshold=5):
-                                try:
-                                    label_bbox, label_obb = get_text_obb_and_bbox(label, renderer, img_h=img_h)
-                                    if add_unique_annotation(reverse_map['axis_labels'], label_bbox, text=label.get_text().strip(), obb=label_obb):
-                                        labels_added += 1
-                                except Exception as e:
-                                    if debug:
-                                        print(f"DEBUG: AX[{ax_idx}]: Heatmap X-label error: {e}")
+                if ax.xaxis.get_visible():
+                    for label in ax.get_xticklabels():
+                        if label.get_visible() and label.get_text().strip():
+                            if x_min <= label.get_position()[0] <= x_max:
+                                if has_non_background_pixels(label, fig, ax, bg_color, threshold=5):
+                                    try:
+                                        label_bbox, label_obb = get_text_obb_and_bbox(label, renderer, img_h=img_h)
+                                        if add_unique_annotation(reverse_map['axis_labels'], label_bbox, text=label.get_text().strip(), obb=label_obb):
+                                            labels_added += 1
+                                    except Exception as e:
+                                        if debug:
+                                            print(f"DEBUG: AX[{ax_idx}]: Heatmap X-label error: {e}")
 
                 # Y-axis tick labels
-                for label in ax.get_yticklabels():
-                    if label.get_visible() and label.get_text().strip():
-                        if y_min <= label.get_position()[1] <= y_max:
-                            if has_non_background_pixels(label, fig, ax, bg_color, threshold=5):
-                                try:
-                                    label_bbox, label_obb = get_text_obb_and_bbox(label, renderer, img_h=img_h)
-                                    if add_unique_annotation(reverse_map['axis_labels'], label_bbox, text=label.get_text().strip(), obb=label_obb):
-                                        labels_added += 1
-                                except Exception as e:
-                                    if debug:
-                                        print(f"DEBUG: AX[{ax_idx}]: Heatmap Y-label error: {e}")
+                if ax.yaxis.get_visible():
+                    for label in ax.get_yticklabels():
+                        if label.get_visible() and label.get_text().strip():
+                            if y_min <= label.get_position()[1] <= y_max:
+                                if has_non_background_pixels(label, fig, ax, bg_color, threshold=5):
+                                    try:
+                                        label_bbox, label_obb = get_text_obb_and_bbox(label, renderer, img_h=img_h)
+                                        if add_unique_annotation(reverse_map['axis_labels'], label_bbox, text=label.get_text().strip(), obb=label_obb):
+                                            labels_added += 1
+                                    except Exception as e:
+                                        if debug:
+                                            print(f"DEBUG: AX[{ax_idx}]: Heatmap Y-label error: {e}")
 
                 if debug:
                     print(f"DEBUG: AX[{ax_idx}]: HEATMAP axis labels: {labels_added}")
@@ -1375,10 +1402,31 @@ def get_granular_annotations(fig, chart_info_map, cls_map):
                 try:
                     # ErrorbarContainer processing
                     plotline, caplines, barlinecols = artist.lines
-                    if barlinecols and caplines:
-                        artist_bbox = artist.get_window_extent(renderer)
-                        artist_bbox = ensure_min_bbox_thickness(artist_bbox, min_size=4.0)
-                        add_unique_annotation(reverse_map['error_bar'], artist_bbox)
+                    if barlinecols:
+                        for bl in barlinecols:
+                            segs = bl.get_segments()
+                            for s_idx, seg in enumerate(segs):
+                                pts = ax.transData.transform(seg)
+                                x0 = float(np.min(pts[:, 0]))
+                                x1 = float(np.max(pts[:, 0]))
+                                y0 = float(np.min(pts[:, 1]))
+                                y1 = float(np.max(pts[:, 1]))
+                                if caplines:
+                                    for cap in caplines:
+                                        try:
+                                            xd, yd = cap.get_data()
+                                            if s_idx < len(xd):
+                                                c_pix = ax.transData.transform_point((xd[s_idx], yd[s_idx]))
+                                                half_sz = (cap.get_markersize() * fig.dpi / 72.0) / 2.0
+                                                x0 = min(x0, c_pix[0] - half_sz)
+                                                x1 = max(x1, c_pix[0] + half_sz)
+                                                y0 = min(y0, c_pix[1] - half_sz)
+                                                y1 = max(y1, c_pix[1] + half_sz)
+                                        except Exception:
+                                            pass
+                                eb_bbox = transforms.Bbox.from_extents(x0, y0, x1, y1)
+                                eb_bbox = ensure_min_bbox_thickness(eb_bbox, min_size=4.0)
+                                add_unique_annotation(reverse_map['error_bar'], eb_bbox)
                 except Exception as e:
                     if GENERATION_CONFIG.get('debug_mode', False):
                         print(f"DEBUG: AX[{ax_idx}]: Error bar processing failed: {e}")
@@ -1402,17 +1450,17 @@ def get_granular_annotations(fig, chart_info_map, cls_map):
                     if GENERATION_CONFIG.get('debug_mode', False):
                         print(f"DEBUG: AX[{ax_idx}]: Text processing failed: {e}")
 
-        if GENERATION_CONFIG.get('debug_mode', False) or GENERATION_CONFIG.get('debug_annotations', False):
-            print(f"DEBUG: Total annotations generated: {len(annotations)}")
-            class_counts = {}
-            for ann in annotations:
-                class_id = ann['class_id']
-                class_counts[class_id] = class_counts.get(class_id, 0) + 1
-            print(f"DEBUG: Class distribution: {class_counts}")
+    if GENERATION_CONFIG.get('debug_mode', False) or GENERATION_CONFIG.get('debug_annotations', False):
+        print(f"DEBUG: Total annotations generated: {len(annotations)}")
+        class_counts = {}
+        for ann in annotations:
+            class_id = ann['class_id']
+            class_counts[class_id] = class_counts.get(class_id, 0) + 1
+        print(f"DEBUG: Class distribution: {class_counts}")
 
-        return annotations
+    return annotations
 
-def filter_overlapping_annotations(annotations, iou_threshold=0.7, cls_map=None, occlusion_threshold=0.85, cull_occluded=False):
+def filter_overlapping_annotations(annotations, iou_threshold=0.7, cls_map=None, occlusion_threshold=0.85, cull_occluded=False, filter_stats=None, is_legacy=True):
     """
     Remove annotations with high IoU overlap within the same class, and perform
     hierarchical cross-class occlusion detection against legend bounding boxes.
@@ -1518,13 +1566,27 @@ def filter_overlapping_annotations(annotations, iou_threshold=0.7, cls_map=None,
 
         keep = []
         for ann in class_anns:
+            if not is_legacy and ann.get('ignored'):
+                keep.append(ann)
+                continue
             is_duplicate = False
             for kept_ann in keep:
+                if kept_ann.get('ignored'):
+                    continue
                 if bbox_iou(ann['bbox'], kept_ann['bbox']) > iou_threshold:
                     is_duplicate = True
                     break
             if not is_duplicate:
                 keep.append(ann)
+            else:
+                if not is_legacy:
+                    ann['ignored'] = True
+                    ann['ignore_reason'] = 'duplicate'
+                    keep.append(ann)
+                if filter_stats is not None:
+                    c_id = ann.get('class_id')
+                    c_name = ann.get('class_name') or (cls_map.get(c_id) if cls_map else None) or (cls_map.get(str(c_id)) if cls_map else None) or str(c_id)
+                    filter_stats['overlap'][c_name] = filter_stats['overlap'].get(c_name, 0) + 1
 
         filtered.extend(keep)
 
@@ -1730,6 +1792,8 @@ EFFECT_REGISTRY = {
     "uneven_lighting": apply_uneven_lighting_effect,
     "chromatic_aberration": apply_chromatic_aberration_effect,
     "pdf_document_context": apply_pdf_document_context_effect,
+    "canvas_reframe": apply_canvas_reframe_effect,
+    "resize": apply_resize_effect,
 }
 
 EFFECT_ALIASES = {
@@ -1739,7 +1803,170 @@ EFFECT_ALIASES = {
 }
 
 
-def apply_realism_effects(pil_img, annotations, effects_config, extra_annotation_sets=None):
+def _compute_content_guard(
+    pil_img,
+    annotations,
+    extra_annotation_sets,
+    transform_steps,
+    init_w,
+    init_h,
+    apply_transform_fn,
+    subdivide_poly_fn,
+    ink_tol=5,
+):
+    """
+    Compute content guard bounding box (cx0, cy0, cx1, cy1) in current image coordinates (FR-110).
+    Union of (a) ink bounding box (border-estimated background, tolerance ink_tol)
+    and (b) all annotation geometry in all streams mapped through transform_steps, clamped to canvas.
+    When a non_rigid_mesh step precedes, uses densified mapping and cv2.minAreaRect OBB corners.
+    """
+    cur_w, cur_h = pil_img.size
+
+    # 1. Ink bounding box
+    arr = np.asarray(pil_img.convert("RGB"), dtype=np.int16)
+    borders = np.concatenate([arr[0, :, :], arr[-1, :, :], arr[:, 0, :], arr[:, -1, :]], axis=0)
+    bg_color = np.median(borders, axis=0)
+    diff = np.max(np.abs(arr - bg_color), axis=-1)
+    ink_y, ink_x = np.where(diff > ink_tol)
+    if len(ink_x) > 0:
+        min_x = float(ink_x.min())
+        min_y = float(ink_y.min())
+        max_x = float(ink_x.max() + 1)
+        max_y = float(ink_y.max() + 1)
+    else:
+        min_x = float("inf")
+        min_y = float("inf")
+        max_x = float("-inf")
+        max_y = float("-inf")
+
+    # 2. Annotation geometry across all streams
+    target_lists = [annotations]
+    if extra_annotation_sets:
+        target_lists.extend(extra_annotation_sets)
+
+    has_non_rigid = any(step[0] == "non_rigid_mesh" for step in transform_steps)
+
+    for ann_list in target_lists:
+        for ann in ann_list:
+            has_kpts = ("keypoints" in ann and ann["keypoints"])
+
+            # A. Bounding box
+            if 'bbox' in ann and ann['bbox'] is not None and not (has_kpts and isinstance(ann['bbox'], tuple)):
+                bbox = ann['bbox']
+                if hasattr(bbox, 'x0'):
+                    x0, y0, x1, y1 = bbox.x0, bbox.y0, bbox.x1, bbox.y1
+                else:
+                    x0, y0, x1, y1 = bbox
+                if has_non_rigid:
+                    pts_to_warp = []
+                    for t in np.linspace(0.0, 1.0, 16, endpoint=False):
+                        pts_to_warp.append((x0 + t * (x1 - x0), y0))
+                    for t in np.linspace(0.0, 1.0, 16, endpoint=False):
+                        pts_to_warp.append((x1, y0 + t * (y1 - y0)))
+                    for t in np.linspace(0.0, 1.0, 16, endpoint=False):
+                        pts_to_warp.append((x1 - t * (x1 - x0), y1))
+                    for t in np.linspace(0.0, 1.0, 16, endpoint=False):
+                        pts_to_warp.append((x0, y1 - t * (y1 - y0)))
+                else:
+                    pts_to_warp = [(x0, y0), (x1, y0), (x1, y1), (x0, y1)]
+
+                for xm, ym in pts_to_warp:
+                    xt, yt = apply_transform_fn(xm, ym)
+                    xi = max(0.0, min(float(cur_w), xt))
+                    yi = max(0.0, min(float(cur_h), cur_h - yt))
+                    min_x = min(min_x, xi)
+                    max_x = max(max_x, xi)
+                    min_y = min(min_y, yi)
+                    max_y = max(max_y, yi)
+
+            # B. Keypoints
+            if has_kpts:
+                for kp in ann["keypoints"]:
+                    x_val, y_val = kp[0], kp[1]
+                    is_norm = (0.0 <= x_val <= 1.0 and 0.0 <= y_val <= 1.0)
+                    x_img = x_val * init_w if is_norm else x_val
+                    y_img = y_val * init_h if is_norm else y_val
+                    xm = x_img
+                    ym = init_h - y_img
+                    xt, yt = apply_transform_fn(xm, ym)
+                    xi = max(0.0, min(float(cur_w), xt))
+                    yi = max(0.0, min(float(cur_h), cur_h - yt))
+                    min_x = min(min_x, xi)
+                    max_x = max(max_x, xi)
+                    min_y = min(min_y, yi)
+                    max_y = max(max_y, yi)
+
+            # C. Polygons
+            for p_key in ("polygon", "amodal_polygon", "modal_polygon"):
+                if p_key in ann and ann[p_key]:
+                    poly_pts = ann[p_key]
+                    if has_non_rigid and len(poly_pts) >= 3:
+                        poly_pts = subdivide_poly_fn(poly_pts, max_segment_len=15.0)
+                    for px, py in poly_pts:
+                        xm = float(px)
+                        ym = float(init_h - py)
+                        xt, yt = apply_transform_fn(xm, ym)
+                        xi = max(0.0, min(float(cur_w), xt))
+                        yi = max(0.0, min(float(cur_h), cur_h - yt))
+                        min_x = min(min_x, xi)
+                        max_x = max(max_x, xi)
+                        min_y = min(min_y, yi)
+                        max_y = max(max_y, yi)
+
+            # D. OBB
+            if "obb" in ann and ann["obb"]:
+                raw_obb = ann["obb"]
+                processed_obb = False
+                if has_non_rigid and len(raw_obb) == 4 and _HAS_CV2:
+                    try:
+                        dense_obb_pts = []
+                        for i in range(4):
+                            p1 = raw_obb[i]
+                            p2 = raw_obb[(i + 1) % 4]
+                            for t in np.linspace(0.0, 1.0, 16, endpoint=False):
+                                dense_obb_pts.append((p1[0] + t * (p2[0] - p1[0]), p1[1] + t * (p2[1] - p1[1])))
+                        warped_dense = []
+                        for px, py in dense_obb_pts:
+                            xm = float(px)
+                            ym = float(init_h - py)
+                            xt, yt = apply_transform_fn(xm, ym)
+                            warped_dense.append((xt, float(cur_h - yt)))
+                        rect = cv2.minAreaRect(np.asarray(warped_dense, dtype=np.float32))
+                        box = cv2.boxPoints(rect)
+                        for bx, by in box:
+                            xi = max(0.0, min(float(cur_w), float(bx)))
+                            yi = max(0.0, min(float(cur_h), float(by)))
+                            min_x = min(min_x, xi)
+                            max_x = max(max_x, xi)
+                            min_y = min(min_y, yi)
+                            max_y = max(max_y, yi)
+                        processed_obb = True
+                    except Exception:
+                        processed_obb = False
+
+                if not processed_obb:
+                    for px, py in raw_obb:
+                        xm = float(px)
+                        ym = float(init_h - py)
+                        xt, yt = apply_transform_fn(xm, ym)
+                        xi = max(0.0, min(float(cur_w), xt))
+                        yi = max(0.0, min(float(cur_h), cur_h - yt))
+                        min_x = min(min_x, xi)
+                        max_x = max(max_x, xi)
+                        min_y = min(min_y, yi)
+                        max_y = max(max_y, yi)
+
+    if math.isinf(min_x):
+        cx0, cy0, cx1, cy1 = 0.0, 0.0, float(cur_w), float(cur_h)
+    else:
+        cx0 = max(0.0, min(float(cur_w), min_x))
+        cy0 = max(0.0, min(float(cur_h), min_y))
+        cx1 = max(cx0, min(float(cur_w), max_x))
+        cy1 = max(cy0, min(float(cur_h), max_y))
+    return (cx0, cy0, cx1, cy1)
+
+
+def apply_realism_effects(pil_img, annotations, effects_config, extra_annotation_sets=None, seed=None, image_idx=0):
     """Apply realism effects and return modified image and annotations."""
     effect_function_map = EFFECT_REGISTRY
 
@@ -1814,25 +2041,54 @@ def apply_realism_effects(pil_img, annotations, effects_config, extra_annotation
                 w_pt = f_map([x_img, y_img])
                 x_t = float(w_pt[0])
                 y_t = float(step_h - w_pt[1])
+            elif step[0] == "scale":
+                x_t *= step[1]
+                y_t *= step[2]
         return x_t, y_t
 
     for effect_name, effect_config in effects_config.items():
         if not isinstance(effect_config, dict):
             continue
         p_val = effect_config.get('p', 1.0) if 'p' in effect_config else 1.0
-        if random.random() < p_val:
+        if effect_name == 'canvas_reframe':
+            from feature_rng import feature_rng
+            eff_rng = feature_rng(seed if seed is not None else 42, image_idx, "canvas_reframe")
+            should_apply = (eff_rng.random() < p_val)
+        else:
+            eff_rng = None
+            should_apply = (random.random() < p_val)
+
+        if should_apply:
             func = effect_function_map.get(effect_name)
             if not func:
                 continue
 
             print(f"    - Applying effect: {effect_name}")
             if 'params' in effect_config and isinstance(effect_config['params'], dict):
-                params = effect_config['params']
+                params = dict(effect_config['params'])
             else:
                 params = {k: v for k, v in effect_config.items() if k != 'p'}
 
+            if effect_name == 'canvas_reframe':
+                params['seed'] = seed
+                params['image_idx'] = image_idx
+                params['rng'] = eff_rng
+                use_guard = params.get('use_guard', True)
+                if use_guard and 'content_bbox' not in params:
+                    params['content_bbox'] = _compute_content_guard(
+                        pil_img,
+                        annotations,
+                        extra_annotation_sets,
+                        transform_steps,
+                        init_w,
+                        init_h,
+                        _apply_transform_steps,
+                        _subdivide_polygon,
+                        ink_tol=params.get('ink_tol', 5),
+                    )
+
             try:
-                if effect_name in ['clipping', 'pdf_document_context']:
+                if effect_name in ['clipping', 'pdf_document_context', 'canvas_reframe']:
                     pil_img, dx, dy = func(pil_img, **params)
                     total_dx += dx
                     total_dy += dy
@@ -1856,6 +2112,20 @@ def apply_realism_effects(pil_img, annotations, effects_config, extra_annotation
                     pil_img, forward_map = func(pil_img, return_forward_map=True, **params)
                     if forward_map is not None:
                         transform_steps.append(("non_rigid_mesh", forward_map, cur_w, cur_h))
+                elif effect_name == 'resize':
+                    cur_w, cur_h = pil_img.size
+                    res = func(pil_img, **params)
+                    if isinstance(res, tuple):
+                        pil_img = res[0]
+                        sx = res[1]
+                        sy = res[2]
+                        new_w, new_h = pil_img.size
+                    else:
+                        pil_img = res
+                        new_w, new_h = pil_img.size
+                        sx = new_w / cur_w if cur_w > 0 else 1.0
+                        sy = new_h / cur_h if cur_h > 0 else 1.0
+                    transform_steps.append(("scale", sx, sy, new_w, new_h))
                 else:
                     pil_img = func(pil_img, **params)
             except Exception as e:
@@ -1908,6 +2178,8 @@ def apply_realism_effects(pil_img, annotations, effects_config, extra_annotation
                     min_x, min_y, max_x, max_y = min(xs), min(ys), max(xs), max(ys)
                     if isinstance(bbox, BoundingBox):
                         ann['bbox'] = BoundingBox(min_x, min_y, max_x, max_y)
+                    elif isinstance(bbox, tuple):
+                        ann['bbox'] = (min_x, min_y, max_x, max_y)
                     else:
                         ann['bbox'] = transforms.Bbox.from_extents(min_x, min_y, max_x, max_y)
 
@@ -2027,7 +2299,7 @@ def apply_realism_effects(pil_img, annotations, effects_config, extra_annotation
     return pil_img, annotations
 
 
-def clip_bbox_to_viewport(ann_list, img_w, img_h, debug_mode=False):
+def clip_bbox_to_viewport(ann_list, img_w, img_h, debug_mode=False, filter_stats=None, cls_map=None, is_legacy=True):
     """
     Clip bounding box annotations to image viewport [0, img_w] x [0, img_h].
     Discards annotations only if post-clip area is degenerate (< 4 px² or w/h < 2 px).
@@ -2056,13 +2328,41 @@ def clip_bbox_to_viewport(ann_list, img_w, img_h, debug_mode=False):
             else:
                 ann['bbox'] = transforms.Bbox.from_extents(x0, y0, x1, y1)
             kept.append(ann)
+        elif not is_legacy and ann.get('ignored'):
+            if x1 > x0 and y1 > y0:
+                if isinstance(bbox, BoundingBox):
+                    ann['bbox'] = BoundingBox(x0, y0, x1, y1)
+                elif isinstance(bbox, (list, tuple)) and not hasattr(bbox, 'x0'):
+                    ann['bbox'] = (x0, y0, x1, y1)
+                else:
+                    ann['bbox'] = transforms.Bbox.from_extents(x0, y0, x1, y1)
+            kept.append(ann)
+        elif not is_legacy:
+            if filter_stats is not None:
+                c_id = ann.get('class_id')
+                c_name = ann.get('class_name') or (cls_map.get(c_id) if cls_map else None) or (cls_map.get(str(c_id)) if cls_map else None) or str(c_id)
+                filter_stats['viewport'][c_name] = filter_stats['viewport'].get(c_name, 0) + 1
+            if x1 > x0 and y1 > y0:
+                ann['ignored'] = True
+                ann['ignore_reason'] = "viewport_clipped"
+                if isinstance(bbox, BoundingBox):
+                    ann['bbox'] = BoundingBox(x0, y0, x1, y1)
+                elif isinstance(bbox, (list, tuple)) and not hasattr(bbox, 'x0'):
+                    ann['bbox'] = (x0, y0, x1, y1)
+                else:
+                    ann['bbox'] = transforms.Bbox.from_extents(x0, y0, x1, y1)
+                kept.append(ann)
         else:
+            if filter_stats is not None:
+                c_id = ann.get('class_id')
+                c_name = ann.get('class_name') or (cls_map.get(c_id) if cls_map else None) or (cls_map.get(str(c_id)) if cls_map else None) or str(c_id)
+                filter_stats['viewport'][c_name] = filter_stats['viewport'].get(c_name, 0) + 1
             if debug_mode:
                 print(f"    - Discarded annotation (degenerate area after clipping): class {ann.get('class_id')}")
     return kept
 
 
-def clip_polygon_to_viewport(ann_list, img_w, img_h, debug_mode=False):
+def clip_polygon_to_viewport(ann_list, img_w, img_h, debug_mode=False, filter_stats=None, cls_map=None, is_legacy=True):
     """
     Clip polygon contours to viewport [0, img_w] x [0, img_h] using analytical polygon intersection.
     Discards polygons only if post-clip bounding envelope is degenerate (< 4 px² or w/h < 2 px).
@@ -2099,6 +2399,10 @@ def clip_polygon_to_viewport(ann_list, img_w, img_h, debug_mode=False):
             ]
 
         if len(clamped) < 3:
+            if filter_stats is not None:
+                c_id = ann.get('class_id')
+                c_name = ann.get('class_name') or (cls_map.get(c_id) if cls_map else None) or (cls_map.get(str(c_id)) if cls_map else None) or str(c_id)
+                filter_stats['viewport'][c_name] = filter_stats['viewport'].get(c_name, 0) + 1
             if debug_mode:
                 print(f"    - Discarded polygon annotation (fewer than 3 vertices after clipping): class {ann.get('class_id')}")
             continue
@@ -2130,18 +2434,23 @@ def clip_polygon_to_viewport(ann_list, img_w, img_h, debug_mode=False):
                                     ann['segmentation'][area_key] = ann[area_key]
                         except Exception:
                             pass
-
             kept.append(ann)
         else:
+            if filter_stats is not None:
+                c_id = ann.get('class_id')
+                c_name = ann.get('class_name') or (cls_map.get(c_id) if cls_map else None) or (cls_map.get(str(c_id)) if cls_map else None) or str(c_id)
+                filter_stats['viewport'][c_name] = filter_stats['viewport'].get(c_name, 0) + 1
             if debug_mode:
                 print(f"    - Discarded polygon annotation (degenerate area after clipping): class {ann.get('class_id')}")
     return kept
 
 
-def save_annotations_yolo(annotations, img_w, img_h, output_path):
+def save_annotations_yolo(annotations, img_w, img_h, output_path, include_ignored: bool = False):
     """Save in proper YOLO format with normalization"""
     with open(output_path, 'w') as f:
         for ann in annotations:
+            if not include_ignored and ann.get('ignored'):
+                continue
             class_id = ann['class_id']
             bbox = ann['bbox']
 
@@ -2180,7 +2489,8 @@ def save_annotations_pose(
     annotations: List[Dict],
     img_w: int,
     img_h: int,
-    output_path: str
+    output_path: str,
+    include_ignored: bool = False,
 ):
     """
     Save YOLO pose format annotations to file.
@@ -2190,6 +2500,8 @@ def save_annotations_pose(
     """
     with open(output_path, 'w') as f:
         for ann in annotations:
+            if not include_ignored and ann.get('ignored'):
+                continue
             class_id = ann['class_id']
             cx, cy, w, h = ann['bbox']
             keypoints = ann['keypoints']
@@ -2205,7 +2517,8 @@ def save_annotations_yolo_obb(
     annotations: List[Dict],
     img_w: int,
     img_h: int,
-    output_path: str
+    output_path: str,
+    include_ignored: bool = False,
 ):
     """
     Save annotations in standard YOLOv8-OBB format:
@@ -2216,6 +2529,8 @@ def save_annotations_yolo_obb(
     """
     with open(output_path, 'w') as f:
         for ann in annotations:
+            if not include_ignored and ann.get('ignored'):
+                continue
             class_id = ann.get('class_id')
             if class_id is None:
                 continue
@@ -2557,7 +2872,7 @@ def extract_area_segmentation_annotations(
     return seg_annotations
 
 
-def save_annotations_yolo_seg(annotations: List[Dict], img_w: int, img_h: int, output_path: str):
+def save_annotations_yolo_seg(annotations: List[Dict], img_w: int, img_h: int, output_path: str, include_ignored: bool = False):
     """
     Saves annotations in YOLO instance-segmentation label format:
     <class_id> x1 y1 x2 y2 ... xn yn (normalized coordinates in [0, 1]).
@@ -2575,6 +2890,8 @@ def save_annotations_yolo_seg(annotations: List[Dict], img_w: int, img_h: int, o
     """
     with open(output_path, 'w') as f:
         for ann in annotations:
+            if not include_ignored and ann.get('ignored'):
+                continue
             class_id = ann['class_id']
             polygon = ann.get('polygon', [])
             if len(polygon) < 3:
@@ -2608,9 +2925,11 @@ _V3_DEPRECATION_WARNED = False
 
 
 def _use_schema_v4(cfg):
-    """v4.0 is the default. v3.0 is used only when the config asks for something other than v4.0."""
+    """v4.x is the default. v3.0 is used only when the config asks for v3.0."""
     requested = {cfg.get('annotation_schema_version'), cfg.get('detailed_schema')} - {None}
-    return not requested or ANNOTATION_SCHEMA_VERSION_V4 in requested
+    if not requested:
+        return True
+    return not any(v in ('v3', 'v3.0') for v in requested)
 
 
 def _warn_v3_deprecated():
@@ -3585,6 +3904,13 @@ def generate_single_chart(i, cfg, images_dir, labels_dir, output_dir):
         return generate_single_vegalite_chart(i, cfg, images_dir, labels_dir, output_dir)
 
     iter_start = time.time()
+    filter_stats = {
+        "size": {},
+        "aspect": {},
+        "viewport": {},
+        "duplicate": {},
+        "overlap": {},
+    }
     chart_generators = {
         "bar": _generate_bar_chart,
         "line": _generate_line_chart,
@@ -3600,6 +3926,10 @@ def generate_single_chart(i, cfg, images_dir, labels_dir, output_dir):
 
     if cfg['debug_mode']:
         print(f"DEBUG: Using DPI {output_dpi}")
+
+    typography_scale = 1.0
+    publication_theme_name = None
+    figsize = (7, 5)
 
     if cfg.get('dataset_format') == 'multi_chart_detection':
         scenario = 'multi'
@@ -3624,12 +3954,57 @@ def generate_single_chart(i, cfg, images_dir, labels_dir, output_dir):
             if cfg['debug_mode']:
                 print(f"DEBUG: Created multi-axis chart: {nrows}x{ncols}")
         else:
-            fig, ax = plt.subplots(figsize=(7, 5), dpi=output_dpi)
-            axes = [ax]
+            fig_cfg = cfg.get('figure', {})
+            if not isinstance(fig_cfg, dict):
+                fig_cfg = {}
+            size_mode = fig_cfg.get('size_mode', cfg.get('figure_size_mode', 'fixed'))
+
+            if size_mode == 'publication':
+                chosen_theme = cfg.get('theme')
+                if chosen_theme not in PUBLICATION_THEMES:
+                    chosen_theme = random.choice(list(PUBLICATION_THEMES.keys()))
+                publication_theme_name = chosen_theme
+                pub_theme_cfg = PUBLICATION_THEMES[chosen_theme]
+                figsize = pub_theme_cfg['figure_size']
+                output_dpi = pub_theme_cfg['dpi']
+                fig, ax = plt.subplots(figsize=figsize, dpi=output_dpi)
+                axes = [ax]
+                w, h = figsize
+                typography_scale = min(max(math.sqrt((w * h) / 35.0), 0.75), 1.25)
+            elif size_mode == 'randomized':
+                aspect_choices = fig_cfg.get('aspect_ratios', [(4, 3), (16, 9), (1, 1), (3, 4), (5, 4), (16, 10), (3, 2), (7, 5)])
+                width_min, width_max = fig_cfg.get('width_range', [5.5, 9.5])
+                width = random.uniform(width_min, width_max)
+                aspect_pair = random.choice(aspect_choices)
+                aspect = aspect_pair[0] / aspect_pair[1]
+                height = width / aspect
+                figsize = (round(width, 2), round(height, 2))
+                dpi_choices = fig_cfg.get('dpi_set', [96, 120, 150])
+                output_dpi = random.choice(dpi_choices)
+                target_ls = fig_cfg.get('target_long_side') or cfg.get('target_long_side')
+                if target_ls is not None:
+                    target_px = random.randint(int(target_ls[0]), int(target_ls[1])) if isinstance(target_ls, (list, tuple)) else int(target_ls)
+                    if target_px >= 1200:
+                        output_dpi = int(round(target_px / max(figsize)))
+                fig, ax = plt.subplots(figsize=figsize, dpi=output_dpi)
+                axes = [ax]
+                w, h = figsize
+                typography_scale = min(max(math.sqrt((w * h) / 35.0), 0.75), 1.25)
+            else:
+                target_ls = fig_cfg.get('target_long_side') or cfg.get('target_long_side')
+                if target_ls is not None:
+                    target_px = random.randint(int(target_ls[0]), int(target_ls[1])) if isinstance(target_ls, (list, tuple)) else int(target_ls)
+                    if target_px >= 1200:
+                        output_dpi = int(round(target_px / max(figsize)))
+                fig, ax = plt.subplots(figsize=figsize, dpi=output_dpi)
+                axes = [ax]
+                typography_scale = 1.0
 
             if cfg['debug_mode']:
-                print(f"DEBUG: Created single-axis chart: 1x1")
+                print(f"DEBUG: Created single-axis chart: 1x1, size_mode: {size_mode}, figsize: {figsize}, dpi: {output_dpi}")
 
+    fig._generator_config = cfg
+    fig._generator_image_idx = i
     try:
         chart_info_map = {}
 
@@ -3658,8 +4033,13 @@ def generate_single_chart(i, cfg, images_dir, labels_dir, output_dir):
             if cfg['debug_mode']:
                 print(f"DEBUG: AX[{ax_idx}]: Class map: {cls_map}")
 
-            theme_name = random.choice(list(THEMES.keys()))
-            theme_config = dict(THEMES[theme_name])
+            if publication_theme_name:
+                theme_name = publication_theme_name
+                theme_config = dict(PUBLICATION_THEMES[theme_name])
+            else:
+                theme_name = random.choice(list(THEMES.keys()))
+                theme_config = dict(THEMES[theme_name])
+            theme_config['profile'] = cfg.get('profile', 'legacy')
             if cfg.get('use_synthetic_data_engine', False):
                 theme_config['use_synthetic_data_engine'] = True
                 theme_config['synthetic_domain'] = cfg.get('synthetic_domain', None)
@@ -3680,6 +4060,12 @@ def generate_single_chart(i, cfg, images_dir, labels_dir, output_dir):
             theme_config['pie_config'] = cfg.get('pie_config', {})
             theme_config['heatmap_config'] = cfg.get('heatmap_config', {})
             theme_config['area_chart_config'] = cfg.get('area_chart_config', {})
+            theme_config['tick_rotation'] = cfg.get('tick_rotation', {})
+            theme_config['label_angle'] = cfg.get('label_angle', 0)
+            theme_config['profile'] = cfg.get('profile', 'legacy')
+            theme_config['typography_scale'] = typography_scale
+            theme_config['figure_size'] = figsize
+            theme_config['output_dpi'] = output_dpi
             style_config = {}
             cfg_semantic_domain = (
                 cfg.get('theme_config', {}).get('semantic_domain')
@@ -3854,7 +4240,7 @@ def generate_single_chart(i, cfg, images_dir, labels_dir, output_dir):
             elif chart_type == 'pie' and keypoint_data is not None:
                 chart_info_map[ax]['pie_geometry'] = keypoint_data
 
-        fig.tight_layout(pad=2.0)
+        fig.tight_layout(pad=2.0 * typography_scale)
 
         buf = io.BytesIO()
         fig.savefig(buf, format='png', dpi=output_dpi)
@@ -3943,47 +4329,44 @@ def generate_single_chart(i, cfg, images_dir, labels_dir, output_dir):
 
         annotations = filtered_annotations
 
-        # Dual-axis post-processing
-        if len(fig.axes) == 2 and any(v == 'axis_labels' for v in cls_map.values()):
-            print("    - Processing dual-axis chart annotations.")
+        # Dual-axis / X-axis label deduplication post-processing
+        if any(v == 'axis_labels' for v in cls_map.values()):
             axis_label_class_id = next((k for k, v in cls_map.items() if v == 'axis_labels'), None)
             if axis_label_class_id is not None:
                 renderer = fig.canvas.get_renderer()
-                main_ax_bbox = axes[0].get_window_extent(renderer)
-                xaxis_y_threshold = main_ax_bbox.y0
-
-                if cfg['debug_mode']:
-                    print(f"DEBUG: Dual-axis processing - threshold Y: {xaxis_y_threshold}")
-
                 x_axis_labels_to_filter = []
                 annotations_to_keep = []
 
                 for ann in annotations:
-                    is_class_8 = (ann['class_id'] == axis_label_class_id)
-                    is_on_x_axis = (ann['bbox'].y1 < xaxis_y_threshold)
+                    ax_i = ann.get('ax_index', 0)
+                    ax_obj = fig.axes[ax_i] if 0 <= ax_i < len(fig.axes) else fig.axes[0]
+                    ax_bbox = ax_obj.get_window_extent(renderer)
+                    is_axis_label = (ann['class_id'] == axis_label_class_id)
+                    is_on_x_axis = (ann['bbox'].y1 <= ax_bbox.y0 + 5)
 
-                    if is_class_8 and is_on_x_axis:
-                        x_axis_labels_to_filter.append(ann)
+                    if is_axis_label and is_on_x_axis:
+                        x_axis_labels_to_filter.append((ax_i, ann))
                     else:
                         annotations_to_keep.append(ann)
 
                 deduplicated_x_labels = []
-                seen_x_positions = []
+                seen_x_by_axis = {}
                 tolerance = 5
 
-                for ann in sorted(x_axis_labels_to_filter, key=lambda a: a['bbox'].x0):
+                for ax_i, ann in sorted(x_axis_labels_to_filter, key=lambda a: a[1]['bbox'].x0):
                     x_center = (ann['bbox'].x0 + ann['bbox'].x1) / 2
+                    seen_x_positions = seen_x_by_axis.setdefault(ax_i, [])
                     is_duplicate = any(abs(x_center - seen_x) < tolerance for seen_x in seen_x_positions)
 
                     if not is_duplicate:
                         deduplicated_x_labels.append(ann)
                         seen_x_positions.append(x_center)
+                    else:
+                        c_id = ann.get('class_id')
+                        c_name = cls_map.get(c_id) or cls_map.get(str(c_id)) or str(c_id)
+                        filter_stats['duplicate'][c_name] = filter_stats['duplicate'].get(c_name, 0) + 1
 
                 annotations = annotations_to_keep + deduplicated_x_labels
-                print(f"    - Kept {len(deduplicated_x_labels)} of {len(x_axis_labels_to_filter)} X-axis labels.")
-
-                if cfg['debug_mode']:
-                    print(f"DEBUG: After dual-axis processing - annotations: {len(annotations)}")
 
         primary_chart_type = chart_info_map.get(fig.axes[0], {}).get('chart_type_str', 'unknown')
 
@@ -4002,21 +4385,27 @@ def generate_single_chart(i, cfg, images_dir, labels_dir, output_dir):
         line_seg_anns = []
         line_marker_anns = []
 
+        clsmap_obj = None
+        clsmap_pose = None
+        if primary_chart_type == 'area':
+            clsmap_obj = GENERATION_CONFIG.get('CLASS_MAP_AREA_OBJ', {})
+        elif primary_chart_type == 'pie':
+            clsmap_obj = GENERATION_CONFIG.get('CLASS_MAP_PIE_OBJ', {})
+            clsmap_pose = GENERATION_CONFIG.get('CLASS_MAP_PIE_POSE', {})
+        elif primary_chart_type == 'line':
+            clsmap_obj = GENERATION_CONFIG.get('CLASS_MAP_LINE_OBJ', {})
+
         if cfg.get('dataset_format') != 'multi_chart_detection':
             if primary_chart_type == 'area':
-                clsmap_obj = GENERATION_CONFIG['CLASS_MAP_AREA_OBJ']
                 annotations_obj = get_granular_annotations(fig, chart_info_map, clsmap_obj)
                 area_seg_anns = extract_area_segmentation_annotations(fig, chart_info_map, init_w, init_h)
             elif primary_chart_type == 'pie':
-                clsmap_obj = GENERATION_CONFIG['CLASS_MAP_PIE_OBJ']
                 annotations_obj = get_granular_annotations(fig, chart_info_map, clsmap_obj)
-                clsmap_pose = GENERATION_CONFIG['CLASS_MAP_PIE_POSE']
                 clsmap_pose_reverse = {v: k for k, v in clsmap_pose.items()}
                 keypoint_annotations = extract_pie_pose_annotations(
                     fig, chart_info_map, clsmap_pose_reverse, init_w, init_h
                 )
             elif primary_chart_type == 'line':
-                clsmap_obj = GENERATION_CONFIG['CLASS_MAP_LINE_OBJ']
                 annotations_obj = get_granular_annotations(fig, chart_info_map, clsmap_obj)
                 line_seg_anns, line_marker_anns = extract_line_segmentation_annotations(
                     fig, chart_info_map, init_w, init_h
@@ -4029,13 +4418,29 @@ def generate_single_chart(i, cfg, images_dir, labels_dir, output_dir):
         cls_map_pre = CHART_CLASS_MAPS.get(primary_chart_type, CHART_CLASS_MAPS['bar'])
         obj_map = clsmap_obj if primary_chart_type in ('area', 'pie', 'line') else cls_map_pre
         pose_map = clsmap_pose if primary_chart_type == 'pie' else None
+        cls_area_seg = cfg.get('CLASS_MAP_AREA_SEG', GENERATION_CONFIG.get('CLASS_MAP_AREA_SEG', {}))
+        cls_line_seg = cfg.get('CLASS_MAP_LINE_SEG', GENERATION_CONFIG.get('CLASS_MAP_LINE_SEG', {}))
+        cls_line_markers = cfg.get('CLASS_MAP_LINE_MARKERS', GENERATION_CONFIG.get('CLASS_MAP_LINE_MARKERS', {}))
+        legend_elements_anns = []
+        is_legacy = (cfg.get('profile', 'legacy') == 'legacy')
+        if not is_legacy:
+            from chart import extract_legend_elements
+            for ax_idx, ax in enumerate(fig.axes):
+                lg = ax.get_legend()
+                if lg and lg.get_visible():
+                    extracted = extract_legend_elements(lg, ax, img_h=init_h, img_w=init_w)
+                    for el in extracted:
+                        el['subplot'] = ax_idx
+                    legend_elements_anns.extend(extracted)
+
         streams_pre = [
             ("annotations", annotations, cls_map_pre, "mat"),
             ("annotations_obj", annotations_obj, obj_map, "mat"),
-            ("area_seg", area_seg_anns, None, "mat"),
+            ("area_seg", area_seg_anns, cls_area_seg, "mat"),
             ("pose", keypoint_annotations, pose_map, "pose"),
-            ("line_seg", line_seg_anns, None, "mat"),
-            ("line_marker", line_marker_anns, None, "mat"),
+            ("line_seg", line_seg_anns, cls_line_seg, "mat"),
+            ("line_marker", line_marker_anns, cls_line_markers, "mat"),
+            ("legend_elements", legend_elements_anns, None, "mat"),
         ]
         graph_pseudo_anns = prepare_detail_annotations(fig, chart_info_map, streams_pre, init_w, init_h)
 
@@ -4045,16 +4450,18 @@ def generate_single_chart(i, cfg, images_dir, labels_dir, output_dir):
             if pdf_noise:
                 effects_to_apply['pdf_document_context'] = pdf_noise
 
-        extra_sets = [annotations_obj, area_seg_anns, keypoint_annotations, line_seg_anns, line_marker_anns, graph_pseudo_anns]
+        extra_sets = [annotations_obj, area_seg_anns, keypoint_annotations, line_seg_anns, line_marker_anns, graph_pseudo_anns, legend_elements_anns]
         pil_img, annotations = apply_realism_effects(
-            pil_img, annotations, effects_to_apply, extra_annotation_sets=extra_sets
+            pil_img, annotations, effects_to_apply, extra_annotation_sets=extra_sets,
+            seed=cfg.get('seed'), image_idx=i
         )
 
         if cfg['debug_mode']:
             print(f"DEBUG: After realism effects - annotations: {len(annotations)}")
 
         # Filter annotations by size and aspect ratio
-        MIN_BBOX_SIZE = 8
+        is_legacy = (cfg.get('profile', 'legacy') == 'legacy')
+        min_side_px = cfg.get('annotation_min_side_px', 8 if is_legacy else 4)
         MAX_ASPECT_RATIO = 20.0
 
         valid_annotations = []
@@ -4064,21 +4471,37 @@ def generate_single_chart(i, cfg, images_dir, labels_dir, output_dir):
             height = bbox.y1 - bbox.y0
 
             ann_chart_type = ann.get('chart_type', primary_chart_type)
-            # Exempt scatter, box, and heatmap components from aspect ratio pruning
-            if ann_chart_type in ['scatter', 'box', 'heatmap']:
+            ann_cls = cls_map_pre.get(ann['class_id']) or cls_map_pre.get(str(ann['class_id'])) or str(ann['class_id'])
+            # Exempt scatter, box, heatmap components, and thin line elements (error_bar, connector_line) from aspect ratio pruning
+            if ann_chart_type in ['scatter', 'box', 'heatmap'] or ann_cls in ['error_bar', 'connector_line']:
                 if width == 0 or height == 0:
+                    filter_stats['size'][ann_cls] = filter_stats['size'].get(ann_cls, 0) + 1
+                    if not is_legacy:
+                        ann['ignored'] = True
+                        ann['ignore_reason'] = "below_min_side"
+                        valid_annotations.append(ann)
                     continue
                 valid_annotations.append(ann)
             else:
-                if width >= MIN_BBOX_SIZE and height >= MIN_BBOX_SIZE :
+                if width >= min_side_px and height >= min_side_px:
                     if width > 0 and height > 0:
                         aspect_ratio = max(width / height, height / width)
                         if aspect_ratio > MAX_ASPECT_RATIO:
+                            filter_stats['aspect'][ann_cls] = filter_stats['aspect'].get(ann_cls, 0) + 1
                             print(f"    - Discarded annotation (extreme aspect ratio): {aspect_ratio:.1f}")
+                            if not is_legacy:
+                                ann['ignored'] = True
+                                ann['ignore_reason'] = "extreme_aspect_ratio"
+                                valid_annotations.append(ann)
                             continue
                         valid_annotations.append(ann)
                 else:
+                    filter_stats['size'][ann_cls] = filter_stats['size'].get(ann_cls, 0) + 1
                     print(f"    - Discarded annotation (too small): class {ann['class_id']}, size {width:.1f}x{height:.1f}")
+                    if not is_legacy:
+                        ann['ignored'] = True
+                        ann['ignore_reason'] = "below_min_side"
+                        valid_annotations.append(ann)
 
         annotations = valid_annotations
 
@@ -4086,28 +4509,30 @@ def generate_single_chart(i, cfg, images_dir, labels_dir, output_dir):
         img_w, img_h = pil_img.size
 
         debug_mode = cfg.get('debug_mode', False)
-        annotations = clip_bbox_to_viewport(annotations, img_w, img_h, debug_mode)
-        annotations_obj = clip_bbox_to_viewport(annotations_obj, img_w, img_h, debug_mode)
-        line_marker_anns = clip_bbox_to_viewport(line_marker_anns, img_w, img_h, debug_mode)
-        area_seg_anns = clip_polygon_to_viewport(area_seg_anns, img_w, img_h, debug_mode)
-        line_seg_anns = clip_polygon_to_viewport(line_seg_anns, img_w, img_h, debug_mode)
+        annotations = clip_bbox_to_viewport(annotations, img_w, img_h, debug_mode, filter_stats=filter_stats, cls_map=cls_map_pre, is_legacy=is_legacy)
+        annotations_obj = clip_bbox_to_viewport(annotations_obj, img_w, img_h, debug_mode, filter_stats=filter_stats, cls_map=obj_map, is_legacy=is_legacy)
+        line_marker_anns = clip_bbox_to_viewport(line_marker_anns, img_w, img_h, debug_mode, filter_stats=filter_stats, cls_map=cls_line_markers, is_legacy=is_legacy)
+        area_seg_anns = clip_polygon_to_viewport(area_seg_anns, img_w, img_h, debug_mode, filter_stats=filter_stats, cls_map=cls_area_seg, is_legacy=is_legacy)
+        line_seg_anns = clip_polygon_to_viewport(line_seg_anns, img_w, img_h, debug_mode, filter_stats=filter_stats, cls_map=cls_line_seg, is_legacy=is_legacy)
 
         if cfg['debug_mode']:
             print(f"DEBUG: After size/aspect/bounds filtering - annotations: {len(annotations)}")
 
-        annotations = filter_overlapping_annotations(annotations, iou_threshold=0.7)
+        annotations = filter_overlapping_annotations(annotations, iou_threshold=0.7, cls_map=cls_map_pre, filter_stats=filter_stats, is_legacy=is_legacy)
 
         if cfg['debug_mode']:
             print(f"DEBUG: After overlap filtering - annotations: {len(annotations)}")
 
         # Save files
         base_filename = f"chart_{i:05d}"
+        export_ignored = bool(cfg.get('export_ignored', False))
 
         ensure_dir(images_dir)
         ensure_dir(labels_dir)
         pil_img.save(os.path.join(images_dir, f"{base_filename}.png"))
         save_annotations_yolo(annotations, img_w, img_h,
-                             os.path.join(labels_dir, f"{base_filename}.txt"))
+                             os.path.join(labels_dir, f"{base_filename}.txt"),
+                             include_ignored=export_ignored)
 
         # Additive YOLOv8-OBB Label Exporter (Phase 5)
         if cfg.get('export_obb', False) or cfg.get('export_labels_obb', False):
@@ -4115,7 +4540,8 @@ def generate_single_chart(i, cfg, images_dir, labels_dir, output_dir):
             ensure_dir(labels_obb_dir)
             save_annotations_yolo_obb(
                 annotations, img_w, img_h,
-                os.path.join(labels_obb_dir, f"{base_filename}.txt")
+                os.path.join(labels_obb_dir, f"{base_filename}.txt"),
+                include_ignored=export_ignored,
             )
 
         if cfg.get('dataset_format') == 'multi_chart_detection':
@@ -4448,11 +4874,12 @@ def generate_single_chart(i, cfg, images_dir, labels_dir, output_dir):
         streams_post = [
             ("annotations", annotations, cls_map, "mat"),
             ("annotations_obj", annotations_obj, obj_map, "mat"),
-            ("area_seg", area_seg_anns, None, "mat"),
+            ("area_seg", area_seg_anns, cls_area_seg, "mat"),
             ("pose", keypoint_annotations, pose_map, "pose"),
-            ("line_seg", line_seg_anns, None, "mat"),
-            ("line_marker", line_marker_anns, None, "mat"),
+            ("line_seg", line_seg_anns, cls_line_seg, "mat"),
+            ("line_marker", line_marker_anns, cls_line_markers, "mat"),
             ("graph", graph_pseudo_anns, None, "graph"),
+            ("legend_elements", legend_elements_anns, None, "mat"),
         ]
 
         if _use_schema_v4(cfg):
@@ -4460,7 +4887,14 @@ def generate_single_chart(i, cfg, images_dir, labels_dir, output_dir):
                 fig, chart_info_map, streams_post, img_w, img_h,
                 schema_version=ANNOTATION_SCHEMA_VERSION_V4, dataset_version=DATASET_VERSION_V4,
                 image_id=base_filename,
+                filter_stats=filter_stats,
             )
+            prof = cfg.get("profile", "legacy")
+            if prof != "legacy":
+                detailed_json["profile"] = prof
+                detailed_json["config_hash"] = compute_config_hash(cfg)
+                if hasattr(fig, "_chosen_font_family") and fig._chosen_font_family:
+                    detailed_json["font_family"] = fig._chosen_font_family
         else:
             _warn_v3_deprecated()
             # Get comprehensive unified JSON with complete metadata
@@ -4616,6 +5050,20 @@ def _compute_manifest_fingerprint() -> str:
         st = yf.stat()
         items.append(f"{yf.name}:{st.st_size}:{st.st_mtime_ns}")
     return hashlib.sha256(";".join(items).encode("utf-8")).hexdigest()
+
+
+def compute_config_hash(cfg: Dict[str, Any]) -> str:
+    """Compute deterministic SHA256 hex digest of non-ephemeral config entries."""
+    serializable_cfg = {}
+    for k, v in cfg.items():
+        try:
+            json.dumps(v)
+            serializable_cfg[k] = v
+        except Exception:
+            serializable_cfg[k] = str(v)
+    ephemeral_keys = {"output_dir", "progress_jsonl", "log_file", "show_debug"}
+    hash_cfg = {k: v for k, v in serializable_cfg.items() if k not in ephemeral_keys}
+    return hashlib.sha256(json.dumps(hash_cfg, sort_keys=True).encode("utf-8")).hexdigest()
 
 
 def _compute_dataset_hash(labels_dir: str) -> str:
@@ -4810,9 +5258,7 @@ def run_generation(cfg, progress=None) -> RunSummary:
         except Exception:
             serializable_cfg[k] = str(v)
 
-    ephemeral_keys = {"output_dir", "progress_jsonl", "log_file", "show_debug"}
-    hash_cfg = {k: v for k, v in serializable_cfg.items() if k not in ephemeral_keys}
-    cfg_hash = hashlib.sha256(json.dumps(hash_cfg, sort_keys=True).encode("utf-8")).hexdigest()
+    cfg_hash = compute_config_hash(cfg)
     dataset_hash = _compute_dataset_hash(labels_dir)
     manifest_data = {
         "schema_version": cfg.get("annotation_schema_version", "v4.0"),
@@ -4831,6 +5277,9 @@ def run_generation(cfg, progress=None) -> RunSummary:
         "failed_indices": failed_indices,
         "resolved_config": serializable_cfg,
     }
+    prof = cfg.get("profile", "legacy")
+    if prof != "legacy":
+        manifest_data["profile"] = prof
     if interrupted:
         manifest_data["interrupted"] = True
 
@@ -4878,11 +5327,14 @@ def main():
     parser.add_argument('--progress-jsonl', type=str, default=None, help='Path to write JSONL progress events')
     parser.add_argument('--log-file', type=str, default=None, help='Path to redirect stdout/stderr logs')
     parser.add_argument('--validate-only', action='store_true', help='Validate resolved configuration and exit')
+    parser.add_argument('--profile', type=str, default=None, help='Configuration profile overlay name (default: legacy)')
     parser.add_argument('--overwrite', action='store_true', help='Overwrite non-empty output directory')
     parser.add_argument('--show-debug', action='store_true', help='Launch visualization script testar.py if in debug mode')
     args = parser.parse_args()
 
     cli_overrides = {}
+    if args.profile is not None:
+        cli_overrides['profile'] = args.profile
     if args.num is not None:
         cli_overrides['num_images'] = args.num
     if args.output is not None:
@@ -4909,7 +5361,11 @@ def main():
         k, v = parse_set_override(set_expr)
         cli_overrides[k] = v
 
-    cfg = load_config(path=args.config, overrides=cli_overrides, use_custom=not args.no_custom)
+    try:
+        cfg = load_config(path=args.config, overrides=cli_overrides, use_custom=not args.no_custom, profile=args.profile)
+    except ValueError as e:
+        sys.stderr.write(f"[CONFIG ERROR] {e}\n")
+        sys.exit(2)
 
     # GEN-02: validate-only check
     if args.validate_only:
@@ -4920,6 +5376,9 @@ def main():
             for err in errors:
                 sys.stderr.write(f"[CONFIG ERROR] {err.path}: {err.msg}\n")
             sys.exit(2)
+        if hasattr(cfg, "provenance") and cfg.provenance:
+            for k in sorted(cfg.provenance.keys()):
+                print(f"{k}: {cfg.provenance[k]}")
         print("Configuration valid.")
         sys.exit(0)
 

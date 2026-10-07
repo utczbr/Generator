@@ -11,6 +11,7 @@ Provides validation rules for generation configurations:
 from __future__ import annotations
 
 from dataclasses import dataclass
+import inspect
 import json
 import os
 from pathlib import Path
@@ -134,6 +135,11 @@ def validate(cfg: Dict[str, Any], domains_dir: Optional[Path] = None) -> List[Is
     if not (0.0 <= sci_ratio <= 1.0):
         issues.append(Issue("error", "scientific_ratio", f"scientific_ratio must be between 0.0 and 1.0 (got {sci_ratio})"))
 
+    if "annotation_min_side_px" in cfg:
+        msp = cfg["annotation_min_side_px"]
+        if not isinstance(msp, (int, float)) or msp <= 0:
+            issues.append(Issue("error", "annotation_min_side_px", f"annotation_min_side_px must be a positive number (got {msp})"))
+
     # 2. Chart types & weights
     chart_types = cfg.get("chart_types", {})
     if not isinstance(chart_types, dict):
@@ -228,13 +234,111 @@ def validate(cfg: Dict[str, Any], domains_dir: Optional[Path] = None) -> List[Is
 
     # 7. Realism effects
     effects = cfg.get("realism_effects", {})
+    prof = cfg.get("profile", "legacy")
+    is_non_legacy = bool(prof and prof != "legacy")
+
     if isinstance(effects, dict):
         for eff_name, eff_cfg in effects.items():
             if eff_name not in EFFECT_REGISTRY:
                 issues.append(Issue("error", f"realism_effects.{eff_name}", f"Effect '{eff_name}' is not in EFFECT_REGISTRY"))
+                continue
             if isinstance(eff_cfg, dict):
                 p_val = eff_cfg.get("p", 1.0)
                 if not (0.0 <= p_val <= 1.0):
                     issues.append(Issue("error", f"realism_effects.{eff_name}.p", f"Probability p must be in [0.0, 1.0] (got {p_val})"))
+
+                # FR-091: Parameter validation against function signature
+                func = EFFECT_REGISTRY[eff_name]
+                target = func.func if hasattr(func, "func") else func
+                sig = inspect.signature(target)
+                accepted = set()
+                for pname, param in sig.parameters.items():
+                    if param.kind in (inspect.Parameter.POSITIONAL_OR_KEYWORD, inspect.Parameter.KEYWORD_ONLY):
+                        if pname not in ("pil_img", "image", "img"):
+                            accepted.add(pname)
+                if eff_name in ("perspective", "perspective_warp"):
+                    accepted.add("magnitude")
+                    accepted.add("distortion_factor")
+                if eff_name == "uneven_lighting":
+                    accepted.add("intensity_range")
+
+                # Extract params from "params" subdict or direct keys
+                params = {}
+                if "params" in eff_cfg and isinstance(eff_cfg["params"], dict):
+                    params.update(eff_cfg["params"])
+                for k, v in eff_cfg.items():
+                    if k not in ("p", "params"):
+                        params[k] = v
+
+                for param_name in params:
+                    if param_name not in accepted:
+                        level = "error" if is_non_legacy else "warning"
+                        issues.append(Issue(level, f"realism_effects.{eff_name}.params.{param_name}", f"Unknown parameter '{param_name}' for effect '{eff_name}'. Accepted parameters: {sorted(list(accepted))}"))
+
+                # FR-091: reject perspective.magnitude > 0.15 in non-legacy profiles
+                if eff_name in ("perspective", "perspective_warp"):
+                    mag = params.get("magnitude") or params.get("distortion_factor")
+                    if mag is not None:
+                        if isinstance(mag, (int, float)) and mag > 0.15:
+                            if is_non_legacy:
+                                issues.append(Issue("error", f"realism_effects.{eff_name}.params.magnitude", f"perspective magnitude {mag} exceeds maximum allowed value 0.15 for non-legacy profile '{prof}'"))
+                            else:
+                                issues.append(Issue("warning", f"realism_effects.{eff_name}.params.magnitude", f"perspective magnitude {mag} exceeds recommended value 0.15"))
+                        elif isinstance(mag, (list, tuple)) and len(mag) == 2 and mag[1] > 0.15:
+                            if is_non_legacy:
+                                issues.append(Issue("error", f"realism_effects.{eff_name}.params.magnitude", f"perspective magnitude {mag} exceeds maximum allowed value 0.15 for non-legacy profile '{prof}'"))
+
+        # FR-112: canvas_reframe ordering and parameter bounds in non-legacy profiles
+        if "canvas_reframe" in effects:
+            reframe_cfg = effects["canvas_reframe"]
+            if is_non_legacy:
+                effect_keys = list(effects.keys())
+                reframe_idx = effect_keys.index("canvas_reframe")
+                geom_effects = {"scan_rotation", "perspective", "perspective_warp", "page_curl", "non_rigid_mesh", "mesh_warp", "clipping", "pdf_document_context"}
+                for ge in geom_effects:
+                    if ge in effect_keys:
+                        ge_idx = effect_keys.index(ge)
+                        if reframe_idx < ge_idx:
+                            issues.append(Issue("error", "realism_effects.canvas_reframe", f"canvas_reframe must follow geometric effect '{ge}', but appears at index {reframe_idx} before index {ge_idx}"))
+                if "resize" in effect_keys:
+                    resize_idx = effect_keys.index("resize")
+                    if reframe_idx > resize_idx:
+                        issues.append(Issue("error", "realism_effects.canvas_reframe", f"canvas_reframe must precede 'resize', but appears at index {reframe_idx} after index {resize_idx}"))
+
+            if isinstance(reframe_cfg, dict):
+                rf_params = {}
+                if "params" in reframe_cfg and isinstance(reframe_cfg["params"], dict):
+                    rf_params.update(reframe_cfg["params"])
+                for k, v in reframe_cfg.items():
+                    if k not in ("p", "params"):
+                        rf_params[k] = v
+
+                for p_key in ("p_tight", "p_match_bg"):
+                    if p_key in rf_params:
+                        pv = rf_params[p_key]
+                        if not (0.0 <= pv <= 1.0):
+                            issues.append(Issue("error" if is_non_legacy else "warning", f"realism_effects.canvas_reframe.params.{p_key}", f"{p_key} must be in [0.0, 1.0] (got {pv})"))
+
+                if "margin_frac_range" in rf_params:
+                    mfr = rf_params["margin_frac_range"]
+                    vals = [mfr] if isinstance(mfr, (int, float)) else list(mfr) if isinstance(mfr, (list, tuple)) else []
+                    for v in vals:
+                        if not (0.0 <= v <= 0.25):
+                            issues.append(Issue("error" if is_non_legacy else "warning", "realism_effects.canvas_reframe.params.margin_frac_range", f"margin_frac_range values must be in [0.0, 0.25] (got {mfr})"))
+
+                if "tight_px" in rf_params:
+                    tpx = rf_params["tight_px"]
+                    vals = [tpx] if isinstance(tpx, (int, float)) else list(tpx) if isinstance(tpx, (list, tuple)) else []
+                    for v in vals:
+                        if v < 0 or v > 12:
+                            issues.append(Issue("error" if is_non_legacy else "warning", "realism_effects.canvas_reframe.params.tight_px", f"tight_px values must be <= 12 (got {tpx})"))
+
+    # 8. Profile validation
+    prof = cfg.get("profile")
+    if prof is not None and prof != "legacy":
+        from config_loader import get_available_profiles
+        available = get_available_profiles()
+        if prof not in available:
+            issues.append(Issue("error", "profile", f"Unknown profile '{prof}'. Available: {', '.join(available)}"))
 
     return issues

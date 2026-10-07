@@ -5,7 +5,16 @@ Self-contained default OCR_TRAINING_CONFIG fallback when custom_config.py is abs
 Satisfies FR-023 and SC-010.
 """
 
+# Shared schema and dataset version constants
+ANNOTATION_SCHEMA_VERSION: str = "v3.0"
+DATASET_VERSION: str = "3.0.0"
+
+# Schema v4.1 (single-list annotations with filter accounting, see detailed.py) - default for matplotlib backend.
+ANNOTATION_SCHEMA_VERSION_V4: str = "v4.1"
+DATASET_VERSION_V4: str = "4.1.0"
+
 OCR_TRAINING_CONFIG = {
+  "profile": "legacy",
   "debug_mode": False,
   "export_legacy_json": False,
   "num_images": 5000,
@@ -25,10 +34,22 @@ OCR_TRAINING_CONFIG = {
   "theme": None,
   "semantic_domain": None,
   "synthetic_domain": None,
-  "annotation_schema_version": "v4.0",
+  "annotation_schema_version": "v4.1",
   "detailed_schema": True,
   "debug_coords": False,
   "label_angle": 0,
+  "tick_rotation": {
+    "mode": "legacy",
+    "p_rotate": 0.3,
+    "angles": [0, 45, 90],
+    "weights": [0.5, 0.3, 0.2]
+  },
+  "figure": {
+    "size_mode": "fixed",
+    "aspect_ratios": [[4, 3], [16, 9], [1, 1], [3, 4], [5, 4], [16, 10], [3, 2], [7, 5]],
+    "width_range": [5.5, 9.5],
+    "dpi_set": [96, 120, 150]
+  },
   "scientific_subdomain_weights": {
     "biomedical": 0.70,
     "engineering": 0.30
@@ -395,7 +416,7 @@ OCR_TRAINING_CONFIG = {
     "perspective": {
       "p": 0.0,
       "params": {
-        "magnitude": 0.5
+        "magnitude": 0.08
       }
     },
     "page_curl": {

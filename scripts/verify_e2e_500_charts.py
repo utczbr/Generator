@@ -24,7 +24,7 @@ if REPO_ROOT not in sys.path:
 from custom_config import OCR_TRAINING_CONFIG
 from generator import generate_single_chart_task
 from merge_json import merge_json_files
-from versions import ANNOTATION_SCHEMA_VERSION, DATASET_VERSION
+from config_defaults import ANNOTATION_SCHEMA_VERSION, DATASET_VERSION
 
 
 VALID_DOMAINS = {"biomedical", "engineering", "business", "demographic", "common"}

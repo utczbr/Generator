@@ -1,0 +1,272 @@
+{
+  "version": "1.0",
+  "character_inventory": "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789\u00b5\u03bc\u00b1\u00b0\u03b1\u03b2\u00b2\u00b3\u207b\u00d7\u2265\u2264\u0394",
+  "total_fonts": 24,
+  "total_size_bytes": 7730260,
+  "fonts": [
+    {
+      "file": "Arimo-Regular.ttf",
+      "family": "Arimo",
+      "style": "normal",
+      "weight": "normal",
+      "category": "sans-serif",
+      "format": "truetype",
+      "license": "OFL-1.1",
+      "sha256": "5c315974260455a02fad62495a0ae9a783bb53f0eccf807deb75c7967e7a81d6",
+      "size_bytes": 478456
+    },
+    {
+      "file": "Arimo-Bold.ttf",
+      "family": "Arimo",
+      "style": "normal",
+      "weight": "bold",
+      "category": "sans-serif",
+      "format": "truetype",
+      "license": "OFL-1.1",
+      "sha256": "10724c3733f60cdec733da1a439de9100e1593ceb219cc4d03c443bef1feb9b6",
+      "size_bytes": 481924
+    },
+    {
+      "file": "Arimo-Italic.ttf",
+      "family": "Arimo",
+      "style": "italic",
+      "weight": "normal",
+      "category": "sans-serif",
+      "format": "truetype",
+      "license": "OFL-1.1",
+      "sha256": "5f4917a32312ba8a011502e2147567d678984d820223367a2a4c5d6dda2a758c",
+      "size_bytes": 490776
+    },
+    {
+      "file": "Arimo-BoldItalic.ttf",
+      "family": "Arimo",
+      "style": "italic",
+      "weight": "bold",
+      "category": "sans-serif",
+      "format": "truetype",
+      "license": "OFL-1.1",
+      "sha256": "8e057ec4b127ee4242b35cf66f31b558aa46eb5e6808047324bf2a6f1e8c86a6",
+      "size_bytes": 492528
+    },
+    {
+      "file": "Tinos-Regular.ttf",
+      "family": "Tinos",
+      "style": "normal",
+      "weight": "normal",
+      "category": "serif",
+      "format": "truetype",
+      "license": "OFL-1.1",
+      "sha256": "cf264a22292950ca1679b2ade07e9e6ecb26c649ab70975d0e113f979efa827a",
+      "size_bytes": 535480
+    },
+    {
+      "file": "Tinos-Bold.ttf",
+      "family": "Tinos",
+      "style": "normal",
+      "weight": "bold",
+      "category": "serif",
+      "format": "truetype",
+      "license": "OFL-1.1",
+      "sha256": "971d6af5fcb3a0c05535a92a635fb63a86ea5eb935639c9b864be33f3bfaba80",
+      "size_bytes": 570480
+    },
+    {
+      "file": "Tinos-Italic.ttf",
+      "family": "Tinos",
+      "style": "italic",
+      "weight": "normal",
+      "category": "serif",
+      "format": "truetype",
+      "license": "OFL-1.1",
+      "sha256": "0f949a3fa0e23cd0ca94a0c4784bd8f9efb99c20070b9f73b5fd592b49c092ad",
+      "size_bytes": 539624
+    },
+    {
+      "file": "Tinos-BoldItalic.ttf",
+      "family": "Tinos",
+      "style": "italic",
+      "weight": "bold",
+      "category": "serif",
+      "format": "truetype",
+      "license": "OFL-1.1",
+      "sha256": "0cd67b90617a03a69a815e758d0649d00f2be48a0cb570615e94e8e5a13aae2e",
+      "size_bytes": 552500
+    },
+    {
+      "file": "DejaVuSansMono.ttf",
+      "family": "DejaVu Sans Mono",
+      "style": "normal",
+      "weight": "normal",
+      "category": "monospace",
+      "format": "truetype",
+      "license": "Bitstream Vera / Free",
+      "sha256": "0f5db4f1749979d961019838b160bec74abdf7f9eca69553fe1aa856bbff49a4",
+      "size_bytes": 343140
+    },
+    {
+      "file": "DejaVuSansMono-Bold.ttf",
+      "family": "DejaVu Sans Mono",
+      "style": "normal",
+      "weight": "bold",
+      "category": "monospace",
+      "format": "truetype",
+      "license": "Bitstream Vera / Free",
+      "sha256": "2964f6dac8e6e9d71613928340f17bf868e9ea51692cca333c79e74962f02233",
+      "size_bytes": 334268
+    },
+    {
+      "file": "DejaVuSansMono-Oblique.ttf",
+      "family": "DejaVu Sans Mono",
+      "style": "italic",
+      "weight": "normal",
+      "category": "monospace",
+      "format": "truetype",
+      "license": "Bitstream Vera / Free",
+      "sha256": "db15e83c273e57cd52731c10ebb5b6bbcb0b3e9e5860dec33a66b60a5294f2df",
+      "size_bytes": 253448
+    },
+    {
+      "file": "DejaVuSansMono-BoldOblique.ttf",
+      "family": "DejaVu Sans Mono",
+      "style": "italic",
+      "weight": "bold",
+      "category": "monospace",
+      "format": "truetype",
+      "license": "Bitstream Vera / Free",
+      "sha256": "97a099e700f0e0a4f0078c04a970686595c9a6049b5a1defbd22362e20ae1fcf",
+      "size_bytes": 254960
+    },
+    {
+      "file": "DejaVuSerif.ttf",
+      "family": "DejaVu Serif",
+      "style": "normal",
+      "weight": "normal",
+      "category": "serif",
+      "format": "truetype",
+      "license": "Bitstream Vera / Free",
+      "sha256": "13e61509f5c81d7c3132810f4f903e3523df89c802bf6e0674621e8f659cdfe1",
+      "size_bytes": 380660
+    },
+    {
+      "file": "DejaVuSerif-Bold.ttf",
+      "family": "DejaVu Serif",
+      "style": "normal",
+      "weight": "bold",
+      "category": "serif",
+      "format": "truetype",
+      "license": "Bitstream Vera / Free",
+      "sha256": "e2fd85eba2de65ac270d1cdb1685e252eb827f600850cf62af2d20c41b22e945",
+      "size_bytes": 356668
+    },
+    {
+      "file": "DejaVuSerif-Italic.ttf",
+      "family": "DejaVu Serif",
+      "style": "italic",
+      "weight": "normal",
+      "category": "serif",
+      "format": "truetype",
+      "license": "Bitstream Vera / Free",
+      "sha256": "889a2b9daff9f091f7cf1ff6c88e5c1a5b55b3afb221571393ccb71ec9301ec9",
+      "size_bytes": 346544
+    },
+    {
+      "file": "DejaVuSerif-BoldItalic.ttf",
+      "family": "DejaVu Serif",
+      "style": "italic",
+      "weight": "bold",
+      "category": "serif",
+      "format": "truetype",
+      "license": "Bitstream Vera / Free",
+      "sha256": "c84b722b8da77cb96873a801c9ad1bc3b75d0c847c718696898878f33186c657",
+      "size_bytes": 348020
+    },
+    {
+      "file": "GFSNeohellenic.otf",
+      "family": "GFS Neohellenic",
+      "style": "normal",
+      "weight": "normal",
+      "category": "sans-serif",
+      "format": "opentype",
+      "license": "OFL-1.1",
+      "sha256": "acff5add00a6919b64e3f6d853a04a4d8665461b6a4d11c36ad2dad6a891f365",
+      "size_bytes": 122288
+    },
+    {
+      "file": "GFSNeohellenicBold.otf",
+      "family": "GFS Neohellenic",
+      "style": "normal",
+      "weight": "bold",
+      "category": "sans-serif",
+      "format": "opentype",
+      "license": "OFL-1.1",
+      "sha256": "750528dfec86e7db23d7fafb16eb89064563e1b86d1c1abb37b916fcc53798aa",
+      "size_bytes": 91984
+    },
+    {
+      "file": "GFSNeohellenicIt.otf",
+      "family": "GFS Neohellenic",
+      "style": "italic",
+      "weight": "normal",
+      "category": "sans-serif",
+      "format": "opentype",
+      "license": "OFL-1.1",
+      "sha256": "3c2aaf027ed71e1a1bb39b2a5aa80c87b7e3f692d2ea4d7cacf8df74e7108620",
+      "size_bytes": 102424
+    },
+    {
+      "file": "GFSNeohellenicBoldIt.otf",
+      "family": "GFS Neohellenic",
+      "style": "italic",
+      "weight": "bold",
+      "category": "sans-serif",
+      "format": "opentype",
+      "license": "OFL-1.1",
+      "sha256": "1739907b36bae01b56ee8dd7f366e981ba90f6b3846ac239f0ab1fd927f8bee6",
+      "size_bytes": 103688
+    },
+    {
+      "file": "GFSDidot.otf",
+      "family": "GFS Didot",
+      "style": "normal",
+      "weight": "normal",
+      "category": "serif",
+      "format": "opentype",
+      "license": "OFL-1.1",
+      "sha256": "27d80cbfb7446a627f577b3a3bc519e1cec71d53328cd3873368e9c3b54e0fc1",
+      "size_bytes": 166580
+    },
+    {
+      "file": "GFSDidotBold.otf",
+      "family": "GFS Didot",
+      "style": "normal",
+      "weight": "bold",
+      "category": "serif",
+      "format": "truetype",
+      "license": "OFL-1.1",
+      "sha256": "8f1febc6e7088c6721c968056f2600f6a1e8b591fd8e686df8b4de19f3ee435c",
+      "size_bytes": 99164
+    },
+    {
+      "file": "GFSDidotItalic.otf",
+      "family": "GFS Didot",
+      "style": "italic",
+      "weight": "normal",
+      "category": "serif",
+      "format": "truetype",
+      "license": "OFL-1.1",
+      "sha256": "83f07e3f4e919d0a0dd8d07c224c624c7a383d013d33ade105908d044109dfe0",
+      "size_bytes": 142668
+    },
+    {
+      "file": "GFSDidotBoldItalic.otf",
+      "family": "GFS Didot",
+      "style": "italic",
+      "weight": "bold",
+      "category": "serif",
+      "format": "truetype",
+      "license": "OFL-1.1",
+      "sha256": "074f1040beb899dbdd137117a519427017a5a73bec4a53715420f1a2d89cd917",
+      "size_bytes": 141988
+    }
+  ]
+}

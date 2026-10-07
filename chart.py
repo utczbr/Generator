@@ -377,41 +377,151 @@ def apply_chart_theme(ax, theme_name, orientation='vertical'):
         if spine in ax.spines: 
             ax.spines[spine].set_visible(visible)
     
+    scale = theme.get('typography_scale', 1.0)
     if theme.get('spine_width'):
         for spine in ax.spines.values():
-            spine.set_linewidth(theme['spine_width'])
+            spine.set_linewidth(theme['spine_width'] * scale)
     
     if theme.get('tick_direction'): 
         ax.tick_params(axis='both', direction=theme['tick_direction'])
     
     return theme
 
-def apply_typography_variation(ax, domain='scientific'):
+
+def apply_tick_formatters(ax, orientation='vertical', active_profile=None, theme_config=None):
+    """
+    Apply publication-grade tick formatters and numeric clutter (FR-088, T234c).
+    Under profile != 'legacy', draws from feature_rng to apply:
+    - ScalarFormatter with scientific multiplier (useMathText=True, powerlimits=(-2, 2))
+    - PercentFormatter
+    - Currency formatters ($k, $M)
+    - Metric / engineering scale suffixes (k, M)
+    """
+    if not active_profile or active_profile == 'legacy':
+        return
+
+    import matplotlib.ticker as ticker
+    from feature_rng import feature_rng
+
+    seed = ax.figure._generator_config.get('seed') if hasattr(ax, 'figure') and hasattr(ax.figure, '_generator_config') else 42
+    image_idx = getattr(ax.figure, '_generator_image_idx', 0) if hasattr(ax, 'figure') else 0
+    rng = feature_rng(seed if seed is not None else 42, image_idx, "tick_formatter")
+
+    # Probability of applying a non-standard formatter (>= 25% requirement)
+    p_format = 0.35
+    if isinstance(theme_config, dict) and 'tick_formatter_probability' in theme_config:
+        p_format = float(theme_config['tick_formatter_probability'])
+
+    if rng.random() >= p_format:
+        return
+
+    actual_orientation = orientation
+    if isinstance(theme_config, dict) and 'orientation' in theme_config:
+        actual_orientation = theme_config['orientation']
+
+    target_axis = ax.xaxis if actual_orientation == 'horizontal' else ax.yaxis
+
+    fmt_type = rng.choices(
+        ['scientific', 'percent', 'currency', 'metric_suffix'],
+        weights=[0.35, 0.25, 0.20, 0.20],
+        k=1
+    )[0]
+
+    if fmt_type == 'scientific':
+        formatter = ticker.ScalarFormatter(useMathText=True)
+        formatter.set_scientific(True)
+        formatter.set_powerlimits((-2, 2))
+        target_axis.set_major_formatter(formatter)
+    elif fmt_type == 'percent':
+        target_axis.set_major_formatter(ticker.PercentFormatter(xmax=100.0, symbol='%'))
+    elif fmt_type == 'currency':
+        def _curr(x, pos):
+            ax_val = abs(x)
+            if ax_val >= 1e6:
+                return f"${x*1e-6:.1f}M"
+            elif ax_val >= 1e3:
+                return f"${x*1e-3:.1f}k"
+            else:
+                return f"${x:,.0f}"
+        target_axis.set_major_formatter(ticker.FuncFormatter(_curr))
+    elif fmt_type == 'metric_suffix':
+        def _metric(x, pos):
+            ax_val = abs(x)
+            if ax_val >= 1e6:
+                return f"{x*1e-6:.1f}M"
+            elif ax_val >= 1e3:
+                return f"{x*1e-3:.1f}k"
+            else:
+                return f"{x:.0f}"
+        target_axis.set_major_formatter(ticker.FuncFormatter(_metric))
+
+
+def apply_typography_variation(ax, domain='scientific', theme_config=None, tick_rotation_cfg=None, orientation='vertical'):
     """
     Aplica diversas configurações de tipografia com base na análise do usuário.
     Varia a família da fonte, tamanhos, peso e rotação.
     """
     
-    # Seleciona a família da fonte
-    if domain == 'scientific':
-        family = np.random.choice(['sans-serif', 'serif'], p=[0.7, 0.3])
-    else: # business
-        family = np.random.choice(['sans-serif', 'serif'], p=[0.8, 0.2])
-    
-    # Seleciona um nome de fonte específico da família escolhida
-    font_name = np.random.choice(FONT_FAMILIES[family])
+    active_profile = None
+    if isinstance(theme_config, dict):
+        active_profile = theme_config.get('profile')
+    if active_profile is None and hasattr(ax, 'figure') and hasattr(ax.figure, '_generator_config'):
+        active_profile = ax.figure._generator_config.get('profile')
+
+    if active_profile and active_profile != 'legacy':
+        apply_tick_formatters(ax, orientation=orientation, active_profile=active_profile, theme_config=theme_config)
+        import font_registry
+        font_registry.ensure_fonts_registered()
+
+        seed = None
+        image_idx = 0
+        if hasattr(ax, 'figure') and hasattr(ax.figure, '_generator_config'):
+            seed = ax.figure._generator_config.get('seed')
+            image_idx = getattr(ax.figure, '_generator_image_idx', 0)
+
+        # Check if theme_config specifies a font (e.g. PUBLICATION_THEMES)
+        if isinstance(theme_config, dict) and 'font' in theme_config:
+            font_name = font_registry.validate_font_and_glyphs(
+                theme_config['font'], active_profile=active_profile
+            )
+        else:
+            from feature_rng import feature_rng
+            rng = feature_rng(seed if seed is not None else 42, image_idx, "font")
+            chosen = font_registry.sample_bundled_font(rng, domain=domain)
+            font_name = chosen["family"]
+
+        if hasattr(ax, 'figure'):
+            ax.figure._chosen_font_family = font_name
+    else:
+        # Seleciona a família da fonte (legacy)
+        if domain == 'scientific':
+            family = np.random.choice(['sans-serif', 'serif'], p=[0.7, 0.3])
+        else: # business
+            family = np.random.choice(['sans-serif', 'serif'], p=[0.8, 0.2])
+        font_name = np.random.choice(FONT_FAMILIES[family])
     
     # Tamanhos de fonte
-    title_size = np.random.randint(12, 17)
-    label_size = np.random.randint(10, 14)
-    tick_size = np.random.randint(8, 12)
+    scale = theme_config.get('typography_scale', 1.0) if isinstance(theme_config, dict) else 1.0
+    if isinstance(theme_config, dict) and 'title_size' in theme_config:
+        title_size = max(6, int(round(theme_config['title_size'] * scale)))
+        label_size = max(5, int(round(theme_config.get('label_size', 7) * scale)))
+        tick_size = max(5, int(round(theme_config.get('font_size', 7) * scale)))
+    else:
+        title_size = max(6, int(round(np.random.randint(12, 17) * scale)))
+        label_size = max(5, int(round(np.random.randint(10, 14) * scale)))
+        tick_size = max(5, int(round(np.random.randint(8, 12) * scale)))
     
     try:
         # Aplica aos elementos dos eixos
         if ax.title:
             ax.title.set_fontsize(title_size)
             ax.title.set_fontfamily(font_name)
-            ax.title.set_fontweight(np.random.choice(['normal', 'bold'], p=[0.6, 0.4]))
+            if active_profile and active_profile != 'legacy':
+                from feature_rng import feature_rng
+                rng = feature_rng(seed if seed is not None else 42, image_idx, "font_weight")
+                ax.title.set_fontweight(rng.choices(['normal', 'bold'], weights=[0.6, 0.4], k=1)[0])
+            else:
+                ax.title.set_fontweight(np.random.choice(['normal', 'bold'], p=[0.6, 0.4]))
         
         if ax.xaxis.label:
             ax.xaxis.label.set_fontsize(label_size)
@@ -425,11 +535,62 @@ def apply_typography_variation(ax, domain='scientific'):
             label.set_fontsize(tick_size)
             label.set_fontfamily(font_name)
         
-        # Variações de rotação de texto
-        if np.random.random() < 0.3: # 30% de chance
-            rotation = np.random.choice([0, 45, 90], p=[0.5, 0.3, 0.2])
-            # Gira apenas os ticks do eixo x para evitar eixo y ilegível
-            ax.tick_params(axis='x', labelrotation=rotation)
+        # Variações de rotação de texto (FR-088)
+        if tick_rotation_cfg is None and isinstance(theme_config, dict):
+            tick_rotation_cfg = theme_config.get('tick_rotation')
+        if tick_rotation_cfg is None and hasattr(ax, 'figure') and hasattr(ax.figure, '_generator_config'):
+            tick_rotation_cfg = ax.figure._generator_config.get('tick_rotation')
+        if not isinstance(tick_rotation_cfg, dict):
+            tick_rotation_cfg = {}
+
+        mode = tick_rotation_cfg.get('mode', 'legacy')
+        active_profile = None
+        if isinstance(theme_config, dict):
+            active_profile = theme_config.get('profile')
+        if active_profile is None and hasattr(ax, 'figure') and hasattr(ax.figure, '_generator_config'):
+            active_profile = ax.figure._generator_config.get('profile')
+        if mode == 'legacy' and active_profile and active_profile != 'legacy' and 'mode' not in tick_rotation_cfg:
+            mode = 'profile'
+
+        if mode == 'legacy':
+            # Note: label_angle is Vega-Lite-only under legacy mode (D1-07/D2-01)
+            if np.random.random() < 0.3: # 30% de chance
+                rotation = np.random.choice([0, 45, 90], p=[0.5, 0.3, 0.2])
+                # Gira apenas os ticks do eixo x para evitar eixo y ilegível
+                ax.tick_params(axis='x', labelrotation=rotation)
+        else:
+            # Profile mode: honor label_angle if specified, else draw from angles/weights
+            label_angle = None
+            if isinstance(theme_config, dict) and 'label_angle' in theme_config:
+                label_angle = theme_config.get('label_angle')
+            elif hasattr(ax, 'figure') and hasattr(ax.figure, '_generator_config'):
+                label_angle = ax.figure._generator_config.get('label_angle')
+            
+            if label_angle is not None and label_angle != 0:
+                rotation = int(label_angle)
+            else:
+                p_rotate = tick_rotation_cfg.get('p_rotate', 0.40)
+                if np.random.random() < p_rotate:
+                    angles = tick_rotation_cfg.get('angles', [30, 45, 60, 90, -30, -45, -60])
+                    weights = tick_rotation_cfg.get('weights', [0.20, 0.25, 0.15, 0.10, 0.10, 0.10, 0.10])
+                    if weights and len(weights) == len(angles):
+                        norm_w = [w / sum(weights) for w in weights]
+                        rotation = int(np.random.choice(angles, p=norm_w))
+                    else:
+                        rotation = int(np.random.choice(angles))
+                else:
+                    rotation = 0
+
+            if rotation != 0:
+                ax.tick_params(axis='x', labelrotation=rotation)
+                if abs(rotation) == 90 or rotation == 0:
+                    ha = 'center'
+                elif rotation > 0:
+                    ha = 'right'
+                else:
+                    ha = 'left'
+                for label in ax.get_xticklabels():
+                    label.set_horizontalalignment(ha)
             
     except Exception as e:
         # Captura erros caso as fontes não sejam encontradas no sistema
@@ -613,21 +774,126 @@ def apply_legend_variation(ax, num_items):
     # Configurações de moldura
     frameon = np.random.choice([True, False], p=[0.4, 0.6])
     
-    legend = None
-    
-    if loc == 'center left': # Trata como "fora à direita"
-        # Usa bbox_to_anchor para mover a legenda para fora do eixo
-        legend = ax.legend(loc=loc, bbox_to_anchor=(1.04, 0.5), frameon=frameon)
-    else:
-        legend = ax.legend(loc=loc, frameon=frameon)
-    
     # Múltiplas colunas para muitos itens
+    ncol = 1
     if num_items > 6:
-        ncol = np.random.choice([1, 2], p=[0.7, 0.3])
-        if legend:
-            legend._ncol = ncol # Define o número de colunas
+        ncol = int(np.random.choice([1, 2], p=[0.7, 0.3]))
+
+    handles, labels = ax.get_legend_handles_labels()
+    kwargs = {'loc': loc, 'frameon': frameon, 'ncols': ncol}
+    if loc == 'center left':
+        kwargs['bbox_to_anchor'] = (1.04, 0.5)
+
+    if handles and labels:
+        legend = ax.legend(handles=handles, labels=labels, **kwargs)
+    else:
+        import matplotlib.patches as mpatches
+        pal = ['#2E86AB', '#D62728', '#2CA02C', '#FF7F0E']
+        h_fall = [mpatches.Patch(color=pal[i % len(pal)], label=f'Series {i+1}') for i in range(num_items)]
+        legend = ax.legend(handles=h_fall, **kwargs)
     
     return legend
+
+from collections import namedtuple
+if 'BoundingBox' not in globals():
+    BoundingBox = namedtuple('BoundingBox', ['x0', 'y0', 'x1', 'y1'])
+
+def extract_legend_elements(legend, ax, img_h=None, img_w=None):
+    """
+    Decompose a Matplotlib Legend into granular elements (FR-114, OC-9):
+    - 'legend_title': legend title text (if present)
+    - 'legend_label': each series label text
+    - 'legend_marker': each series handle (marker / line / patch)
+
+    A marker-less Line2D handle has zero-height window extent (E16: 119/119),
+    so its legend_marker box is padded by half line-width (>= 2 px per side).
+    All boxes have width and height >= 2 px.
+    """
+    if legend is None or not legend.get_visible():
+        return []
+
+    fig = ax.figure
+    try:
+        renderer = fig.canvas.get_renderer()
+    except Exception:
+        fig.canvas.draw()
+        renderer = fig.canvas.get_renderer()
+
+    if img_h is None or img_w is None:
+        canvas_w, canvas_h = fig.canvas.get_width_height()
+        img_w = img_w or canvas_w
+        img_h = img_h or canvas_h
+
+    out = []
+
+    # 1. Legend title
+    title_artist = legend.get_title()
+    if title_artist and title_artist.get_text() and title_artist.get_text().strip():
+        try:
+            tb = title_artist.get_window_extent(renderer)
+            if tb.width > 0 and tb.height > 0:
+                x0, y0, x1, y1 = float(tb.x0), float(img_h - tb.y1), float(tb.x1), float(img_h - tb.y0)
+                out.append({
+                    "class_name": "legend_title",
+                    "bbox": BoundingBox(tb.x0, tb.y0, tb.x1, tb.y1),
+                    "obb": [(x0, y0), (x1, y0), (x1, y1), (x0, y1)],
+                    "polygon": [x0, y0, x1, y0, x1, y1, x0, y1],
+                    "text": title_artist.get_text().strip(),
+                    "role": "legend_title",
+                })
+        except Exception:
+            pass
+
+    # 2. Legend labels and markers
+    texts = legend.get_texts()
+    handles = getattr(legend, 'legend_handles', getattr(legend, 'legendHandles', []))
+
+    for txt, handle in zip(texts, handles):
+        # Label text
+        try:
+            text_str = txt.get_text().strip() if txt.get_text() else ""
+            if text_str:
+                tb = txt.get_window_extent(renderer)
+                if tb.width > 0 and tb.height > 0:
+                    x0, y0, x1, y1 = float(tb.x0), float(img_h - tb.y1), float(tb.x1), float(img_h - tb.y0)
+                    out.append({
+                        "class_name": "legend_label",
+                        "bbox": BoundingBox(tb.x0, tb.y0, tb.x1, tb.y1),
+                        "obb": [(x0, y0), (x1, y0), (x1, y1), (x0, y1)],
+                        "polygon": [x0, y0, x1, y0, x1, y1, x0, y1],
+                        "text": text_str,
+                        "role": "legend_label",
+                    })
+        except Exception:
+            pass
+
+        # Handle marker
+        try:
+            hb = handle.get_window_extent(renderer)
+            lw = getattr(handle, 'get_linewidth', lambda: 2.0)()
+            if not isinstance(lw, (int, float)) or lw <= 0:
+                lw = 2.0
+            pad_y = max(lw / 2.0, 2.0)
+            pad_x = 2.0 if hb.width < 2.0 else 0.0
+
+            ymin = hb.y0 - pad_y if hb.height < 2.0 else hb.y0
+            ymax = hb.y1 + pad_y if hb.height < 2.0 else hb.y1
+            xmin = hb.x0 - pad_x if hb.width < 2.0 else hb.x0
+            xmax = hb.x1 + pad_x if hb.width < 2.0 else hb.x1
+
+            x0, y0, x1, y1 = float(xmin), float(img_h - ymax), float(xmax), float(img_h - ymin)
+            out.append({
+                "class_name": "legend_marker",
+                "bbox": BoundingBox(xmin, ymin, xmax, ymax),
+                "obb": [(x0, y0), (x1, y0), (x1, y1), (x0, y1)],
+                "polygon": [x0, y0, x1, y0, x1, y1, x0, y1],
+                "text": None,
+                "role": "legend_marker",
+            })
+        except Exception:
+            pass
+
+    return out
 
 def apply_pie_label_strategy(data, labels_text):
     """Implementa diversas estratégias de rotulagem para gráficos de pizza."""
@@ -1830,7 +2096,19 @@ def _generate_bar_chart(ax, theme_name, theme_config, style_config, debug_mode=F
     
     # Apply theme and typography variation
     theme = apply_chart_theme(ax, theme_name, orientation)
-    apply_typography_variation(ax, domain='scientific' if is_scientific else 'business')
+    apply_typography_variation(ax, domain='scientific' if is_scientific else 'business', theme_config=theme_config)
+
+    if style in ('side_by_side', 'stacked'):
+        active_profile = theme_config.get('profile') if isinstance(theme_config, dict) else None
+        if active_profile is None and hasattr(ax, 'figure') and hasattr(ax.figure, '_generator_config'):
+            active_profile = ax.figure._generator_config.get('profile')
+        if active_profile and active_profile != 'legacy':
+            seed = ax.figure._generator_config.get('seed') if hasattr(ax, 'figure') and hasattr(ax.figure, '_generator_config') else 42
+            image_idx = getattr(ax.figure, '_generator_image_idx', 0) if hasattr(ax, 'figure') else 0
+            from feature_rng import feature_rng
+            rng = feature_rng(seed if seed is not None else 42, image_idx, "legend_spawn")
+            if rng.random() < 0.70:
+                apply_legend_variation(ax, 2)
     
     #  Ensure all code paths return complete metadata
     if not bar_info_list:
@@ -1988,7 +2266,7 @@ def _generate_line_chart(ax, theme_name, theme_config, is_scientific, debug_mode
         legend = apply_legend_variation(ax, num_series)
         other_artists.append(legend)
     
-    apply_typography_variation(ax, domain='scientific' if is_scientific else 'business')
+    apply_typography_variation(ax, domain='scientific' if is_scientific else 'business', theme_config=theme_config)
     
     # Collect minimum y value across all series for axis scaling
     all_y_vals = [pt[1] for kpi in keypoint_info for pt in kpi['plotted_points']]
@@ -2257,8 +2535,22 @@ def _generate_scatter_chart(ax, theme_name, theme_config, is_scientific, debug_m
         ]
     }
     
-    apply_typography_variation(ax, domain='scientific' if is_scientific else 'business')
-    
+    apply_typography_variation(ax, domain='scientific' if is_scientific else 'business', theme_config=theme_config)
+
+    active_profile = theme_config.get('profile') if isinstance(theme_config, dict) else None
+    if active_profile is None and hasattr(ax, 'figure') and hasattr(ax.figure, '_generator_config'):
+        active_profile = ax.figure._generator_config.get('profile')
+    if active_profile and active_profile != 'legacy' and relationship == 'clustered':
+        seed = ax.figure._generator_config.get('seed') if hasattr(ax, 'figure') and hasattr(ax.figure, '_generator_config') else 42
+        image_idx = getattr(ax.figure, '_generator_image_idx', 0) if hasattr(ax, 'figure') else 0
+        from feature_rng import feature_rng
+        rng = feature_rng(seed if seed is not None else 42, image_idx, "legend_spawn")
+        if rng.random() < 0.70:
+            import matplotlib.patches as mpatches
+            pal = palette if isinstance(palette, list) and palette else ['#2E86AB', '#D62728', '#2CA02C', '#FF7F0E']
+            handles = [mpatches.Patch(color=pal[i % len(pal)], label=f'Cluster {i+1}') for i in range(num_clusters)]
+            ax.legend(handles=handles, loc='upper right')
+
     data_min = np.min(y_data)
     apply_axis_scaling(ax, data_min=data_min, orientation='vertical')
     
@@ -2435,7 +2727,23 @@ def _generate_boxplot_chart(ax, theme_name, theme_config, is_scientific,
     else:
         scale_axis_info = {'primary_scale_axis': 'y', 'boxplot_raw': bp}
     
-    apply_typography_variation(ax, domain='scientific' if is_scientific else 'business')
+    apply_typography_variation(ax, domain='scientific' if is_scientific else 'business', theme_config=theme_config)
+
+    active_profile = theme_config.get('profile') if isinstance(theme_config, dict) else None
+    if active_profile is None and hasattr(ax, 'figure') and hasattr(ax.figure, '_generator_config'):
+        active_profile = ax.figure._generator_config.get('profile')
+    if active_profile and active_profile != 'legacy' and num_groups >= 2:
+        seed = ax.figure._generator_config.get('seed') if hasattr(ax, 'figure') and hasattr(ax.figure, '_generator_config') else 42
+        image_idx = getattr(ax.figure, '_generator_image_idx', 0) if hasattr(ax, 'figure') else 0
+        from feature_rng import feature_rng
+        rng = feature_rng(seed if seed is not None else 42, image_idx, "legend_spawn")
+        if rng.random() < 0.70:
+            import matplotlib.patches as mpatches
+            pal = theme.get('palette', ['#4472C4']) if isinstance(theme, dict) else ['#4472C4']
+            if not isinstance(pal, list) or not pal:
+                pal = ['#4472C4', '#ED7D31', '#A5A5A5', '#FFC000']
+            handles = [mpatches.Patch(color=pal[i % len(pal)], label=f'G{i+1}') for i in range(num_groups)]
+            ax.legend(handles=handles, loc='upper right')
     
     return data_artists, other_artists_list, bar_info_list, orientation_str, [], [], \
            scale_axis_info, boxplot_metadata
@@ -2594,7 +2902,7 @@ def _generate_pie_chart(ax, theme_name, theme_config, is_scientific, pie_config=
         print(f"DEBUG [PIE] Pie geometry calculated - center: {pie_geometry.get('center_point')}")
         print(f"DEBUG [PIE] Number of wedges in geometry: {len(pie_geometry.get('wedges', []))}")
     
-    apply_typography_variation(ax, domain='scientific' if is_scientific else 'business')
+    apply_typography_variation(ax, domain='scientific' if is_scientific else 'business', theme_config=theme_config)
     
     pie_payload = {"geometry": pie_geometry, "metadata": pie_metadata}
 
@@ -3005,8 +3313,20 @@ def _generate_histogram(ax, theme_name, theme_config, is_scientific, debug_mode=
                 )
                 data_label_artists.append(text_artist)
     
-    # Apply typography variation
-    apply_typography_variation(ax, domain='scientific' if is_scientific else 'business')
+    apply_typography_variation(ax, domain='scientific' if is_scientific else 'business', theme_config=theme_config)
+
+    active_profile = theme_config.get('profile') if isinstance(theme_config, dict) else None
+    if active_profile is None and hasattr(ax, 'figure') and hasattr(ax.figure, '_generator_config'):
+        active_profile = ax.figure._generator_config.get('profile')
+    if active_profile and active_profile != 'legacy':
+        seed = ax.figure._generator_config.get('seed') if hasattr(ax, 'figure') and hasattr(ax.figure, '_generator_config') else 42
+        image_idx = getattr(ax.figure, '_generator_image_idx', 0) if hasattr(ax, 'figure') else 0
+        from feature_rng import feature_rng
+        rng = feature_rng(seed if seed is not None else 42, image_idx, "legend_spawn")
+        if rng.random() < 0.70:
+            import matplotlib.patches as mpatches
+            handle = mpatches.Patch(color=hist_color if isinstance(hist_color, str) else '#4472C4', label='Distribution')
+            ax.legend(handles=[handle], loc='upper right')
 
     skew_value = stats.skew(data) if data.size > 2 else 0.0
     if not np.isfinite(skew_value):
@@ -3233,7 +3553,7 @@ def _generate_area_chart(ax, theme_name, theme_config, is_scientific, debug_mode
         legend = apply_legend_variation(ax, num_series)
         other_artists.append(legend)
     
-    apply_typography_variation(ax, domain='scientific' if is_scientific else 'business')
+    apply_typography_variation(ax, domain='scientific' if is_scientific else 'business', theme_config=theme_config)
     
     if stacking_mode != 'percentage':
         data_min = float(min(np.min(boundary_y), np.min(y_stack)))
@@ -3271,7 +3591,7 @@ def _generate_heatmap_chart(ax, theme_name, theme_config, is_scientific, debug_m
     e usa pcolormesh para anotação robusta de células.
     """
     theme = apply_chart_theme(ax, theme_name)
-    apply_typography_variation(ax, domain='scientific' if is_scientific else 'business')
+    apply_typography_variation(ax, domain='scientific' if is_scientific else 'business', theme_config=theme_config)
 
     # 1. Gerar dados estruturados
     data, cmap_type, heatmap_meta = generate_structured_heatmap(debug_mode=debug_mode)

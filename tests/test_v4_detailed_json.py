@@ -36,8 +36,9 @@ def test_v4_detailed_json_generation(tmp_path):
     with open(det_path, "r", encoding="utf-8") as f:
         det = json.load(f)
 
-    assert det["schema_version"] == "v4.0"
-    assert det["dataset_version"] == "4.0.0"
+    assert det["schema_version"] == "v4.1"
+    assert det["dataset_version"] == "4.1.0"
+    assert "filter_stats" in det
     assert det.get("image_id") == base_name
     assert not os.path.isfile(os.path.join(lbl_dir, f"{base_name}_ocr.json"))
     assert not os.path.isfile(os.path.join(lbl_dir, f"{base_name}.json"))

@@ -26,6 +26,7 @@ Two phases
 from __future__ import annotations
 
 import math
+import warnings
 from typing import Any, Dict, Iterable, List, Optional, Sequence, Tuple
 
 import numpy as np
@@ -334,6 +335,8 @@ def prepare_detail_annotations(fig, chart_info_map, streams: Iterable[Stream], i
         for ann in anns:
             art = ann.pop("_artist", None)
             _, cname = resolve_class(cls_map, ann.get("class_id"))
+            if ann.get("class_name"):
+                cname = str(ann["class_name"])
 
             # -- subplot ------------------------------------------------------
             sub_idx = None
@@ -480,10 +483,16 @@ def prepare_detail_annotations(fig, chart_info_map, streams: Iterable[Stream], i
 # --------------------------------------------------------------------------- #
 # phase 2: AFTER effects
 # --------------------------------------------------------------------------- #
-def _serialize(ann: Dict[str, Any], name: str, cls_map, kind: str, w: int, h: int) -> Optional[Dict[str, Any]]:
+def _serialize(ann: Dict[str, Any], name: str, cls_map, kind: str, w: int, h: int, strict: bool = False) -> Optional[Dict[str, Any]]:
     cid, cname = resolve_class(cls_map, ann.get("class_id"))
     if ann.get("class_name"):
         cname = str(ann["class_name"])
+
+    if cname == "unknown":
+        msg = f"Unresolved class '{ann.get('class_id')}' in stream '{name}'"
+        if strict:
+            raise ValueError(msg)
+        warnings.warn(msg, UserWarning)
 
     amodal = _pts(ann.get("amodal_polygon"))
     modal = _pts(ann.get("modal_polygon"))
@@ -545,6 +554,8 @@ def _serialize(ann: Dict[str, Any], name: str, cls_map, kind: str, w: int, h: in
     text = str(ann.get("text", "")).strip()
     if text:
         rec["text"] = text
+    if ann.get("role"):
+        rec["role"] = str(ann["role"])
     occluded = bool(ann.get("occluded", False))
     rec["visibility"] = 0 if (occluded or ann.get("visibility") == 0) else 1
     rec["occluded"] = occluded
@@ -555,6 +566,10 @@ def _serialize(ann: Dict[str, Any], name: str, cls_map, kind: str, w: int, h: in
     attrs = {k: v for k, v in attrs.items() if v is not None}
     if attrs:
         rec["attrs"] = attrs
+    if ann.get("ignored"):
+        rec["ignored"] = True
+        if ann.get("ignore_reason"):
+            rec["ignore_reason"] = str(ann["ignore_reason"])
     return rec
 
 
@@ -646,7 +661,7 @@ def _subplot_record(sub) -> Dict[str, Any]:
     return rec
 
 
-def merge_streams(streams: Iterable[Stream], w: int, h: int) -> List[Dict[str, Any]]:
+def merge_streams(streams: Iterable[Stream], w: int, h: int, strict: bool = False, filter_stats: Optional[Dict[str, Dict[str, int]]] = None) -> List[Dict[str, Any]]:
     """Serialise + dedupe all streams into ONE list; assign ids; resolve links."""
     out: List[Dict[str, Any]] = []
     seen: Dict[Tuple, int] = {}
@@ -657,15 +672,39 @@ def merge_streams(streams: Iterable[Stream], w: int, h: int) -> List[Dict[str, A
         for ann in anns:
             if not isinstance(ann, dict):
                 continue
-            rec = _serialize(ann, name, cls_map, kind, w, h)
+            rec = _serialize(ann, name, cls_map, kind, w, h, strict=strict)
             if rec is None:
                 continue
             if kind == "mat" and "polygon" not in rec and "amodal_polygon" not in rec:
+                is_dup = False
                 dk = (rec["class_name"], tuple(round(v, 1) for v in rec["xyxy"]), rec.get("text", ""))
                 if dk in seen:
-                    prev = out[seen[dk]]
+                    is_dup = True
+                    match_idx = seen[dk]
+                else:
+                    # Harmonize cross-stream duplicate pairs with IoU >= 0.8
+                    for idx, existing in enumerate(out):
+                        if existing["class_name"] == rec["class_name"] and existing.get("subplot") == rec.get("subplot"):
+                            b1, b2 = existing["xyxy"], rec["xyxy"]
+                            inter = max(0, min(b1[2], b2[2]) - max(b1[0], b2[0])) * max(0, min(b1[3], b2[3]) - max(b1[1], b2[1]))
+                            if inter > 0:
+                                a1 = (b1[2] - b1[0]) * (b1[3] - b1[1])
+                                a2 = (b2[2] - b2[0]) * (b2[3] - b2[1])
+                                u = a1 + a2 - inter
+                                if u > 0 and inter / u >= 0.8:
+                                    is_dup = True
+                                    match_idx = idx
+                                    break
+                if is_dup:
+                    if filter_stats is not None:
+                        c_name = rec.get("class_name", "unknown")
+                        filter_stats["duplicate"][c_name] = filter_stats["duplicate"].get(c_name, 0) + 1
+                    prev = out[match_idx]
                     if "attrs" in rec and "attrs" not in prev:
                         prev["attrs"] = rec["attrs"]
+                    if not rec.get("ignored") and prev.get("ignored"):
+                        prev.pop("ignored", None)
+                        prev.pop("ignore_reason", None)
                     continue
                 seen[dk] = len(out)
             rec["id"] = len(out)
@@ -693,8 +732,18 @@ def build_detailed_json(
     schema_version: str,
     dataset_version: str,
     image_id: Optional[str] = None,
+    strict: bool = False,
+    filter_stats: Optional[Dict[str, Dict[str, int]]] = None,
 ) -> Dict[str, Any]:
-    """Assemble the v4.0 ``_detailed.json`` payload. Call AFTER effects/filtering."""
+    """Assemble the v4.1 ``_detailed.json`` payload. Call AFTER effects/filtering."""
+    if filter_stats is None:
+        filter_stats = {
+            "size": {},
+            "aspect": {},
+            "viewport": {},
+            "duplicate": {},
+            "overlap": {},
+        }
     subs = _subplot_axes(fig, chart_info_map)
     subplots = [_subplot_record(s) for s in subs]
     primary = subplots[0] if subplots else {}
@@ -709,7 +758,8 @@ def build_detailed_json(
         "composite_chart_types": [s["chart_type"] for s in subplots] if len(subplots) > 1 else [],
         "composite_domains": [s["semantic_domain"] for s in subplots] if len(subplots) > 1 else [],
         "subplots": subplots,
-        "annotations": merge_streams(streams, int(img_w), int(img_h)),
+        "annotations": merge_streams(streams, int(img_w), int(img_h), strict=strict, filter_stats=filter_stats),
+        "filter_stats": filter_stats,
     }
     if image_id is not None:
         payload["image_id"] = image_id

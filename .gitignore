@@ -17,6 +17,7 @@ __pycache__/
 # Runtime Datasets & Benchmark Outputs
 dataset_export/
 dataset_verification_run/
+test/
 benchmark_results.json
 run_manifest.json
 import_plan.json

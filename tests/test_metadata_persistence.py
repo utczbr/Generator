@@ -9,7 +9,7 @@ import json
 import os
 import pytest
 
-from versions import ANNOTATION_SCHEMA_VERSION, DATASET_VERSION
+from config_defaults import ANNOTATION_SCHEMA_VERSION, DATASET_VERSION
 from custom_config import OCR_TRAINING_CONFIG
 from generator import generate_single_chart
 from backends.vegalite_backend import generate_single_vegalite_chart

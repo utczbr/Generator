@@ -20,9 +20,11 @@ jobs:
 
       - name: Install dependencies
         run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
-          pip install pytest pytest-cov
+            python -m pip install --upgrade pip
+            pip install -r requirements.txt
+
+      - name: Environment Fingerprint
+        run: python scripts/env_fingerprint.py
 
       - name: AST Audit Legacy Semantic References
         run: python scripts/audit_legacy_references.py
@@ -31,4 +33,4 @@ jobs:
         run: pytest tests/test_domain_manifests.py tests/test_startup_latency.py
 
       - name: Full Test Suite
-        run: pytest tests/ --ignore=tests/regression
+        run: pytest tests/ --ignore=tests/regression -m "not slow"

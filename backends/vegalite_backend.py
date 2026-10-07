@@ -19,7 +19,7 @@ import svgelements as se
 import vl_convert as vlc
 
 from themes import THEMES
-from versions import ANNOTATION_SCHEMA_VERSION, DATASET_VERSION
+from config_defaults import ANNOTATION_SCHEMA_VERSION, DATASET_VERSION
 from generator import (
     BoundingBox,
     CHART_CLASS_MAPS,

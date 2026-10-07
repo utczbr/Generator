@@ -1,0 +1,83 @@
+{
+  "version": "baseline-2",
+  "seed": 42,
+  "env_fingerprint": {
+    "os": {
+      "system": "Linux",
+      "release": "6.1.0-52-amd64",
+      "machine": "x86_64",
+      "platform": "Linux-6.1.0-52-amd64-x86_64-with-glibc2.36"
+    },
+    "python": {
+      "version": "3.11.2",
+      "implementation": "CPython"
+    },
+    "matplotlib": {
+      "version": "3.10.8",
+      "freetype_version": "2.6.1",
+      "freetype_build": "local"
+    },
+    "font_files": {
+      "DejaVu Sans": {
+        "path": "/home/stuart/.local/lib/python3.11/site-packages/matplotlib/mpl-data/fonts/ttf/DejaVuSans.ttf",
+        "sha256": "3fdf69cabf06049ea70a00b5919340e2ce1e6d02b0cc3c4b44fb6801bd1e0d22"
+      },
+      "DejaVu Sans:weight=bold": {
+        "path": "/home/stuart/.local/lib/python3.11/site-packages/matplotlib/mpl-data/fonts/ttf/DejaVuSans-Bold.ttf",
+        "sha256": "b184b89e3c1075f22f6b71575b6fc20d4972b3cfd3b23322ca6fd596dcaef167"
+      },
+      "DejaVu Serif": {
+        "path": "/home/stuart/.local/lib/python3.11/site-packages/matplotlib/mpl-data/fonts/ttf/DejaVuSerif.ttf",
+        "sha256": "107244956e9962b9e96faccdc551825e0ae0898ae13737133e1b921a2fd35ffa"
+      },
+      "DejaVu Sans Mono": {
+        "path": "/home/stuart/.local/lib/python3.11/site-packages/matplotlib/mpl-data/fonts/ttf/DejaVuSansMono.ttf",
+        "sha256": "602ec86b8948cfcd956482fe64f94c36c867770149ef2f791d4613f443bcecb3"
+      }
+    },
+    "fingerprint_hash": "36003e4e1d3b0aad3ff77e76100fe7753e1d7f7b5f0888d7a546e589463422e4"
+  },
+  "combined_sha256": "06a5dc343fa4f3021b119ccc5636d981b259796f1adf61f93734dfd5153f8f97",
+  "file_hashes": {
+    "chart_00000.txt": "22b5519c1ca65957fc6c51c2a034211c7a667b6571902f910f78ee8fad1702a9",
+    "chart_00000_detailed.json": "216b2459b6db5d6dcd351abf472cfd44fdf6cfb497cb512723b48f0f080dcae8",
+    "chart_00001.txt": "b3987bb5039f2f6255cd2dd7cd07420f065eee5cba1a9988355f0c1da0a1473c",
+    "chart_00001_detailed.json": "7e7302ab669017077c771b6b98bedf08debc75326961cc03691887977a759296",
+    "chart_00002.txt": "6559941b86df4d8eefeb5dc29a1dfcc1548c787b3e822d82016a222c83d34ede",
+    "chart_00002_detailed.json": "c9a83cd6a1f197b06e063b82c8f41bba01f4b0fc5db2e7caf0b56a6b6a2cb19a",
+    "chart_00003.txt": "9b933ee9b44a3f356a825aca16c673e7c073dee5ae5f558c485517860c791724",
+    "chart_00003_detailed.json": "639da47bf5d0e4a52a42f70281a59ecc17a0988b69877cda581d8624a72c4b73",
+    "chart_00004.txt": "6e8a2b12539c4664ee8530be02f582a99e2e33dd4e1f4591fec6b7fb8154f8b4",
+    "chart_00004_detailed.json": "2d02f51e1e3ce504620fc0ef7c9160d005da64e8d2f715938facc6f26a23636e",
+    "chart_00005.txt": "4ca4182999ebad0990001538a4db0b59c762139718a6be6270739103f231d282",
+    "chart_00005_detailed.json": "2cb3fedc456d1ece0e4e8cd4c9c939fdd524e4f3553b813821425d1a16ee47ea",
+    "chart_00006.txt": "9b0b8bb4f3b20f6b1fbf280c4dab60142d6d27939c259a365b3248abbeb87e2a",
+    "chart_00006_detailed.json": "14ec6317c989ab2ae9eef69cfa62d8d551460bec123eb9612a8760e16640f197",
+    "chart_00007.txt": "a3e1f9dbcb30dfee07db11a2aad54e0a7e431bbe4081f32db74f3eab0f4ef864",
+    "chart_00007_detailed.json": "fe70857ce7318ee2275d61784d239a4009aa26abb99a91bd54cef224e4a5280e",
+    "chart_00008.txt": "d55eccbebcdfd049a7da4aacc214b68a6f38813832786b18a06c0fab82ee1e21",
+    "chart_00008_detailed.json": "c5e12edab48dfee492ec87e757b9076f83b27f47e156f91ec8590c0d5b521997",
+    "chart_00009.txt": "4ffb5b39c7599dfd040067dca28e37601fa1931dd70f1bd57c3b75909bc26043",
+    "chart_00009_detailed.json": "932a735169d0d046e7fd693fdee1a1dad4f122c82d01640e1e9682212b2b6d7b",
+    "chart_00010.txt": "9d0cd5f6fd128984a8f97d6b9c199e3651c77145d86433ff6ae48b78f783d465",
+    "chart_00010_detailed.json": "7dbbd3a672658ef5511e3790411f8c49ab271a9d21860d7dd9db54db286847f7",
+    "chart_00011.txt": "2d72d0d6c948ae769eac83e4f5f1e0ec8e171d456b2ebe1d9a339698a40af78d",
+    "chart_00011_detailed.json": "26b7633846d8f6556781c0a0451e2d0294c7ad30aa7c4bbe1d2fa2ba2731a5d8",
+    "chart_00012.txt": "a11e810e811a25cef2ee6cd9d3797834b57071700229755f7b588b6c8dd130f3",
+    "chart_00012_detailed.json": "79546cd88e2bcb31cd20b00d06ec116df75b50b4c866578d0cfea2497208dd13",
+    "chart_00013.txt": "a4c6b19e9ee58f56989c7822c6520925d6cc69d90bd5e3c098260aa7d33533ff",
+    "chart_00013_detailed.json": "f7e454ea8773d06c521b5f45ad289e30b51ae55425d7b042924e24c73bd4a8d2",
+    "chart_00014.txt": "0e6d1dfe0296d5885bf000cd4c1a3906522b33808f2fa4ad3c27262435046aed",
+    "chart_00014_detailed.json": "6fe3e8924bbd717c0f82201e5dd688097b3a73a12649edf6cf41b61c6978c917",
+    "chart_00015.txt": "2837b105443c7b028cad9e0a40a8f70bdffb4c018e18d3d098c9b2e53a8753de",
+    "chart_00015_detailed.json": "f7f574a8f0d9ada57d7172981402c760205701ac9eaeb3e5538fa4ab926cf6e3",
+    "chart_00016.txt": "4403a91e7e808e507ef23ee1953e8a2c4d225b0119f4dcd8aa65da440731aa88",
+    "chart_00016_detailed.json": "ac9f5dc3bee43027a6d6b9caf2a1793671f774422931811831f7d743d72e5ebe",
+    "chart_00017.txt": "fb6876642ce75b925f2cae0f14fb89bd94fdc416020628529775dafa27188610",
+    "chart_00017_detailed.json": "9321c158fef402b8f9dd8ebcf1b23af7c04b37c7022dd8264093f074af879e3c",
+    "chart_00018.txt": "85e892ac6a2bf114e49b0a2b514dd27d531452fd311d122ef10860a949d2958f",
+    "chart_00018_detailed.json": "5f9c78a140675aa35cbb8cccfa3c24a2508881187c1e2add8b5972e0cee138a8",
+    "chart_00019.txt": "1a58aba9e2db5dc7c15860b1418dc751a99259cab254bd988a5fac979ae2018a",
+    "chart_00019_detailed.json": "a0c61ae6403d24fbb60676c3795030a4215b0207aaead85a9e06ff90c2d2f00d"
+  }
+}

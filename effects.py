@@ -2,7 +2,7 @@
 import numpy as np
 import random
 import io
-from typing import Optional, Tuple
+from typing import Optional, Tuple, Union, Sequence, Any
 from PIL import Image, ImageFilter, ImageOps, ImageEnhance, ImageDraw, ImageFont, ImageChops
 
 try:
@@ -260,8 +260,12 @@ def apply_perspective_warp_effect(pil_img, distortion_factor=0.08, border_value=
     if not _HAS_CV2:
         raise RuntimeError("perspective warp requires opencv (see requirements.txt)")
     w, h = pil_img.size
-    dx = w * distortion_factor
-    dy = h * distortion_factor
+    if isinstance(distortion_factor, (list, tuple)) and len(distortion_factor) == 2:
+        df = random.uniform(float(distortion_factor[0]), float(distortion_factor[1]))
+    else:
+        df = float(distortion_factor)
+    dx = w * df
+    dy = h * df
 
     src_pts = np.float32([[0, 0], [w - 1, 0], [w - 1, h - 1], [0, h - 1]])
     dst_pts = np.float32([
@@ -282,15 +286,24 @@ def apply_perspective_warp_effect(pil_img, distortion_factor=0.08, border_value=
     return out_img
 
 
-def apply_uneven_lighting_effect(pil_img, intensity=0.6, gradient_type="radial", **kwargs):
+def apply_uneven_lighting_effect(pil_img, intensity=0.6, gradient_type="radial", intensity_range=None, **kwargs):
+    if intensity_range is not None and isinstance(intensity_range, (list, tuple)) and len(intensity_range) == 2:
+        intensity = random.uniform(float(intensity_range[0]), float(intensity_range[1]))
     intensity = max(0.0, min(1.0, float(intensity)))
+
+    if isinstance(gradient_type, (list, tuple)):
+        gradient_type = random.choice(list(gradient_type))
+    elif gradient_type in ("random", "any", None):
+        gradient_type = random.choice(["radial", "linear"])
+
     arr = np.array(pil_img).astype(np.float32)
     h, w = arr.shape[:2]
 
     if gradient_type == "radial":
         X, Y = np.meshgrid(np.linspace(-1, 1, w), np.linspace(-1, 1, h))
         distance = np.sqrt(X ** 2 + Y ** 2)
-        light_mask = 1.0 - (distance / np.max(distance)) * intensity
+        max_dist = np.max(distance) if np.max(distance) > 0 else 1.0
+        light_mask = 1.0 - (distance / max_dist) * intensity
     elif gradient_type == "linear":
         gradient = np.linspace(1.0, 1.0 - intensity, w)
         light_mask = np.tile(gradient, (h, 1))
@@ -416,6 +429,8 @@ def apply_page_curl(
     phase: float = 0.0,
     border_value: Optional[Tuple[int, int, int]] = None,
     return_forward_map: bool = True,
+    amplitude_ratio: Optional[float] = None,
+    wavelength_ratio: Optional[float] = None,
     **kwargs
 ):
     """
@@ -428,13 +443,22 @@ def apply_page_curl(
 
     # Compute amplitude and wavelength defaults if not provided
     if amplitude is None:
-        amp_ratio = float(kwargs.get("amplitude_ratio", random.uniform(0.02, 0.05)))
+        if amplitude_ratio is not None:
+            if isinstance(amplitude_ratio, (list, tuple)) and len(amplitude_ratio) == 2:
+                amp_ratio = random.uniform(float(amplitude_ratio[0]), float(amplitude_ratio[1]))
+            else:
+                amp_ratio = float(amplitude_ratio)
+        else:
+            amp_ratio = float(kwargs.get("amplitude_ratio", random.uniform(0.02, 0.05)))
         amplitude = amp_ratio * (h if curl_axis == "y" else w)
     else:
         amplitude = float(amplitude)
 
     if wavelength is None:
-        wave_ratio = float(kwargs.get("wavelength_ratio", random.uniform(0.8, 1.5)))
+        if wavelength_ratio is not None:
+            wave_ratio = float(wavelength_ratio)
+        else:
+            wave_ratio = float(kwargs.get("wavelength_ratio", random.uniform(0.8, 1.5)))
         wavelength = wave_ratio * (w if curl_axis == "y" else h)
     else:
         wavelength = float(wavelength)
@@ -528,4 +552,156 @@ def apply_page_curl(
     if return_forward_map:
         return out_img, forward_map
     return out_img
+
+
+def apply_resize_effect(
+    pil_img,
+    target_long_side=None,
+    scale=None,
+    scale_range=None,
+    target_size=None,
+    anti_alias=True,
+    **kwargs
+):
+    """
+    Resample pil_img to a target resolution or scale factor (FR-085, T232).
+    Returns (new_img, sx, sy).
+    """
+    cur_w, cur_h = pil_img.size
+    if cur_w <= 0 or cur_h <= 0:
+        return pil_img, 1.0, 1.0
+
+    if target_size is not None:
+        new_w, new_h = max(1, int(round(target_size[0]))), max(1, int(round(target_size[1])))
+    elif scale is not None:
+        new_w = max(1, int(round(cur_w * scale)))
+        new_h = max(1, int(round(cur_h * scale)))
+    elif scale_range is not None:
+        s = random.uniform(scale_range[0], scale_range[1])
+        new_w = max(1, int(round(cur_w * s)))
+        new_h = max(1, int(round(cur_h * s)))
+    elif target_long_side is not None:
+        if isinstance(target_long_side, (list, tuple)):
+            target_px = random.uniform(target_long_side[0], target_long_side[1])
+        else:
+            target_px = float(target_long_side)
+        cur_long = max(cur_w, cur_h)
+        s = target_px / cur_long
+        new_w = max(1, int(round(cur_w * s)))
+        new_h = max(1, int(round(cur_h * s)))
+    else:
+        # Default distribution: 256 to 2400 px long side (FR-085, T232)
+        target_px = random.uniform(256.0, 2400.0)
+        cur_long = max(cur_w, cur_h)
+        s = target_px / cur_long
+        new_w = max(1, int(round(cur_w * s)))
+        new_h = max(1, int(round(cur_h * s)))
+
+    if new_w == cur_w and new_h == cur_h:
+        return pil_img, 1.0, 1.0
+
+    resample_filter = getattr(Image, "Resampling", Image).LANCZOS if anti_alias else getattr(Image, "Resampling", Image).BILINEAR
+    resized_img = pil_img.resize((new_w, new_h), resample=resample_filter)
+    sx = new_w / cur_w
+    sy = new_h / cur_h
+    return resized_img, sx, sy
+
+
+def apply_canvas_reframe_effect(
+    image: Image.Image,
+    p_tight: float = 0.4,
+    tight_px: Union[int, float, Sequence[float]] = (0, 6),
+    margin_frac_range: Sequence[float] = (0.0, 0.12),
+    p_match_bg: float = 0.5,
+    ink_tol: int = 5,
+    content_bbox: Optional[Tuple[float, float, float, float]] = None,
+    use_guard: bool = True,
+    seed: Optional[int] = 42,
+    image_idx: int = 0,
+    rng: Optional[Any] = None,
+) -> Tuple[Image.Image, float, float]:
+    """
+    Randomized canvas reframing and re-margining effect (FR-109, FR-110, FR-111).
+    Crops to the content box behind a content guard, then draws each side's
+    margin independently (tight U[0, tight_px] with prob p_tight, else loose
+    U[margin_frac_range] * min(W, H)).
+    Returns (new_image, dx, dy) where dx = -bx0 and dy = by1 - H.
+    """
+    W, H = image.size
+
+    arr = np.asarray(image.convert("RGB"), dtype=np.int16)
+    borders = np.concatenate([arr[0, :, :], arr[-1, :, :], arr[:, 0, :], arr[:, -1, :]], axis=0)
+    bg_color = np.median(borders, axis=0)
+
+    if use_guard and content_bbox is not None:
+        cx0, cy0, cx1, cy1 = content_bbox
+    else:
+        diff = np.max(np.abs(arr - bg_color), axis=-1)
+        ink_y, ink_x = np.where(diff > ink_tol)
+        if len(ink_x) > 0:
+            cx0 = float(ink_x.min())
+            cy0 = float(ink_y.min())
+            cx1 = float(ink_x.max() + 1)
+            cy1 = float(ink_y.max() + 1)
+        else:
+            cx0, cy0, cx1, cy1 = 0.0, 0.0, float(W), float(H)
+
+    # Clamp content box to current image bounds
+    cx0 = max(0.0, min(float(W), cx0))
+    cy0 = max(0.0, min(float(H), cy0))
+    cx1 = max(cx0, min(float(W), cx1))
+    cy1 = max(cy0, min(float(H), cy1))
+
+    # Parse ranges
+    if isinstance(tight_px, (int, float)):
+        tight_min, tight_max = 0.0, float(tight_px)
+    else:
+        tight_min, tight_max = float(tight_px[0]), float(tight_px[1])
+
+    if isinstance(margin_frac_range, (int, float)):
+        frac_min, frac_max = 0.0, float(margin_frac_range)
+    else:
+        frac_min, frac_max = float(margin_frac_range[0]), float(margin_frac_range[1])
+
+    if rng is None:
+        from feature_rng import feature_rng
+        rng = feature_rng(seed if seed is not None else 42, image_idx, "canvas_reframe")
+
+    ref_dim = min(W, H)
+    margins = []
+    for _ in range(4):  # left, top, right, bottom
+        if rng.random() < p_tight:
+            m = rng.uniform(tight_min, tight_max)
+        else:
+            m = rng.uniform(frac_min, frac_max) * ref_dim
+        margins.append(m)
+
+    m_left, m_top, m_right, m_bottom = margins
+
+    bx0 = float(round(cx0 - m_left))
+    by0 = float(round(cy0 - m_top))
+    bx1 = float(round(cx1 + m_right))
+    by1 = float(round(cy1 + m_bottom))
+
+    new_w = max(16, int(round(bx1 - bx0)))
+    new_h = max(16, int(round(by1 - by0)))
+
+    if rng.random() < p_match_bg:
+        fill_color = tuple(int(round(c)) for c in bg_color)
+    else:
+        tone = int(round(rng.uniform(245, 255)))
+        fill_color = (tone, tone, tone)
+
+    if image.mode == "RGBA":
+        new_img = Image.new("RGBA", (new_w, new_h), fill_color + (255,))
+    else:
+        new_img = Image.new("RGB", (new_w, new_h), fill_color)
+
+    paste_x = int(round(-bx0))
+    paste_y = int(round(-by0))
+    new_img.paste(image, (paste_x, paste_y))
+
+    dx = -bx0
+    dy = by1 - H
+    return new_img, dx, dy
 

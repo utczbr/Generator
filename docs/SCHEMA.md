@@ -11,6 +11,7 @@ This document specifies the dataset output schemas produced by the chart synthes
 | **v2.1** (Semantic) | Additive: AABB + OBB | YOLOv26-OBB (8 coords) | Directed keypoint graph | Dual `amodal_polygon` / `modal_polygon` | `semantic_domain`, `subplots`, `is_composite` | Full backwards compatibility with v2 & v1 |
 | **v3.0** (Declarative) | Additive: AABB + OBB | YOLOv26-OBB (8 coords) | Directed keypoint graph | Dual `amodal_polygon` / `modal_polygon` | Declarative YAML manifests, direct domain naming, purged legacy constants | Full backwards compatibility with v2.1, v2 & v1 |
 | **v4.0** (Unified) | Unified single-list `annotations` (pixel `xyxy` + `attrs`) | YOLOv26-OBB (8 coords) | Directed keypoint graph & topology | Dual `amodal_polygon` / `modal_polygon` | Dynamic registry, single-list annotations, pre-effects coordinate preservation, `subplots` | Production default for matplotlib engine; supersedes v3.0 |
+| **v4.1** (Hardened) | Unified single-list `annotations` (pixel `xyxy` + `attrs`) | YOLOv26-OBB (8 coords) | Directed keypoint graph & topology | Dual `amodal_polygon` / `modal_polygon` | Top-level `filter_stats` dictionary, error bar annotations, multi-axis deduplication | Additive extension to v4.0; production default |
 
 ---
 
@@ -344,5 +345,39 @@ Each element in `annotations` conforms to:
 * `obb` (`Optional[List[List[float]]]`): YOLOv26-OBB oriented bounding box vertices `[[x1, y1], [x2, y2], [x3, y3], [x4, y4]]`.
 * `attrs` (`Optional[Dict[str, Any]]`): Element-specific attributes (`baseline_id`, `data_value`, `series_idx`, `keypoints`, `line_topology`).
 * `amodal_polygon` / `modal_polygon` (`Optional[List[List[float]]]`): Polygon boundary coordinates for area charts.
+
+---
+
+## Version 4.1: Filter Accounting & Baseline Hardening (`v4.1`)
+
+Introduced under Feature `005-domain-gap-closure` (baseline-2).
+Extends `v4.0` additively:
+- `schema_version` is bumped from `"v4.0"` to `"v4.1"`.
+- `dataset_version` is bumped from `"4.0.0"` to `"4.1.0"`.
+- Adds top-level `filter_stats` dictionary recording discarded annotations by filter reason and class name:
+
+```json
+{
+  "schema_version": "v4.1",
+  "dataset_version": "4.1.0",
+  "filter_stats": {
+    "size": { "bar": 1 },
+    "aspect": { "axis_labels": 2 },
+    "viewport": {},
+    "duplicate": { "axis_labels": 1 },
+    "overlap": {}
+  },
+  "image": { "width": 800, "height": 600 },
+  "chart_type": "bar",
+  "annotations": [...]
+}
+```
+
+### Filter Reason Taxonomy
+* `size`: Bounding box width or height below minimum threshold (`MIN_BBOX_SIZE`).
+* `aspect`: Bounding box aspect ratio exceeding `MAX_ASPECT_RATIO`.
+* `viewport`: Bounding box or polygon clipped to degenerate area (< 4 px² or < 2 px in either dimension) at canvas boundaries.
+* `duplicate`: Duplicate annotation detected during layout traversal, axis deduplication, or cross-stream merge.
+* `overlap`: Same-class bounding boxes exceeding high-IoU suppression threshold (`iou_threshold >= 0.7`).
 
 

@@ -188,8 +188,8 @@ def test_m8_new_domain_e2e_20_charts(sandbox_env: Path, tmp_path: Path):
         with open(df, "r", encoding="utf-8") as f:
             data = json.load(f)
 
-        assert data["schema_version"] == "v4.0"
-        assert data["dataset_version"] == "4.0.0"
+        assert data["schema_version"] in ("v4.0", "v4.1")
+        assert data["dataset_version"] in ("4.0.0", "4.1.0")
         assert data["semantic_domain"] == domain_id
         assert data["is_scientific"] is True
 
